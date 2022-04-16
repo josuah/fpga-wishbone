@@ -1,0 +1,12 @@
+*.asc
+*.bin
+*.bit
+*.core
+*.d
+*.dfu
+*.elf
+*.hex
+*.json
+*.log
+*.vcd
+/testbench
