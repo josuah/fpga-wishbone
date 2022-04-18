@@ -104,7 +104,7 @@ tick(Vsimulation *v)
 	v->eval();
 	tick_vcd->dump(tick_count * 10 - 1);
 
-	v->i_wb_clk = 1;
+	v->wb_clk_i = 1;
 
 	v->eval();
 	v->i_uart_sampling = uart_tick(&uart, 0);
@@ -112,7 +112,7 @@ tick(Vsimulation *v)
 	v->eval();
 	tick_vcd->dump(tick_count * 10);
 
-	v->i_wb_clk = 0;
+	v->wb_clk_i = 0;
 
 	v->eval();
 	tick_vcd->dump(tick_count * 10 + 5);
@@ -120,37 +120,45 @@ tick(Vsimulation *v)
 	tick_vcd->flush();
 }
 
+/*
+ * Wishbone B4 read request in pipelined mode
+ */
 static inline uint32_t
 wb_read(Vsimulation *v, uint32_t addr)
 {
-	v->i_wb_cyc = 1;
-	v->i_wb_stb = 1;
-	v->i_wb_we = 0;
-	v->i_wb_addr = addr;
+	v->wb_cyc_i = 1;
+	v->wb_stb_i = 1;
+	v->wb_we_i = 0;
+	//v->wb_adr_i = addr;
 	tick(v);
 
-	while (!v->o_wb_ack) tick(v);
-	v->i_wb_stb = 0;
-	v->i_wb_cyc = 0;
-	v->i_wb_we = 0;
+	while (v->wb_stall_o) tick(v);
+	v->wb_stb_i = 0;
+	v->wb_we_i = 0;
+	while (!v->wb_ack_o) tick(v);
+	v->wb_cyc_i = 0;
 
-	return v->o_wb_data;
+	return v->wb_dat_o;
 }
 
+/*
+ * Wishbone B4 write request in pipeline mode
+ */
 static inline void
 wb_write(Vsimulation *v, uint32_t addr, uint32_t data)
 {
-	v->i_wb_cyc = 1;
-	v->i_wb_stb = 1;
-	v->i_wb_we = 1;
-	v->i_wb_addr = addr;
-	v->i_wb_data = data;
+	v->wb_cyc_i = 1;
+	v->wb_stb_i = 1;
+	v->wb_we_i = 1;
+	//v->wb_adr_i = addr;
+	v->wb_dat_i = data;
 	tick(v);
 
-	while (!v->o_wb_ack) tick(v);
-	v->i_wb_stb = 0;
-	v->i_wb_cyc = 0;
-	v->i_wb_we = 0;
+	while (v->wb_stall_o) tick(v);
+	v->wb_stb_i = 0;
+	v->wb_we_i = 0;
+	while (!v->wb_ack_o) tick(v);
+	v->wb_cyc_i = 0;
 }
 
 char
@@ -165,8 +173,12 @@ uart_get_byte(struct uart *uart, struct Vsimulation *v)
 void
 peek(Vsimulation *v)
 {
-	uint32_t u32 = wb_read(v, 0);
+	uint32_t u32;
 
+	// TODO: this feels a bit like "I do not know what I am doing la la la la!", but it's a WIP
+	for (size_t i = 0; i < 100; i++) tick(v);
+
+	u32 = wb_read(v, 0);
 	fprintf(stderr, "read 0x%02X ('%c')\n", u32, u32);
 }
 
@@ -184,8 +196,8 @@ main(int argc, char **argv)
 	v->trace(tick_vcd, 99);
 	tick_vcd->open("simulation.vcd");
 
-	tick(v); v->i_wb_rst = 1;
-	tick(v); v->i_wb_rst = 0;
+	tick(v); v->wb_rst_i = 1;
+	tick(v); v->wb_rst_i = 0;
 	uart_init(&uart, v->o_uart_setup);
 	tick(v);
 

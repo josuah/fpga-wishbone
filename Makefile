@@ -9,7 +9,7 @@ NEXTPNR = nextpnr-ice40 --up5k --package sg48
 YOSYS = yosys
 
 PCF = upduino.pcf
-V = wb_led_pwm.v wb_pwm.v
+V = wb_led_pwm.v wb_pwm.v wb_uart.v
 
 all: board.bit simulation.vcd
 
@@ -20,7 +20,7 @@ flash: board.bit
 	${ICEPROG} -d i:0x0403:0x6014 board.bit
 
 wave: simulation.vcd
-	gtkwave --nomenus simulation.vcd
+	gtkwave simulation.vcd
 
 test: ${V} testbench.v testbench.sby
 	sby -f testbench.sby

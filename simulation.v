@@ -1,44 +1,40 @@
 module simulation #(
 	parameter TICKS_PER_BAUD = 3
 ) (
-`ifdef VERILATOR
 	// Cosimulator
 	output wire [31:0] o_uart_setup,
 	input wire i_uart_sampling,
 	input wire [7:0] i_uart_ticks_cnt,
-`endif
 
-	// Wishbone B4 bus
-	input wire i_wb_clk,
-	input wire i_wb_rst,
-	input wire i_wb_cyc,
-	input wire i_wb_stb,
-	input wire i_wb_we,
-	input wire [31:0] i_wb_addr,
-	input wire [31:0] i_wb_data,
-	output wire [31:0] o_wb_data,
-	output wire o_wb_stall,
-	output wire o_wb_ack
+	// Wishbone B4
+	input wire wb_clk_i,
+	input wire wb_rst_i,
+	input wire wb_stb_i,
+	input wire wb_cyc_i,
+	input wire wb_we_i,
+	input wire [31:0] wb_dat_i,
+	output wire [31:0] wb_dat_o,
+	output wire wb_stall_o,
+	output wire wb_ack_o
 );
 	wire [8:0] unused = { i_uart_sampling, i_uart_ticks_cnt };
-	wire uart_io;
+	wire uart_loop;
 
 	wb_uart #(
 		.TICKS_PER_BAUD(TICKS_PER_BAUD)
 	) wb_uart (
-		.i_wb_clk(i_wb_clk),
-		.i_wb_rst(i_wb_rst),
-		.i_wb_cyc(i_wb_cyc),
-		.i_wb_stb(i_wb_stb),
-		.i_wb_we(i_wb_we),
-		.i_wb_addr(i_wb_addr),
-		.i_wb_data(i_wb_data),
-		.o_wb_data(o_wb_data),
-		.o_wb_stall(o_wb_stall),
-		.o_wb_ack(o_wb_ack),
+		.wb_clk_i(wb_clk_i),
+		.wb_rst_i(wb_rst_i),
+		.wb_stb_i(wb_stb_i),
+		.wb_cyc_i(wb_cyc_i),
+		.wb_we_i(wb_we_i),
+		.wb_dat_i(wb_dat_i),
+		.wb_dat_o(wb_dat_o),
+		.wb_stall_o(wb_stall_o),
+		.wb_ack_o(wb_ack_o),
 		/* loop input back to output */
-		.i_uart_rx(uart_io),
-		.o_uart_tx(uart_io)
+		.uart_rx(uart_loop),
+		.uart_tx(uart_loop)
 	);
 
 	assign o_uart_setup = TICKS_PER_BAUD;

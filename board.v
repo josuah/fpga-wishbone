@@ -6,10 +6,12 @@ module board (
 	output wire gpio_27
 );
 	wire clk;
-	wire [32+32+1-1:0] unused = { o_wb_data, o_wb_stall, o_wb_ack };
 	wire led_r, led_g, led_b;
+	wire pwm_ack;
+	wire pwm_stall;
 
 	reg [2:0] state = 0;
+	reg [31:0] pwm_addr = 0;
 
 	assign gpio_26 = 0;
 	assign gpio_27 = 0;
@@ -18,7 +20,8 @@ module board (
 		STATE_RESET = 0,
 		STATE_READY = 1,
 		STATE_REQUEST = 2,
-		STATE_END = 3;
+		STATE_WAIT_ACK = 3,
+		STATE_END = 4;
 
 	// internal oscillator
 	SB_HFOSC SB_HFOSC (
@@ -44,26 +47,39 @@ module board (
 	);
 
 	// control the leds over a wishbone bus
-	wb_led_pwm wb_led_pwm (
-		// Wishbone B4
+	wb_pwm #(
+		.PWM_CHANS(3),
+		.PWM_BITS(3)
+	) wb_pwm (
 		.i_wb_clk(clk),
 		.i_wb_rst(state == STATE_RESET),
-		.i_wb_cyc(state == STATE_REQUEST),
 		.i_wb_stb(state == STATE_REQUEST),
 		.i_wb_we(1),
-		.i_wb_addr(0),
-		.i_wb_data(32'h110000),
-		.o_wb_data(o_wb_data),
-		.o_wb_stall(o_wb_stall),
-		.o_wb_ack(o_wb_ack),
-		.o_led_r(led_r),
-		.o_led_g(led_g),
-		.o_led_b(led_b)
+		.i_wb_addr(pwm_addr),
+		.i_wb_data(
+			pwm_addr == 0 ? 3'b111 :
+			pwm_addr == 1 ? 3'b011 :
+			pwm_addr == 2 ? 3'b001 :
+			0
+		),
+		.o_wb_stall(pwm_stall),
+		.o_wb_ack(pwm_ack),
+		.o_pwm_chan({ led_r, led_g, led_b }),
 	);
 
-	/* issue a request over wishbone */
+	// issue a request over wishbone
 	always @(posedge clk) begin
-		if (state < STATE_END)
+		case (state)
+		STATE_END: begin
+			pwm_addr <= pwm_addr + 1;
+			state <= pwm_ack ? (pwm_addr < 3) : state;
+		end
+		STATE_WAIT_ACK: begin
+			state <= state + pwm_ack;
+		end
+		default: begin
 			state <= state + 1;
+		end
+		endcase
 	end
 endmodule
