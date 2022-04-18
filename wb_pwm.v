@@ -1,53 +1,73 @@
+/*
+ * BITS:
+ *      Length of the PWM counter and duty-cycle. Increasing the
+ *	number of bits also increases the duration between two cycles:
+ *	reduces the frequency.
+ *
+ * CHANNELS:
+ *	Number of pwm outputs privided through `pwm`. Affects the addresses
+ *	at which it is possible to write duty-cycle length data.
+ *
+ * 0x0000+i*4 i=[CHANNELS-1..0]:
+ *	Duty cycle value, with `i` the number of the PWM chanel.
+ *	Value between `0` (0%) and `1 << BITS-1` (100%) inclusive.
+ */
+
 module wb_pwm #(
-	parameter WB_ADDR_BITS = 32,
-	parameter PWM_BITS = 4,
-	parameter PWM_CHANS = 1
+	parameter BITS = 4,
+	parameter CHANNELS = 3
 ) (
-        // Wishbone B4
-        input wire i_wb_clk,
-        input wire i_wb_rst,
-        input wire i_wb_stb,
-        input wire i_wb_we,
-        input wire [WB_ADDR_BITS-1:0] i_wb_addr,
-        input wire [31:0] i_wb_data,
-        output wire o_wb_stall,
-        output wire o_wb_ack,
+	// Wishbone B4 pipelined
+	input wire wb_clk_i,
+	input wire wb_rst_i,
+	input wire wb_cyc_i,
+	input wire wb_stb_i,
+	input wire wb_we_i,
+	input wire [31 : 0] wb_adr_i,
+	input wire [31 : 0] wb_dat_i,
+	output wire wb_ack_o,
+	output wire wb_stall_o,
 
-	// Output pin
-	output wire [PWM_CHANS-1:0] o_pwm_chan
+	// PWM output
+	output wire [CHANNELS-1:0] pwm
 );
+	reg [CHANNELS*BITS-1 : 0] duty_cycle;
+	// one less bit, to permit reaching 100% duty cycle
+	reg [BITS-2 : 0] counter;
 
-`define DUTY_CYCLE(i) duty_cycle[PWM_BITS*(i+1)-1:PWM_BITS*i]
+	wire [31-BITS : 0] unused = { wb_dat_i[31:BITS] };
 
-	genvar g;
-	integer i;
+	assign wb_stall_o = 0;
 
-	reg [PWM_BITS-1:0] cnt;
-	reg [PWM_BITS*PWM_CHANS-1:0] duty_cycle;
+generate
+genvar I;
+for (I = 0; I < CHANNELS; I++) begin
+	assign pwm[I] = duty_cycle[(I+1)*BITS-1 : I*BITS] > { 1'b0, counter };
 
-	assign i_wb_ack = i_wb_stb & i_wb_we & (i_wb_addr < PWM_CHANS);
-	assign o_wb_stall = i_wb_stb & !i_wb_we;
-	for (g = 0; g < PWM_CHANS; g++)
-		assign o_pwm_chan[g] = (cnt > `DUTY_CYCLE(g));
-
-	always @(posedge i_wb_clk) begin
-		cnt <= cnt + 1;
-
-		if (i_wb_rst)
-			{ cnt, duty_cycle } <= 0;
-
-		if (i_wb_stb & i_wb_we) begin
-			for (i = 0; i < PWM_CHANS; i++)
-				if (i_wb_addr == i)
-					`DUTY_CYCLE(i) <= i_wb_data;
-		end
+	always @(posedge wb_clk_i) begin
+		if (wb_stb_i & wb_cyc_i & wb_we_i & (wb_adr_i == I))
+			duty_cycle[(I+1)*BITS-1 : I*BITS] <= wb_dat_i[BITS-1 : 0];
 	end
-endmodule
+end
+endgenerate
+
+	always @(posedge wb_clk_i) begin
+		wb_ack_o <= wb_cyc_i & wb_stb_i;
+		counter <= counter + 1;
+		if (wb_rst_i)
+			{ duty_cycle, counter } <= 0;
+	end
 
 `ifdef FORMAL
 
-	always @(posedge i_wb_clk) begin
-		// TODO
+	reg f_past_valid = 0;
+
+	alwaus @(posedge wb_clk_i) begin
+		f_past_valid <= 1;
+
+		assert();
 	end
 
 `endif
+
+endmodule

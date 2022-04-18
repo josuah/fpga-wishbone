@@ -11,7 +11,7 @@ module board (
 	wire pwm_stall;
 
 	reg [2:0] state = 0;
-	reg [31:0] pwm_addr = 0;
+	reg [31:0] pwm_address = 0;
 
 	assign gpio_26 = 0;
 	assign gpio_27 = 0;
@@ -48,31 +48,31 @@ module board (
 
 	// control the leds over a wishbone bus
 	wb_pwm #(
-		.PWM_CHANS(3),
-		.PWM_BITS(3)
-	) wb_pwm (
-		.i_wb_clk(clk),
-		.i_wb_rst(state == STATE_RESET),
-		.i_wb_stb(state == STATE_REQUEST),
-		.i_wb_we(1),
-		.i_wb_addr(pwm_addr),
-		.i_wb_data(
-			pwm_addr == 0 ? 3'b111 :
-			pwm_addr == 1 ? 3'b011 :
-			pwm_addr == 2 ? 3'b001 :
+		.BITS(2),
+		.CHANNELS(3)
+	) pwm_leds (
+		.wb_clk_i(clk),
+		.wb_rst_i(state == STATE_RESET),
+		.wb_stb_i(state == STATE_REQUEST),
+		.wb_we_i(1),
+		.wb_adr_i(pwm_address),
+		.wb_dat_i(
+			pwm_address == 0 ? 2'b11 :
+			pwm_address == 1 ? 2'b01 :
+			pwm_address == 2 ? 2'b00 :
 			0
 		),
-		.o_wb_stall(pwm_stall),
-		.o_wb_ack(pwm_ack),
-		.o_pwm_chan({ led_r, led_g, led_b }),
+		.wb_stall_o(pwm_stall),
+		.wb_ack_o(pwm_ack),
+		.pwm({ led_r, led_g, led_b }),
 	);
 
 	// issue a request over wishbone
 	always @(posedge clk) begin
 		case (state)
 		STATE_END: begin
-			pwm_addr <= pwm_addr + 1;
-			state <= pwm_ack ? (pwm_addr < 3) : state;
+			pwm_address <= pwm_address + 1;
+			state <= pwm_ack ? (pwm_address < 3) : state;
 		end
 		STATE_WAIT_ACK: begin
 			state <= state + pwm_ack;

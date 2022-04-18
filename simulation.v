@@ -1,41 +1,33 @@
-module simulation #(
-	parameter TICKS_PER_BAUD = 3
-) (
-	// Cosimulator
-	output wire [31:0] o_uart_setup,
-	input wire i_uart_sampling,
-	input wire [7:0] i_uart_ticks_cnt,
-
+module simulation (
 	// Wishbone B4
 	input wire wb_clk_i,
 	input wire wb_rst_i,
 	input wire wb_stb_i,
 	input wire wb_cyc_i,
 	input wire wb_we_i,
+	input wire [31:0] wb_adr_i,
 	input wire [31:0] wb_dat_i,
-	output wire [31:0] wb_dat_o,
 	output wire wb_stall_o,
-	output wire wb_ack_o
-);
-	wire [8:0] unused = { i_uart_sampling, i_uart_ticks_cnt };
-	wire uart_loop;
+	output wire wb_ack_o,
 
-	wb_uart #(
-		.TICKS_PER_BAUD(TICKS_PER_BAUD)
-	) wb_uart (
+	// PWM-controlled LEDs
+	output wire led_r,
+	output wire led_g,
+	output wire led_b
+);
+	wb_pwm #(
+		.BITS(5),
+		.CHANNELS(3)
+	) wb_pwm (
 		.wb_clk_i(wb_clk_i),
 		.wb_rst_i(wb_rst_i),
 		.wb_stb_i(wb_stb_i),
 		.wb_cyc_i(wb_cyc_i),
 		.wb_we_i(wb_we_i),
+		.wb_adr_i(wb_adr_i),
 		.wb_dat_i(wb_dat_i),
-		.wb_dat_o(wb_dat_o),
 		.wb_stall_o(wb_stall_o),
 		.wb_ack_o(wb_ack_o),
-		/* loop input back to output */
-		.uart_rx(uart_loop),
-		.uart_tx(uart_loop)
+		.pwm({ led_b, led_g, led_r })
 	);
-
-	assign o_uart_setup = TICKS_PER_BAUD;
 endmodule

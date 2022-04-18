@@ -1,5 +1,4 @@
 module wb_uart #(
-	parameter WB_DAT_BITS = 32,
 	parameter TICKS_PER_BAUD = 8
 ) (
 	// Wishbone B4 (5.3)
