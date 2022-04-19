@@ -18,7 +18,7 @@ module wb_led_pwm (
 	output wire o_led_g,
 	output wire o_led_b
 );
-	wire [23:0] unused = { i_wb_data[31:24], i_wb_addr[15:0] };
+	wire [8+32-1:0] unused = { i_wb_data[31:24], i_wb_addr[31:0] };
 	wire write_request = (i_wb_cyc && i_wb_stb && i_wb_we);
 
 	reg r_wb_ack;

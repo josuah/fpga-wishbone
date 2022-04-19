@@ -8,7 +8,7 @@ module simulation (
 	output wire led_g,
 	output wire led_b
 );
-	main main (
+	top top (
 		.clk(clk),
 		.led_r(led_r),
 		.led_g(led_g),

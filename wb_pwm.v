@@ -37,18 +37,18 @@ module wb_pwm #(
 	// one less bit, to permit reaching 100% duty cycle
 	reg [BITS-2 : 0] counter;
 
-	wire [31-BITS : 0] unused = { wb_dat_i[31:BITS] };
+	wire [32-BITS+CHANNELS*BITS-1 : 0] unused = { wb_dat_i[31:BITS], duty_cycle };
 
 	assign wb_stall_o = 0;
 
 generate
 genvar I;
 for (I = 0; I < CHANNELS; I++) begin
-	assign pwm[I] = duty_cycle[(I+1)*BITS-1 : I*BITS] > { 1'b0, counter };
+	assign pwm[I] = duty_cycle[I*BITS +: BITS] > { 1'b0, counter };
 
 	always @(posedge wb_clk_i) begin
 		if (wb_stb_i & wb_cyc_i & wb_we_i & (wb_adr_i == I))
-			duty_cycle[(I+1)*BITS-1 : I*BITS] <= wb_dat_i[BITS-1 : 0];
+			duty_cycle[I*BITS +: BITS] <= wb_dat_i[BITS-1 : 0];
 	end
 end
 endgenerate

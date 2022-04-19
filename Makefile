@@ -5,11 +5,11 @@ MAKE = gmake
 VERILATOR = verilator -Wall -DSIMULATION --trace
 VERILATOR_ROOT = /usr/local/share/verilator
 VERILATOR_SRC = ${VERILATOR_ROOT}/include/verilated.cpp ${VERILATOR_ROOT}/include/verilated_vcd_c.cpp
-NEXTPNR = nextpnr-ice40 --up5k --package sg48
+NEXTPNR = nextpnr-ice40 --randomize-seed --up5k --package sg48
 YOSYS = yosys
 
 PCF = upduino.pcf
-V = main.v wb_led_pwm.v wb_pwm.v wb_uart.v
+V = top.v wb_led_pwm.v wb_pwm.v wb_uart.v
 
 all: board.bit simulation.vcd
 

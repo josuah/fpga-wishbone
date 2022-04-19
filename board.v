@@ -1,5 +1,3 @@
-`default_nettype none
-
 module board (
 	output wire rgb0,
 	output wire rgb1,
@@ -8,31 +6,30 @@ module board (
 	wire clk;
 	wire led_r, led_g, led_b;
 
-	// plug the clock
+	// internal oscillator
 	SB_HFOSC SB_HFOSC (
 		.CLKHFPU(1'b1),
 		.CLKHFEN(1'b1),
 		.CLKHF(clk)
 	);
 
-	// plug the led driver
+	// RGB primitive with control of the current
 	SB_RGBA_DRV #(
 		.RGB0_CURRENT("0b000001"),
 		.RGB1_CURRENT("0b000001"),
 		.RGB2_CURRENT("0b000001")
 	) sb_rgba_drv (
 		.RGBLEDEN(1'b1),
-		.RGB0PWM(1),
-		.RGB1PWM(led_r),
-		.RGB2PWM(led_b),
+		.RGB0PWM(led_g),
+		.RGB1PWM(led_b),
+		.RGB2PWM(led_r),
 		.CURREN(1'b1),
 		.RGB0(rgb0),
 		.RGB1(rgb1),
 		.RGB2(rgb2)
 	);
 
-	// run
-	main main (
+	top top (
 		.clk(clk),
 		.led_r(led_r),
 		.led_g(led_g),
