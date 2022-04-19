@@ -1,3 +1,5 @@
+`default_nettype none
+
 module wb_uart_tx #(
 	parameter TICKS_PER_BAUD = 8
 ) (

@@ -1,3 +1,5 @@
+`default_nettype none
+
 module wb_uart #(
 	parameter TICKS_PER_BAUD = 8
 ) (
@@ -19,7 +21,7 @@ module wb_uart #(
 	wire [24-1:0] unused = { wb_dat_i[31:8] };
 
 	assign wb_ack_o = wb_cyc_i & wb_stb_i;
-	assign wb_dat_o[WB_DAT_BITS-1:8] = 0;
+	assign wb_dat_o[31:8] = 0;
 	assign wb_stall_o = 0;
 
 	wb_uart_rx #(

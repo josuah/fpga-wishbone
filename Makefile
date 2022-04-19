@@ -9,7 +9,7 @@ NEXTPNR = nextpnr-ice40 --up5k --package sg48
 YOSYS = yosys
 
 PCF = upduino.pcf
-V = wb_led_pwm.v wb_pwm.v wb_uart.v
+V = main.v wb_led_pwm.v wb_pwm.v wb_uart.v
 
 all: board.bit simulation.vcd
 

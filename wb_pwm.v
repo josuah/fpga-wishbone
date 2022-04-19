@@ -1,3 +1,5 @@
+`default_nettype none
+
 /*
  * BITS:
  *      Length of the PWM counter and duty-cycle. Increasing the

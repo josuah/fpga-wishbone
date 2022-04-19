@@ -1,3 +1,5 @@
+`default_nettype none
+
 module wb_led_pwm (
 	// Wishbone B4
 	input wire i_wb_clk,
@@ -5,7 +7,7 @@ module wb_led_pwm (
 	input wire i_wb_cyc,
 	input wire i_wb_stb,
 	input wire i_wb_we,
-	input wire [15:0] i_wb_addr,
+	input wire [31:0] i_wb_addr,
 	input wire [31:0] i_wb_data,
 	output wire [31:0] o_wb_data,
 	output wire o_wb_stall,

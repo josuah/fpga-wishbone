@@ -1,3 +1,5 @@
+`default_nettype none
+
 module simulation #(
 	parameter TICKS_PER_BAUD = 3
 ) (
