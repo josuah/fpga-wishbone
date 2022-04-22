@@ -1,0 +1,15 @@
+
+[files]
+simulation.v
+top.v
+wb_pwm.v
+
+[engines]
+smtbmc
+
+[script]
+read -formal simulation.v top.v wb_pwm.v
+prep -top simulation
+
+[options]
+mode prove

@@ -9,4 +9,6 @@
 *.json
 *.log
 *.vcd
+*.pdf
+*.dot
 /testbench

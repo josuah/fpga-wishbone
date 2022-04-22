@@ -9,12 +9,12 @@ NEXTPNR = nextpnr-ice40 --randomize-seed --up5k --package sg48
 YOSYS = yosys
 
 PCF = upduino.pcf
-V = top.v wb_led_pwm.v wb_pwm.v wb_uart.v
+V = top.v wb_pwm.v wb_pwm_channel.v wb_uart.v
 
 all: board.bit simulation.vcd
 
 clean:
-	rm -fr *.log *.json *.asc *.bit *.hex *.elf *.d *.vcd
+	rm -fr *.log *.json *.asc *.bit *.hex *.elf *.d *.vcd *.dot *.pdf
 
 flash: board.bit
 	${ICEPROG} -d i:0x0403:0x6014 board.bit
@@ -22,14 +22,14 @@ flash: board.bit
 wave: simulation.vcd
 	gtkwave simulation.vcd
 
-test: ${V} testbench.v testbench.sby
+test: ${V} simulation.v testbench.sby
 	sby -f testbench.sby
 
 board.json: ${V}
 
 simulation.elf: ${V} simulation.cpp
 
-.SUFFIXES: .v .elf .vcd .json .asc .bit .dfu .hex
+.SUFFIXES: .v .elf .vcd .json .asc .bit .dfu .hex .dot .pdf
 
 .v.elf:
 	${VERILATOR} -cc --Mdir $*.d $<
@@ -51,3 +51,9 @@ simulation.elf: ${V} simulation.cpp
 .bit.dfu:
 	cp $< $@
 	dfu-suffix -v 1209 -p 70b1 -a $@
+
+.v.dot:
+	yosys -p "read_verilog $<; show -format dot -prefix $*"
+
+.dot.pdf:
+	dot -Tpdf $< >$@

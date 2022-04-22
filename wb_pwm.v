@@ -27,47 +27,54 @@ module wb_pwm #(
 	input wire wb_we_i,
 	input wire [31 : 0] wb_adr_i,
 	input wire [31 : 0] wb_dat_i,
+	output wire [31 : 0] wb_dat_o,
 	output wire wb_ack_o,
 	output wire wb_stall_o,
 
 	// PWM output
 	output wire [CHANNELS-1:0] pwm
 );
-	reg [CHANNELS*BITS-1 : 0] duty_cycle;
 	// one less bit, to permit reaching 100% duty cycle
-	reg [BITS-2 : 0] counter;
-
-	wire [32-BITS+CHANNELS*BITS-1 : 0] unused = { wb_dat_i[31:BITS], duty_cycle };
+	reg [BITS-1:0] counter;
+	wire [31:BITS] unused = { wb_dat_i[31:BITS] };
+	wire request = wb_cyc_i & wb_stb_i & wb_we_i;
+	wire [CHANNELS-1:0] channel_sel = 2{1'b0} request << wb_adr_i[$clog2(CHANNELS):0];
 
 	assign wb_stall_o = 0;
+	assign wb_dat_o = 0;
 
-generate
-genvar I;
-for (I = 0; I < CHANNELS; I++) begin
-	assign pwm[I] = duty_cycle[I*BITS +: BITS] > { 1'b0, counter };
-
-	always @(posedge wb_clk_i) begin
-		if (wb_stb_i & wb_cyc_i & wb_we_i & (wb_adr_i == I))
-			duty_cycle[I*BITS +: BITS] <= wb_dat_i[BITS-1 : 0];
-	end
-end
-endgenerate
+	wb_pwm_channel #(
+		.BITS(BITS)
+	) channel[CHANNELS-1:0] (
+		.wb_clk_i(wb_clk_i),
+		.wb_rst_i(wb_rst_i),
+		.wb_stb_i(channel_sel),
+		.wb_dat_i(wb_dat_i[BITS-1:0]),
+		.pwm_counter(counter),
+		.pwm_channel(pwm)
+	);
 
 	always @(posedge wb_clk_i) begin
 		wb_ack_o <= wb_cyc_i & wb_stb_i;
 		counter <= counter + 1;
+
 		if (wb_rst_i)
-			{ duty_cycle, counter } <= 0;
+			counter <= 0;
 	end
 
 `ifdef FORMAL
 
 	reg f_past_valid = 0;
+	reg f_should_pulse = 0;
 
-	alwaus @(posedge wb_clk_i) begin
+	always @(posedge wb_clk_i) begin
 		f_past_valid <= 1;
 
-		assert();
+		if (wb_stb_i)
+			f_should_pulse <= 1;
+
+		if (f_should_pulse)
+			cover(|pwm);
 	end
 
 `endif

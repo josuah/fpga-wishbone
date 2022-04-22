@@ -8,8 +8,6 @@ module top (
 );
 	wire wb_ack_o;
 	wire wb_stall_o;
-	wire [31:0] wb_dat_o;
-	wire [31:0] unused = { wb_dat_o };
 
 	reg [2:0] state = 0;
 	reg [2:0] pwm_address = 0;
@@ -34,11 +32,10 @@ module top (
 		.wb_adr_i({ 29'h0, pwm_address }),
 		.wb_dat_i(
 			pwm_address == 0 ? 32'hF :
-			pwm_address == 1 ? 32'h0 :
-			pwm_address == 2 ? 32'h8 :
+			pwm_address == 1 ? 32'hF :
+			pwm_address == 2 ? 32'hF :
 			0
 		),
-		.wb_dat_o(wb_dat_o),
 		.wb_stall_o(wb_stall_o),
 		.wb_ack_o(wb_ack_o),
 		.pwm({ led_r, led_g, led_b })
