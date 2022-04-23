@@ -3,12 +3,13 @@
 simulation.v
 top.v
 wb_pwm.v
+wb_pwm_channel.v
 
 [engines]
 smtbmc
 
 [script]
-read -formal simulation.v top.v wb_pwm.v
+read -formal simulation.v top.v wb_pwm.v wb_pwm_channel.v
 prep -top simulation
 
 [options]

@@ -18,7 +18,7 @@ module wb_uart #(
 	input wire uart_rx,
 	output wire uart_tx
 );
-	wire [24-1:0] unused = { wb_dat_i[31:8] };
+	wire unused = &{ wb_dat_i[31:8] };
 
 	assign wb_ack_o = wb_cyc_i & wb_stb_i;
 	assign wb_dat_o[31:8] = 0;

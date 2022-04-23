@@ -36,9 +36,8 @@ module wb_pwm #(
 );
 	// one less bit, to permit reaching 100% duty cycle
 	reg [BITS-1:0] counter;
-	wire [31:BITS] unused = { wb_dat_i[31:BITS] };
+	wire unused = &{ wb_dat_i[31:BITS] };
 	wire request = wb_cyc_i & wb_stb_i & wb_we_i;
-	wire [CHANNELS-1:0] channel_sel = 2{1'b0} request << wb_adr_i[$clog2(CHANNELS):0];
 
 	assign wb_stall_o = 0;
 	assign wb_dat_o = 0;
@@ -48,7 +47,7 @@ module wb_pwm #(
 	) channel[CHANNELS-1:0] (
 		.wb_clk_i(wb_clk_i),
 		.wb_rst_i(wb_rst_i),
-		.wb_stb_i(channel_sel),
+		.wb_stb_i({ {CHANNELS-1{1'b0}}, request } << wb_adr_i),
 		.wb_dat_i(wb_dat_i[BITS-1:0]),
 		.pwm_counter(counter),
 		.pwm_channel(pwm)

@@ -2,9 +2,9 @@
 # Note that they are negative logic (write a 0 to turn on).
 # These are also brought out to the left side of the board. 
 # Cut the board trace on jumper R28 to disable the onboard 3 color LED.
-set_io -nowarn rgb0 39
-set_io -nowarn rgb1 41
-set_io -nowarn rgb2 40
+set_io -nowarn rgb0 39 # red
+set_io -nowarn rgb1 41 # green
+set_io -nowarn rgb2 40 # blue
 
 # FTDI chip interface
 set_io -nowarn serial_txd 14 # FPGA transmit to USB

@@ -19,7 +19,7 @@ module simulation #(
 	output wire wb_stall_o,
 	output wire wb_ack_o
 );
-	wire [8:0] unused = { i_uart_sampling, i_uart_ticks_cnt };
+	wire unused = &{ i_uart_sampling, i_uart_ticks_cnt };
 	wire uart_loop;
 
 	wb_pwm #(

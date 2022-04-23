@@ -9,7 +9,7 @@ module top (
 	wire wb_ack_o;
 	wire wb_stall_o;
 	wire [31:0] wb_dat_o;
-	wire [31:0] unused = { wb_dat_o };
+	wire unused = &{ wb_dat_o };
 
 	reg [2:0] state = 0;
 	reg [2:0] pwm_address = 0;
@@ -33,15 +33,15 @@ module top (
 		.wb_we_i(1),
 		.wb_adr_i({ 29'h0, pwm_address }),
 		.wb_dat_i(
-			pwm_address == 0 ? 32'hF :
-			pwm_address == 1 ? 32'h0 :
-			pwm_address == 2 ? 32'h8 :
+			pwm_address == 0 ? 32'hA :
+			pwm_address == 1 ? 32'h7 :
+			pwm_address == 2 ? 32'h1 :
 			0
 		),
 		.wb_dat_o(wb_dat_o),
 		.wb_stall_o(wb_stall_o),
 		.wb_ack_o(wb_ack_o),
-		.pwm({ led_r, led_g, led_b })
+		.pwm({ led_b, led_g, led_r })
 	);
 
 	// main state machine: issue requests over wishbone
