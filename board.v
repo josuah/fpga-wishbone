@@ -3,18 +3,19 @@ module board (
 	output wire rgb1,
 	output wire rgb2,
 	input wire gpio_23,
-	output wire gpio_25
+	output wire gpio_25,
+	output wire gpio_26
 );
-	wire clk;
+	wire clock;
 
 	// internal oscillator
 	SB_HFOSC SB_HFOSC (
 		.CLKHFPU(1'b1),
 		.CLKHFEN(1'b1),
-		.CLKHF(clk)
+		.CLKHF(clock)
 	);
 
-	// RGB primitive with control of the current
+	// RGB with voltage control
 	SB_RGBA_DRV #(
 		.RGB0_CURRENT("0b000001"),
 		.RGB1_CURRENT("0b000001"),
@@ -33,9 +34,9 @@ module board (
 	top #(
 		.TICKS_PER_BAUD(48000000/9600)
 	) top (
-		.clk(clk),
+		.clock(clock),
 		.uart_tx(gpio_25),
-		.uart_rx(gpio_23)
+		.uart_rx(gpio_23),
+		.pwm_motor_o(gpio_26)
 	);
-
 endmodule
