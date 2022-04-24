@@ -70,11 +70,12 @@ uart_tick_tx(struct uart *u)
 	}
 
 	if (u->tx.ticks_counter == 0) {
-		switch (u->tx.state++) {
+		switch (u->tx.state) {
 		case UART_TX_IDLE:
 			break;
 		case UART_TX_START:
 			u->v->uart_rx = 0;
+			u->tx.state++;
 			break;
 		case UART_TX_BIT_0:
 		case UART_TX_BIT_1:
@@ -86,11 +87,12 @@ uart_tick_tx(struct uart *u)
 		case UART_TX_BIT_7:
 			u->v->uart_rx = !(u->tx.shift_register & 1);
 			u->tx.shift_register >>= 1;
+			u->tx.state++;
 			break;
 		case UART_TX_STOP:
-			u->tx.state = 0;
 			u->tx.shift_register_full = 0;
 			u->v->uart_rx = 1;
+			u->tx.state = 0;
 			break;
 		default:
 			assert(!"unreached");
@@ -116,9 +118,11 @@ uart_tick_rx(struct uart *u)
 	}
 
 	if (u->rx.ticks_counter == u->v->uart_ticks_per_baud / 2) {
-		switch (u->rx.state++) {
+		switch (u->rx.state) {
 		case UART_RX_IDLE:
+			break;
 		case UART_RX_START:
+			u->rx.state++;
 			break;
 		case UART_RX_BIT_0:
 		case UART_RX_BIT_1:
@@ -131,10 +135,11 @@ uart_tick_rx(struct uart *u)
 			u->rx.shift_register =
 			 (u->rx.shift_register >> 1) | (!u->v->uart_tx << 7);
 			sampling = 1;
+			u->rx.state++;
 			break;
 		case UART_RX_STOP:
-			u->rx.state = 0;
 			u->rx.shift_register_ready = 1;
+			u->rx.state = 0;
 			break;
 		default:
 			assert(!"unreached");

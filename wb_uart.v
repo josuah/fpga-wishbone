@@ -24,7 +24,6 @@ module wb_uart #(
 );
 	wire unused = &{ wb_dat_i[31:8], wb_dat_o[31:8], wb_adr_i };
 
-	assign wb_ack_o = wb_cyc_i & wb_stb_i;
 	assign wb_dat_o[31:8] = 0;
 	assign wb_stall_o = 0;
 
@@ -48,5 +47,9 @@ module wb_uart #(
 		.wb_dat_i(wb_dat_i[7:0]),
 		.uart_tx(uart_tx)
 	);
+
+	always @(posedge wb_clk_i) begin
+		wb_ack_o <= wb_cyc_i && wb_stb_i;
+	end
 
 endmodule

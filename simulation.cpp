@@ -20,6 +20,15 @@ main(int argc, char **argv)
 
 	v->uart_rx = 1;
 
+	simulation_tick_begin(v);
+	simulation_tick_end(v);
+
+	simulation_tick_begin(v);
+	simulation_tick_end(v);
+
+	simulation_tick_begin(v);
+	simulation_tick_end(v);
+
 	for (size_t i = 0; i < 0x200; i++) {
 		uart_tx_byte(&u, '.');
 		c = uart_rx_byte(&u);

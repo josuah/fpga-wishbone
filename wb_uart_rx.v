@@ -61,7 +61,7 @@ module wb_uart_rx #(
 		end
 
 		if (wb_stb_i)
-			int_uart_rx <= 0;
+			int_uart_rx <= 0;	// what if we read the data register just now? should be set for one clock and disappear?
 
 		if (wb_rst_i) begin
 			{ state, shift_reg, baud_cnt, wb_dat_o } <= 0;
