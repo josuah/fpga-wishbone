@@ -1,18 +1,26 @@
 `default_nettype none
 
-module top (
+`define CLOCK_RATE_HZ 48000000
+`define BAUD_RATE_HZ 9600
+
+module top #(
+	parameter TICKS_PER_BAUD = 4
+) (
 	input wire clk,
-	output wire led_r,
-	output wire led_g,
-	output wire led_b
+	input wire uart_rx,
+	output wire uart_tx,
+	output wire led
 );
+	reg [2:0] state = 0;
+	reg [31:0] buffer;
+	reg write_mode = 0;
+
 	wire wb_ack_o;
 	wire wb_stall_o;
-	wire [31:0] wb_dat_o;
-	wire unused = &{ wb_dat_o };
+	wire int_uart_rx;
+	wire unused = &{ wb_stall_o };
 
-	reg [2:0] state = 0;
-	reg [2:0] pwm_address = 0;
+	assign led = 1;
 
 	localparam [2:0]
 		STATE_RESET = 0,
@@ -21,32 +29,33 @@ module top (
 		STATE_WAIT_ACK = 3,
 		STATE_END = 4;
 
-	// control the leds over a wishbone bus
-	wb_pwm #(
-		.BITS(5),
-		.CHANNELS(3)
-	) pwm_leds (
+	wb_uart #(
+		.TICKS_PER_BAUD(`CLOCK_RATE_HZ / `BAUD_RATE_HZ)
+	) uart (
 		.wb_clk_i(clk),
 		.wb_rst_i(state == STATE_RESET),
 		.wb_stb_i(state == STATE_REQUEST),
 		.wb_cyc_i(state >= STATE_REQUEST && state <= STATE_WAIT_ACK),
-		.wb_we_i(1),
-		.wb_adr_i({ 29'h0, pwm_address }),
-		.wb_dat_i(
-			pwm_address == 0 ? 32'hA :
-			pwm_address == 1 ? 32'h7 :
-			pwm_address == 2 ? 32'h1 :
-			0
-		),
-		.wb_dat_o(wb_dat_o),
+		.wb_we_i(write_mode),
+		.wb_adr_i(0),
+		.wb_dat_i(buffer),
+		.wb_dat_o(buffer),
 		.wb_stall_o(wb_stall_o),
 		.wb_ack_o(wb_ack_o),
-		.pwm({ led_b, led_g, led_r })
+		.int_uart_rx(int_uart_rx),
+		.uart_tx(uart_tx),
+		.uart_rx(uart_rx)
 	);
 
 	// main state machine: issue requests over wishbone
 	always @(posedge clk) begin
 		case (state)
+		STATE_READY: begin
+			// either we are writing and do not need to wait,
+			// either we are reading and will wait the interrupt,
+			if (write_mode || int_uart_rx)
+				state <= state + 1;
+		end
 		STATE_REQUEST: begin
 			if (!wb_stall_o)
 				state <= state + 1;
@@ -56,16 +65,13 @@ module top (
 				state <= state + 1;
 		end
 		STATE_END: begin
-			// wraparound if not already at the end
-			if (pwm_address < 2) begin
-				state <= 1;
-				pwm_address <= pwm_address + 1;
-			end
+			// swap between reading and writing mode
+			write_mode <= !write_mode;
+			state <= STATE_READY;
 		end
 		default: begin
 			state <= state + 1;
 		end
 		endcase
 	end
-
 endmodule

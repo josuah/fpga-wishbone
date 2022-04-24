@@ -9,7 +9,7 @@ NEXTPNR = nextpnr-ice40 --randomize-seed --up5k --package sg48
 YOSYS = yosys
 
 PCF = upduino.pcf
-V = top.v wb_pwm.v wb_pwm_channel.v wb_uart.v
+V = top.v wb_uart.v wb_uart_tx.v wb_uart_rx.v wb_pwm.v wb_pwm_channel.v
 
 all: board.bit simulation.vcd
 
@@ -27,7 +27,7 @@ test: ${V} simulation.v testbench.sby
 
 board.json: ${V}
 
-simulation.elf: ${V} simulation.cpp
+simulation.elf: ${V} simulation.cpp simulation.h simulation.uart.h
 
 .SUFFIXES: .v .elf .vcd .json .asc .bit .dfu .hex .dot .pdf
 

@@ -2,9 +2,11 @@ module board (
 	output wire rgb0,
 	output wire rgb1,
 	output wire rgb2,
+	output wire gpio_23,
+	output wire gpio_25
 );
 	wire clk;
-	wire led_r, led_g, led_b;
+	wire led_r;
 
 	// internal oscillator
 	SB_HFOSC SB_HFOSC (
@@ -20,8 +22,8 @@ module board (
 		.RGB2_CURRENT("0b000001")
 	) sb_rgba_drv (
 		.RGBLEDEN(1'b1),
-		.RGB0PWM(led_g),
-		.RGB1PWM(led_b),
+		.RGB0PWM(0),
+		.RGB1PWM(0),
 		.RGB2PWM(led_r),
 		.CURREN(1'b1),
 		.RGB0(rgb0),
@@ -29,11 +31,13 @@ module board (
 		.RGB2(rgb2)
 	);
 
-	top top (
+	top #(
+		.TICKS_PER_BAUD(4)
+	) top (
 		.clk(clk),
-		.led_r(led_r),
-		.led_g(led_g),
-		.led_b(led_b)
+		.led(led_r),
+		.uart_tx(gpio_23),
+		.uart_rx(gpio_25)
 	);
 
 endmodule

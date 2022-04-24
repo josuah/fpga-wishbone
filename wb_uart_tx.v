@@ -28,7 +28,7 @@ module wb_uart_tx #(
 
 	reg [3:0] state = 0;
 	reg [9:0] shift_reg = 0;
-	reg [7:0] baud_cnt = 0;
+	reg [$size(TICKS_PER_BAUD)-1:0] baud_cnt = 0;
 
 	assign uart_tx = !shift_reg[0];
 

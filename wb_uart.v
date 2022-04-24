@@ -9,16 +9,20 @@ module wb_uart #(
 	input wire wb_cyc_i,
 	input wire wb_stb_i,
 	input wire wb_we_i,
+	input wire [3:0] wb_adr_i,
 	input wire [31:0] wb_dat_i,
 	output wire [31:0] wb_dat_o,
 	output reg wb_ack_o,
 	output wire wb_stall_o,
 
+	// Interrupts
+	output int_uart_rx,
+
 	// UART
 	input wire uart_rx,
 	output wire uart_tx
 );
-	wire unused = &{ wb_dat_i[31:8] };
+	wire unused = &{ wb_dat_i[31:8], wb_dat_o[31:8], wb_adr_i };
 
 	assign wb_ack_o = wb_cyc_i & wb_stb_i;
 	assign wb_dat_o[31:8] = 0;
@@ -29,7 +33,9 @@ module wb_uart #(
 	) rx (
 		.wb_clk_i(wb_clk_i),
 		.wb_rst_i(wb_rst_i),
+		.wb_stb_i(wb_stb_i & !wb_we_i),
 		.wb_dat_o(wb_dat_o[7:0]),
+		.int_uart_rx(int_uart_rx),
 		.uart_rx(uart_rx)
 	);
 

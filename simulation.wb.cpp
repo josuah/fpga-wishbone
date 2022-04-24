@@ -1,11 +1,3 @@
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <arpa/inet.h>
-#include "verilated.h"
-#include "verilated_vcd_c.h"
-#include "Vsimulation.h"
-
 /*
  * Wishbone B4 read request in pipelined mode
  */

@@ -6,7 +6,11 @@ module wb_uart_rx #(
 	// Wishbone B4 (subset)
 	input wire wb_clk_i,
 	input wire wb_rst_i,
+	input wire wb_stb_i,
 	output reg [7:0] wb_dat_o,
+
+	// Interrupts
+	output reg int_uart_rx,
 
 	// UART
 	input wire uart_rx
@@ -27,7 +31,7 @@ module wb_uart_rx #(
 		STATE_LAST	= 10;  // same as STATE_STOP
 
 	reg [3:0] state = 0;
-	reg [7:0] baud_cnt = 0;
+	reg [$size(TICKS_PER_BAUD)-1:0] baud_cnt = 0;
 	reg [7:0] shift_reg = 0;
 
 	always @(posedge wb_clk_i) begin
@@ -44,14 +48,20 @@ module wb_uart_rx #(
 				shift_reg <= { !uart_rx, shift_reg[7:1] };
 
 			if (baud_cnt == TICKS_PER_BAUD - 1) begin
-				if (state == STATE_BIT_LAST)
+				if (state == STATE_BIT_LAST) begin
 					// continuously update the data buffer
 					wb_dat_o <= shift_reg;
+					// raise interrupt: dinner is served
+					int_uart_rx <= 1;
+				end
 
 				state <= (state == STATE_LAST) ? 0 : state + 1;
 				baud_cnt <= 0;
 			end
 		end
+
+		if (wb_stb_i)
+			int_uart_rx <= 0;
 
 		if (wb_rst_i) begin
 			{ state, shift_reg, baud_cnt, wb_dat_o } <= 0;
