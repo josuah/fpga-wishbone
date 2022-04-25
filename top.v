@@ -9,12 +9,17 @@ module top #(
 	input wire uart_rx,
 	output wire uart_tx,
 
+	// LED output
+	output wire led_r,
+	output wire led_g,
+	output wire led_b,
+
 	// PWM output
-	output pwm_motor_o
+	output wire pwm_servo
 );
 	reg not_reset = 0;
 	wire reset = !not_reset;
-	wire unused = &{ pwm_dat_o };
+	wire unused = &{ pwm_dat_o, pdm_dat_o };
 
 	always @(posedge clock)
 		not_reset <= 1;
@@ -88,7 +93,7 @@ module top #(
 	);
 
 
-	// PWM module
+	// PWM for servo control
 
 	localparam [2:0]
 		PWM_STATE_IDLE = 0,
@@ -103,8 +108,9 @@ module top #(
 	wire pwm_stall_o;
 
 	wb_pwm #(
-		.CHANNEL_NUM(1)
-	) pwm_motor (
+		.CHANNEL_NUM(1),
+		.TICKS_PER_CYCLE(48000000/50)
+	) pwm (
 		.wb_clk_i(clock),
 		.wb_rst_i(reset),
 		.wb_stb_i(pwm_state == PWM_STATE_REQUEST),
@@ -112,11 +118,11 @@ module top #(
 			&& pwm_state <= PWM_STATE_WAIT_ACK),
 		.wb_we_i(1),
 		.wb_adr_i(0),
-		.wb_dat_i(32'h30),
+		.wb_dat_i(32'h300),
 		.wb_dat_o(pwm_dat_o),
 		.wb_ack_o(pwm_ack_o),
 		.wb_stall_o(pwm_stall_o),
-		.pwm(pwm_motor_o)
+		.pwm_channel(pwm_servo)
 	);
 
 	// main state machine for PWM: issue a single duty-cycle request
@@ -136,6 +142,60 @@ module top #(
 		end
 		default: begin
 			pwm_state <= pwm_state + 1;
+		end
+		endcase
+	end
+
+
+	// PDM for LEDs
+
+	localparam [2:0]
+		PDM_STATE_IDLE = 0,
+		PDM_STATE_REQUEST = 1,
+		PDM_STATE_WAIT_ACK = 2,
+		PDM_STATE_END = 3;
+
+	reg [2:0] pdm_state = 0;
+
+	wire [31:0] pdm_dat_o;
+	wire pdm_ack_o;
+	wire pdm_stall_o;
+
+	wb_pdm #(
+		.CHANNEL_NUM(3),
+		.BIT_RESOLUTION(16)
+	) pdm (
+		.wb_clk_i(clock),
+		.wb_rst_i(reset),
+		.wb_stb_i(pdm_state == PDM_STATE_REQUEST),
+		.wb_cyc_i(pdm_state >= PDM_STATE_REQUEST
+			&& pdm_state <= PDM_STATE_WAIT_ACK),
+		.wb_we_i(1),
+		.wb_adr_i(0),
+		.wb_dat_i(32'h9563),
+		.wb_dat_o(pdm_dat_o),
+		.wb_ack_o(pdm_ack_o),
+		.wb_stall_o(pdm_stall_o),
+		.pdm_channel({ led_b, led_g, led_r })
+	);
+
+	// main state machine for PDM: issue a single duty-cycle request
+	// issue responses over wishbone
+	always @(posedge clock) begin
+		case (pdm_state)
+		PDM_STATE_REQUEST: begin
+			if (!pdm_stall_o)
+				pdm_state <= pdm_state + 1;
+		end
+		PDM_STATE_WAIT_ACK: begin
+			if (pdm_ack_o)
+				pdm_state <= pdm_state + 1;
+		end
+		PDM_STATE_END: begin
+			// sleep forever
+		end
+		default: begin
+			pdm_state <= pdm_state + 1;
 		end
 		endcase
 	end
