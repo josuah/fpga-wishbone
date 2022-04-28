@@ -15,7 +15,11 @@ module top #(
 	output wire led_b,
 
 	// PWM output
-	output wire pwm_servo
+	output wire pwm_servo,
+
+	// Charliplexed Screen output
+	output wire [6:0] cxscreen_o,
+	output wire [6:0] cxscreen_oe
 );
 	reg not_reset = 0;
 	wire reset = !not_reset;
@@ -93,7 +97,7 @@ module top #(
 	);
 
 
-	// PWM for servo control
+	// PWM for servo control (err... I have no servo, I use an oscilloscope)
 
 	localparam [2:0]
 		PWM_STATE_IDLE = 0,
@@ -147,7 +151,7 @@ module top #(
 	end
 
 
-	// PDM for LEDs
+	// PDM for LEDs (and Rolls-Royce for doing groceries?)
 
 	localparam [2:0]
 		PDM_STATE_IDLE = 0,
@@ -156,6 +160,7 @@ module top #(
 		PDM_STATE_END = 3;
 
 	reg [2:0] pdm_state = 0;
+	reg [2:0] pdm_address = 0;
 
 	wire [31:0] pdm_dat_o;
 	wire pdm_ack_o;
@@ -163,7 +168,7 @@ module top #(
 
 	wb_pdm #(
 		.CHANNEL_NUM(3),
-		.BIT_RESOLUTION(16)
+		.BIT_RESOLUTION(8)
 	) pdm (
 		.wb_clk_i(clock),
 		.wb_rst_i(reset),
@@ -171,15 +176,22 @@ module top #(
 		.wb_cyc_i(pdm_state >= PDM_STATE_REQUEST
 			&& pdm_state <= PDM_STATE_WAIT_ACK),
 		.wb_we_i(1),
-		.wb_adr_i(0),
-		.wb_dat_i(32'h9563),
+		.wb_adr_i({ 1'b0, pdm_address }),
+		// whatever that changes from address to address:
+		.wb_dat_i({ 24'b0, 8'b01 }),
 		.wb_dat_o(pdm_dat_o),
 		.wb_ack_o(pdm_ack_o),
 		.wb_stall_o(pdm_stall_o),
 		.pdm_channel({ led_b, led_g, led_r })
 	);
 
-	// main state machine for PDM: issue a single duty-cycle request
+	wb_cxscreen cxscreen (
+		.wb_clk_i(clock),
+		.cxscreen_oe(cxscreen_oe),
+		.cxscreen_o(cxscreen_o)
+	);
+
+	// main state machine for PDM: issue a single duty-address request
 	// issue responses over wishbone
 	always @(posedge clock) begin
 		case (pdm_state)
@@ -192,7 +204,10 @@ module top #(
 				pdm_state <= pdm_state + 1;
 		end
 		PDM_STATE_END: begin
-			// sleep forever
+			if (pdm_address < 2) begin
+				pdm_state <= PDM_STATE_REQUEST;
+				pdm_address <= pdm_address + 1;
+			end
 		end
 		default: begin
 			pdm_state <= pdm_state + 1;

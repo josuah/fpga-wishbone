@@ -1,5 +1,5 @@
 static uint64_t tick_count;
-static uint64_t tick_max = 0x100000;
+static uint64_t tick_max = 0x10000;
 VerilatedVcdC *tick_vcd;
 
 static void

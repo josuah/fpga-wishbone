@@ -29,7 +29,7 @@ main(int argc, char **argv)
 	simulation_tick_begin(v);
 	simulation_tick_end(v);
 
-	for (size_t i = 0; i < 0x2000000; i++) {
+	for (size_t i = 0; i < 0x200000; i++) {
 		uart_tx_byte(&u, '.');
 		c = uart_rx_byte(&u);
 	}

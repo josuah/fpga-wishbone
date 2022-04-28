@@ -22,7 +22,9 @@ module simulation #(
 	// PWM output
 	output wire pwm_servo
 );
-	wire unused = &{ uart_sampling, uart_ticks_counter };
+	wire [6:0] cxscreen_oe;
+	wire [6:0] cxscreen_o;
+	wire unused = &{ uart_sampling, uart_ticks_counter, cxscreen_o , cxscreen_oe };
 	assign uart_ticks_per_baud = TICKS_PER_BAUD;
 
 	top #(
@@ -34,6 +36,8 @@ module simulation #(
 		.led_r(led_r),
 		.led_g(led_g),
 		.led_b(led_b),
-		.pwm_servo(pwm_servo)
+		.pwm_servo(pwm_servo),
+		.cxscreen_oe(cxscreen_oe),
+		.cxscreen_o(cxscreen_o)
 	);
 endmodule

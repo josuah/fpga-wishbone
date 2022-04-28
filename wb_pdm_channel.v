@@ -10,17 +10,19 @@ module wb_pdm_channel #(
 	input wire [BIT_RESOLUTION-1:0] wb_dat_i,
 
 	// PDM I/O
-	input wire [BIT_RESOLUTION-1:0] pdm_counter,
 	output wire pdm_channel
 );
 	reg [BIT_RESOLUTION-1:0] level = 0;
+	reg [BIT_RESOLUTION:0] accumulator = 0;
 
-	assign pdm_channel = level > pdm_counter;
+	assign pdm_channel = accumulator[BIT_RESOLUTION];
 
 	always @(posedge wb_clk_i) begin
+		accumulator <= accumulator[BIT_RESOLUTION-1:0] + level;
+
 		if (wb_stb_i)
 			level <= wb_dat_i;
 		if (wb_rst_i)
-			level <= 0;
+			{ level, accumulator } <= 0;
 	end
 endmodule

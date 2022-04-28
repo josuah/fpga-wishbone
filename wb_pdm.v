@@ -29,18 +29,10 @@ module wb_pdm #(
 	// PDM output, 1 bit per channel
 	output [CHANNEL_NUM-1:0] pdm_channel
 );
-	reg [BIT_RESOLUTION-1:0] counter;
-
-	wire [$size(counter)-1:0] reversed;
 	wire request = wb_cyc_i & wb_stb_i & wb_we_i;
 	wire unused = &{ wb_dat_i };
 
 	assign { wb_stall_o, wb_dat_o } = 0;
-
-	// flip the counter bits to switch the output more often
-generate genvar i; for (i = 0; i < $size(counter); i++) begin
-	assign reversed[i] = counter[$size(counter)-i-1 +: 1];
-end endgenerate
 
 	wb_pdm_channel #(
 		.BIT_RESOLUTION(BIT_RESOLUTION)
@@ -49,16 +41,10 @@ end endgenerate
 		.wb_rst_i(wb_rst_i),
 		.wb_stb_i({ {CHANNEL_NUM-1{1'b0}}, request } << wb_adr_i),
 		.wb_dat_i(wb_dat_i[BIT_RESOLUTION-1:0]),
-		.pdm_counter(reversed),
 		.pdm_channel(pdm_channel)
 	);
 
 	always @(posedge wb_clk_i) begin
 		wb_ack_o <= wb_cyc_i && wb_stb_i;
-
-		counter <= counter + 1;
-
-		if (wb_rst_i)
-			counter <= 0;
 	end
 endmodule

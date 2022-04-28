@@ -9,7 +9,7 @@ NEXTPNR = nextpnr-ice40 --randomize-seed --up5k --package sg48
 YOSYS = yosys
 
 PCF = upduino.pcf
-V = top.v wb_uart.v wb_uart_tx.v wb_uart_rx.v wb_pwm.v wb_pwm_channel.v wb_pdm.v wb_pdm_channel.v
+V = top.v wb_uart.v wb_uart_tx.v wb_uart_rx.v wb_pwm.v wb_pwm_channel.v wb_pdm.v wb_pdm_channel.v wb_cxscreen.v
 
 all: board.bit simulation.vcd
 
