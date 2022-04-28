@@ -18,8 +18,8 @@ module top #(
 	output wire pwm_servo,
 
 	// Charliplexed Screen output
-	output wire [6:0] cxscreen_o,
-	output wire [6:0] cxscreen_oe
+	output wire [6:0] charlie7x5_o,
+	output wire [6:0] charlie7x5_oe
 );
 	reg not_reset = 0;
 	wire reset = !not_reset;
@@ -185,10 +185,10 @@ module top #(
 		.pdm_channel({ led_b, led_g, led_r })
 	);
 
-	wb_cxscreen cxscreen (
+	wb_charlie7x5 charlie7x5 (
 		.wb_clk_i(clock),
-		.cxscreen_oe(cxscreen_oe),
-		.cxscreen_o(cxscreen_o)
+		.charlie7x5_oe(charlie7x5_oe),
+		.charlie7x5_o(charlie7x5_o)
 	);
 
 	// main state machine for PDM: issue a single duty-address request

@@ -5,26 +5,26 @@ module board (
 	output wire rgb2,
 
 	// uart
-	input wire gpio_23,
-	output wire gpio_25,
+	input wire gpio_10,
+	output wire gpio_20,
+
+	// charlie7x5
+	output wire gpio_38,
+	output wire gpio_36,
+	output wire gpio_34,
+	output wire gpio_31,
+	output wire gpio_32,
+	output wire gpio_26,
+	output wire gpio_23,
 
 	// pwm_servo
-	output wire gpio_26,
-
-	// cxscreen
-	output wire gpio_19,
-	output wire gpio_11,
-	output wire gpio_6,
-	output wire gpio_4,
-	output wire gpio_48,
-	output wire gpio_47,
 	output wire gpio_2
 );
 	wire clock;
 	wire led_r, led_g, led_b;
 
-	wire [6:0] cxscreen_oe;
-	wire [6:0] cxscreen_o;
+	wire [6:0] charlie7x5_oe;
+	wire [6:0] charlie7x5_o;
 
 	// internal oscillator
 	SB_HFOSC SB_HFOSC (
@@ -57,13 +57,13 @@ module board (
 		.IO_STANDARD("SB_LVCMOS")
 	) SB_IO [6:0] (
 		.PACKAGE_PIN({
-			gpio_19, gpio_11, gpio_6, gpio_4, gpio_48, gpio_47,
-			gpio_2
+			gpio_38, gpio_36, gpio_34, gpio_31, gpio_32, gpio_26,
+			gpio_23
 		}),
 		.LATCH_INPUT_VALUE(1'b0),
 		.CLOCK_ENABLE(1'b0),
-		.OUTPUT_ENABLE(cxscreen_oe),
-		.D_OUT_0(cxscreen_o)
+		.OUTPUT_ENABLE(charlie7x5_oe),
+		.D_OUT_0(charlie7x5_o)
 	);
 
 
@@ -71,13 +71,13 @@ module board (
 		.TICKS_PER_BAUD(48000000/9600)
 	) top (
 		.clock(clock),
-		.uart_tx(gpio_25),
-		.uart_rx(gpio_23),
+		.uart_tx(gpio_10),
+		.uart_rx(gpio_20),
 		.led_r(led_r),
 		.led_g(led_g),
 		.led_b(led_b),
-		.pwm_servo(gpio_26),
-		.cxscreen_oe(cxscreen_oe),
-		.cxscreen_o(cxscreen_o)
+		.pwm_servo(gpio_2),
+		.charlie7x5_oe(charlie7x5_oe),
+		.charlie7x5_o(charlie7x5_o)
 	);
 endmodule

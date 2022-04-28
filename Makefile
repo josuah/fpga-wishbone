@@ -9,12 +9,12 @@ NEXTPNR = nextpnr-ice40 --randomize-seed --up5k --package sg48
 YOSYS = yosys
 
 PCF = upduino.pcf
-V = top.v wb_uart.v wb_uart_tx.v wb_uart_rx.v wb_pwm.v wb_pwm_channel.v wb_pdm.v wb_pdm_channel.v wb_cxscreen.v
+V = top.v wb_uart.v wb_uart_tx.v wb_uart_rx.v wb_pwm.v wb_pwm_channel.v wb_pdm.v wb_pdm_channel.v wb_charlie7x5.v
 
 all: board.bit simulation.vcd
 
 clean:
-	rm -fr *.log *.json *.asc *.bit *.hex *.elf *.d *.vcd *.dot *.pdf
+	rm -fr testbench *.log *.json *.asc *.bit *.hex *.elf *.d *.vcd *.dot *.pdf
 
 flash: board.bit
 	${ICEPROG} -d i:0x0403:0x6014 board.bit
@@ -40,10 +40,10 @@ simulation.elf: ${V} simulation.cpp simulation.h simulation.uart.h
 	./$<
 
 .v.json: ${V}
-	${YOSYS} -p "read_verilog $< ${V}; synth_ice40 -top $* -json $@" >cmd.yosys.log
+	${YOSYS} -p "read_verilog $< ${V}; synth_ice40 -top $* -json $@" >$*.yosys.log
 
 .json.asc: ${PCF}
-	${NEXTPNR} -q -l cmd.nextpnr.log --pcf ${PCF} --json $< --asc $@
+	${NEXTPNR} -q -l $*.nextpnr.log --pcf ${PCF} --json $< --asc $@
 
 .asc.bit:
 	${ICEPACK} $< $@
