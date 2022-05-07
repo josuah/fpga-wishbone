@@ -5,38 +5,18 @@ module simulation #(
 ) (
 	input wire clock,
 
-        // Cosimulator
-	input wire uart_sampling,
-	input wire [7:0] uart_ticks_counter,
-	output wire [31:0] uart_ticks_per_baud,
-
-	// uart I/O
-	input wire uart_rx,
-	output wire uart_tx,
-
-	// LED output
-	output wire led_r,
-	output wire led_g,
-	output wire led_b,
-
-	// PWM output
-	output wire pwm_servo
+	// CHARLIE7X5
+	output wire [6:0] charlie7x5_o,
+	output wire [6:0] charlie7x5_oe
 );
 	wire [6:0] charlie7x5_oe;
 	wire [6:0] charlie7x5_o;
-	wire unused = &{ uart_sampling, uart_ticks_counter, charlie7x5_o , charlie7x5_oe };
-	assign uart_ticks_per_baud = TICKS_PER_BAUD;
+	wire unused = &{ charlie7x5_o , charlie7x5_oe };
 
 	top #(
 		.TICKS_PER_BAUD(4)
 	) top (
 		.clock(clock),
-		.uart_tx(uart_tx),
-		.uart_rx(uart_rx),
-		.led_r(led_r),
-		.led_g(led_g),
-		.led_b(led_b),
-		.pwm_servo(pwm_servo),
 		.charlie7x5_oe(charlie7x5_oe),
 		.charlie7x5_o(charlie7x5_o)
 	);
