@@ -1,7 +1,7 @@
 `default_nettype none
 
 module wb_uart_tx #(
-	parameter TICKS_PER_BAUD = 8
+	parameter TICKS_PER_BAUD = 0
 ) (
 	// Wishbone B4 (subset)
 	input wire wb_clk_i,

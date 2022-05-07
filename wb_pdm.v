@@ -36,7 +36,7 @@ module wb_pdm #(
 
 	wb_pdm_channel #(
 		.BIT_RESOLUTION(BIT_RESOLUTION)
-	) channel[CHANNEL_NUM-1:0] (
+	) channel [CHANNEL_NUM-1:0] (
 		.wb_clk_i(wb_clk_i),
 		.wb_rst_i(wb_rst_i),
 		.wb_stb_i({ {CHANNEL_NUM-1{1'b0}}, request } << wb_adr_i),

@@ -1,57 +1,68 @@
+// TODO: split the design with the wishbone front-end at the top
+//	simplifying it and enforcing rules, so that this block can
+//	be copy-pasted from module to module, and implementation
+//	below.
+
 `default_nettype none
 
-// The big challenge with controlling a LED matrix, or even a screen,
-// is there will be a large amount of LEDs to wire to a controller.
-//
-// The obvious solution to wire one LED to one pin is wasting precious
-// I/O pins, but permits to display all pixel continuously. This might
-// work for integrated circuits where it is possible to add as many
-// pins as needed, but still not good for a simple LED matrix display.
-//
-// A more economical approach is to connect the LEDs in a crossbar:
-//
-// Here, the screen can be displayed by first connecting A to the
-// ground, and take signals ROW[0..3] up or down according to what
-// needs to be connected.
-//
-// This reduces the number of pins from ROW*COL down to only ROW+COL,
-// and requires showing one row at a time (the other with light off),
-// quickly switching from row to row for providing the illusion of a
-// entire surface lit by the LEDs.
-//
-// It is possible to reduce it even further with charlieplexing [1]:
-// the same pins are used for both rows and columns, and the wiring
-// is configured to include
-
-module wb_charlie7x5 (
+module wb_charlie7x5 #(
+	parameter WB_CLK_HZ = 48_000_000,
+	parameter MEM_SIZE = 1 << $clog2(5)
+) (
 	// Wishbone B4 pipelined
 	input wire wb_clk_i,
+	input wire wb_rst_i,
+	input wire wb_cyc_i,
+	input wire wb_stb_i,
+	input wire wb_we_i,
+	input wire wb_adr_i,
+	input wire wb_dat_i,
+	output wire wb_dat_o,
+	output wire wb_stall_o,
+	output reg wb_ack_o,
 
 	// Screen output pins
 	output wire [6:0] charlie7x5_o,
 	output wire [6:0] charlie7x5_oe
 );
-	reg [6:0] row = 0;
-	reg [6:0] col = 0;
+	reg [MEM_SIZE-1:0] mem [0:4];
+	reg [2:0] row = 0;
+	reg [2:0] col = 0;
+	reg [$clog2(WB_CLK_HZ / 100000):0] tick = 0;
 
-	// 
-	wire [6:0] row_pin = (row >= col) ? row + 1 : row;
-	wire [6:0] col_pin = col;
+	wire [2:0] row_pin = (row >= col) ? row + 1 : row;
+	wire [2:0] col_pin = col;
+	wire dot = mem[row][col];
+	wire request = wb_cyc_i && wb_stb_i;
 
-	assign charlie7x5_o =	(1 << row_pin);
-	assign charlie7x5_oe =	(1 << row_pin) | (1 << col_pin);
+	assign wb_stall_o = 0;
+	assign charlie7x5_o = dot
+		? (1 << row_pin)
+		: 0;
+	assign charlie7x5_oe = dot
+		? (1 << row_pin) | (1 << col_pin)
+		: 0;
 
 	always @(posedge wb_clk_i) begin
-		row <= row + 1;
+		wb_ack_o <= request;
 
-		if (row == 5) begin
-			row <= 0;
-			col <= col + 1;
+		tick <= tick + 1;
+		if (tick == 0) begin
+			if (row == 4) begin
+				row <= 0;
+			end else begin
+				row <= row + 1;
+			end
+			row <= (row == 4) ? 0 : row + 1;
+			col <= (row == 4) ? col : (col == 6) ? 0 : col + 1;
 		end
 
-		if (col == 7) begin
-			col <= 0;
-		end
+		if (request && wb_we_i)
+			mem[wb_adr_i] <= wb_dat_i;
+		if ()
+			wb_err_i <= 1;
+
+		if (wb_rst_i)
+			{ row, col } <= 0;
 	end
-
 endmodule

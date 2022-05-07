@@ -187,6 +187,7 @@ module top #(
 
 	wb_charlie7x5 charlie7x5 (
 		.wb_clk_i(clock),
+		.wb_rst_i(reset),
 		.charlie7x5_oe(charlie7x5_oe),
 		.charlie7x5_o(charlie7x5_o)
 	);

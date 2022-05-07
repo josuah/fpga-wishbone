@@ -1,7 +1,8 @@
 `default_nettype none
 
 module wb_uart #(
-	parameter TICKS_PER_BAUD = 8
+	parameter WB_CLK_HZ = 0,
+	parameter OUTPUT_HZ = 9600
 ) (
 	// Wishbone B4 (5.3)
 	input wire wb_clk_i,
@@ -22,6 +23,8 @@ module wb_uart #(
 	input wire uart_rx,
 	output wire uart_tx
 );
+	localparam TICKS_PER_BAUD = WB_CLK_HZ / OUTPUT_HZ;
+
 	wire unused = &{ wb_dat_i[31:8], wb_dat_o[31:8], wb_adr_i };
 
 	assign wb_dat_o[31:8] = 0;
