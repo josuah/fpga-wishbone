@@ -46,12 +46,12 @@ module wb_charlie7x5 #(
 	reg [2:0] col = 0;
 
 	// is the current pixel on or off?
-	wire dot = mem[row-1][col];
+	wire dot = mem[row][col];
 
 	// row and col use the same pins, with priority to the cols,
 	// and the row shifted by one when they overlap
 	wire [2:0] col_pin = col;
-	wire [2:0] row_pin = (row < col) ? row : row + 1;
+	wire [2:0] row_pin = (row + 1 < col) ? row + 1 : row + 2;
 	assign charlie7x5_o = dot ? (1 << row_pin) : 0;
 	assign charlie7x5_oe = dot ? (1 << row_pin) | (1 << col_pin) : 0;
 
@@ -77,8 +77,8 @@ module wb_charlie7x5 #(
 			// why do I have to set it to 5 and not 4?
 			// it behaves differently in hardware and
 			// software
-			if (row == 5) begin
-				row <= 1;
+			if (row == 4) begin
+				row <= 0;
 
 				// once the row is complete, switch
 				// to the next column
