@@ -45,28 +45,26 @@ module wb_charlie7x5 #(
 	reg [2:0] row = 0;
 	reg [2:0] col = 0;
 
-	// clock divider for reducing the refresh rate
-	localparam DELAY_HZ = 100000;
-	reg [$clog2(WB_CLK_HZ / DELAY_HZ)-1:0] cnt = 0;
+	// is the current pixel on or off?
+	wire dot = mem[row-1][col];
 
 	// row and col use the same pins, with priority to the cols,
 	// and the row shifted by one when they overlap
 	wire [2:0] col_pin = col;
 	wire [2:0] row_pin = (row < col) ? row : row + 1;
-
-	// is the current pixel on or off?
-	wire dot = mem_rd[0]; //col];
-
 	assign charlie7x5_o = dot ? (1 << row_pin) : 0;
 	assign charlie7x5_oe = dot ? (1 << row_pin) | (1 << col_pin) : 0;
 
 	// memory for the screen pixels
-	localparam ADDR_SIZE = $clog2(MEM_SIZE);
-	reg [MEM_SIZE-1:0] mem [4:0], mem_wr, mem_rd;
-	wire [ADDR_SIZE-1:0] mem_wr_addr = wb_adr_i[ADDR_SIZE-1:0];
-	wire [ADDR_SIZE-1:0] mem_rd_addr = col;
-	always @(posedge wb_clk_i) mem[mem_wr_addr] <= mem_wr;
-	always @(posedge wb_clk_i) mem_rd <= mem[mem_rd_addr];
+	reg [MEM_SIZE-1:0] mem [4:0], mem_wr_data;
+	reg [$clog2(MEM_SIZE)-1:0] mem_wr_addr;
+
+	always @(posedge wb_clk_i)
+		mem[mem_wr_addr] <= mem_wr_data;
+
+	// clock divider for reducing the refresh rate
+	localparam DELAY_HZ = 100000;
+	reg [$clog2(WB_CLK_HZ / DELAY_HZ)-1:0] cnt = 0;
 
 	always @(posedge wb_clk_i) begin
 		// scale the clock down
@@ -79,8 +77,8 @@ module wb_charlie7x5 #(
 			// why do I have to set it to 5 and not 4?
 			// it behaves differently in hardware and
 			// software
-			if (row == 4) begin
-				row <= 0;
+			if (row == 5) begin
+				row <= 1;
 
 				// once the row is complete, switch
 				// to the next column
@@ -88,11 +86,13 @@ module wb_charlie7x5 #(
 			end
 		end
 
-		if (wb_request && wb_we_i)
-			mem_wr <= wb_dat_i[7:0];
+		if (wb_request && wb_we_i) begin
+			mem_wr_data <= wb_dat_i[7:0];
+			mem_wr_addr <= wb_adr_i[$clog2(MEM_SIZE)-1:0];
+		end
 
 		if (wb_rst_i)
-			{ row, col, cnt, mem_wr, mem_rd } <= 0;
+			{ row, col, cnt, mem_wr_data, mem_wr_addr } <= 0;
 	end
 
 endmodule

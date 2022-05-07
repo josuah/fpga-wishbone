@@ -43,7 +43,14 @@ module top #(
 		),
 		.wb_we_i(1),
 		.wb_adr_i(charlie7x5_addr),
-		.wb_dat_i(32'b1111111),
+		.wb_dat_i(
+			charlie7x5_addr == 0 ? 32'b1_0_0_0_0_0_1 :
+			charlie7x5_addr == 1 ? 32'b0_1_0_0_0_0_1 :
+			charlie7x5_addr == 2 ? 32'b0_0_1_1_1_1_0 :
+			charlie7x5_addr == 3 ? 32'b0_1_0_0_0_0_1 :
+			charlie7x5_addr == 4 ? 32'b1_0_0_0_0_0_1 :
+			32'b1111111
+		),
 		.wb_dat_o(charlie7x5_dat_o),
 		.wb_stall_o(charlie7x5_stall_o),
 		.wb_ack_o(charlie7x5_ack_o),
