@@ -1,8 +1,9 @@
 `default_nettype none
 
 module top #(
-	parameter CPU_CLK_HZ = 48_000_000,
-	parameter TICKS_PER_BAUD = 4
+	parameter TICKS_PER_BAUD = 4,
+	parameter WISHBONE_PERIPH_NUM = 1,
+	parameter CPU_CLK_HZ = 48_000_000
 ) (
 	input wire clk,
 
@@ -17,65 +18,87 @@ module top #(
 	always @(posedge clk)
 		rst_n <= 1;
 
-	// charlie7x5 //
+        wire wb_clk_i = clk, wb_rst_i = rst;
 
-	localparam CHARLIE7X5_STATE_READY = 2'd0;
-	localparam CHARLIE7X5_STATE_WAIT_STALL = 2'd1;
-	localparam CHARLIE7X5_STATE_WAIT_ACK = 2'd2;
-	localparam CHARLIE7X5_STATE_DONE = 2'd3;
+	// interconnect //
 
-	reg [1:0] charlie7x5_state = 0;
-	reg [3:0] charlie7x5_addr = 0;
+	// slave wires
+	wire wbs_stb_i, wbs_we_i;
+	wire [31:0] wbs_dat_i, wbs_adr_i;
+	wire [4*WISHBONE_PERIPH_NUM-1:0] wbs_sel_i;
+	wire [32*WISHBONE_PERIPH_NUM-1:0] wbs_dat_o;
+	wire [WISHBONE_PERIPH_NUM-1:0] wbs_stall_o, wbs_ack_o, wbs_cyc_i;
 
-	wire charlie7x5_stall_o;
-	wire charlie7x5_ack_o;
-	wire charlie7x5_dat_o;
-	wire charlie7x5_unused = &{ charlie7x5_stall_o, charlie7x5_dat_o };
+	// master wires
+        wire wbm_stb_o, wbm_we_o, wbm_stall_i, wbm_ack_i, wbm_cyc_o;
+	wire [3:0] wbm_sel_o;
+	wire [31:0] wbm_dat_o, wbm_adr_o, wbm_dat_i;
+
+	wbx_1master #(
+		.PERIPH_NUM(WISHBONE_PERIPH_NUM)
+	) wbx_1master (
+		.wb_clk_i(wb_clk_i),
+		.wb_rst_i(wb_rst_i),
+
+		.wbs_cyc_i(wbs_cyc_i),
+		.wbs_stb_i(wbs_stb_i),
+		.wbs_we_i(wbs_we_i),
+		.wbs_sel_i(wbs_sel_i),
+		.wbs_dat_i(wbs_dat_i),
+		.wbs_adr_i(wbs_adr_i),
+		.wbs_dat_o(wbs_dat_o),
+		.wbs_stall_o(wbs_stall_o),
+		.wbs_ack_o(wbs_ack_o),
+
+		.wbm_cyc_o(wbm_cyc_o),
+		.wbm_stb_o(wbm_stb_o),
+		.wbm_we_o(wbm_we_o),
+		.wbm_adr_o(wbm_adr_o[3:0]),
+		.wbm_sel_o(wbm_sel_o),
+		.wbm_dat_o(wbm_dat_o),
+		.wbm_dat_i(wbm_dat_i),
+		.wbm_stall_i(wbm_stall_i),
+		.wbm_ack_i(wbm_ack_i)
+	);
+
+	// master //
+
+	wbm_spi wbm_spi (
+		.wbm_clk_i(wb_clk_i),
+		.wbm_rst_i(wb_rst_i),
+
+		.wbm_stb_o(wbm_stb_o),
+		.wbm_we_o(wbm_we_o),
+		.wbm_sel_o(wbm_sel_o),
+		.wbm_dat_o(wbm_dat_o),
+		.wbm_adr_o(wbm_adr_o),
+		.wbm_dat_i(wbm_dat_i),
+		.wbm_stall_i(wbm_stall_i),
+		.wbm_ack_i(wbm_ack_i)
+	);
+
+	// slaves //
+
+`define WISHBONE_B4_PIPELINED(ID) \
+	.wbs_clk_i(wb_clk_i), \
+	.wbs_rst_i(wb_rst_i), \
+	\
+	.wbs_cyc_i(wbs_cyc_i[ID]), \
+	.wbs_stb_i(wbs_stb_i), \
+	.wbs_we_i(wbs_we_i), \
+	.wbs_adr_i(wbs_adr_i[15:0]), \
+	.wbs_sel_i(wbs_sel_i),  \
+	.wbs_dat_i(wbs_dat_i), \
+	.wbs_dat_o(wbs_dat_o[32*(ID+1)-1:32*ID]), \
+	.wbs_stall_o(wbs_stall_o[ID]), \
+	.wbs_ack_o(wbs_ack_o[ID])
 
 	wbs_charlie7x5 #(
 		.WB_CLK_HZ(CPU_CLK_HZ)
-	) charlie7x5 (
-		.wbs_clk_i(clk),
-		.wbs_rst_i(rst),
-		.wbs_cyc_i(
-			charlie7x5_state >= CHARLIE7X5_STATE_WAIT_STALL
-		&&	charlie7x5_state <= CHARLIE7X5_STATE_WAIT_ACK
-		),
-		.wbs_stb_i(
-			charlie7x5_state == CHARLIE7X5_STATE_WAIT_STALL
-		),
-		.wbs_we_i(1),
-		.wbs_adr_i(charlie7x5_addr),
-		.wbs_dat_i(
-			charlie7x5_addr == 0 ? 32'b1_0_0_0_0_0_1 :
-			charlie7x5_addr == 1 ? 32'b0_1_0_0_0_0_1 :
-			charlie7x5_addr == 2 ? 32'b0_0_1_1_1_1_0 :
-			charlie7x5_addr == 3 ? 32'b0_1_0_0_0_0_1 :
-			charlie7x5_addr == 4 ? 32'b1_0_0_0_0_0_1 :
-			32'b1111111
-		),
-		.wbs_dat_o(charlie7x5_dat_o),
-		.wbs_stall_o(charlie7x5_stall_o),
-		.wbs_ack_o(charlie7x5_ack_o),
-		.charlie7x5_oe(charlie7x5_oe),
-		.charlie7x5_o(charlie7x5_o)
+	) wbs0 (
+		`WISHBONE_B4_PIPELINED(0),
+		.charlie7x5_o(charlie7x5_o),
+		.charlie7x5_oe(charlie7x5_oe)
 	);
-
-	always @(posedge clk) begin
-		case (charlie7x5_state)
-		CHARLIE7X5_STATE_WAIT_STALL:
-			if (!charlie7x5_stall_o)
-				charlie7x5_state <= charlie7x5_state + 1;
-		CHARLIE7X5_STATE_WAIT_ACK:
-			if (charlie7x5_ack_o)
-				charlie7x5_state <= charlie7x5_state + 1;
-		CHARLIE7X5_STATE_DONE: begin
-			charlie7x5_addr <= charlie7x5_addr < 4 ? charlie7x5_addr + 1 : 0;
-			charlie7x5_state <= 0;
-		end
-		default:
-			charlie7x5_state <= charlie7x5_state + 1;
-		endcase
-	end
 
 endmodule

@@ -10,6 +10,7 @@ module wbs_charlie7x5 #(
 	input wire wbs_stb_i,
 	input wire wbs_we_i,
 	input wire [3:0] wbs_adr_i,
+	input wire [3:0] wbs_sel_i,
 	input wire [31:0] wbs_dat_i,
 	output wire wbs_dat_o,
 	output wire wbs_stall_o,
@@ -21,7 +22,7 @@ module wbs_charlie7x5 #(
 );
 	localparam MEM_SIZE = 1 << $clog2(5);
 
-	wire unused = &{ wbs_adr_i[3], wbs_dat_i[31:8] };
+	wire unused = &{ wbs_adr_i[3], wbs_dat_i[31:8], wbs_sel_i };
 
 	// wishbone //
 
