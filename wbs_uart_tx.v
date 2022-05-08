@@ -1,15 +1,15 @@
 `default_nettype none
 
-module wb_uart_tx #(
+module wbs_uart_tx #(
 	parameter TICKS_PER_BAUD = 0
 ) (
-	// Wishbone B4 (subset)
-	input wire wb_clk_i,
-	input wire wb_rst_i,
-	input wire wb_stb_i,
-	input wire [7:0] wb_dat_i,
+	// wishbone b4 (subset)
+	input wire wbs_clk_i,
+	input wire wbs_rst_i,
+	input wire wbs_stb_i,
+	input wire [7:0] wbs_dat_i,
 
-	// UART
+	// uart
 	output wire uart_tx
 );
 	localparam [3:0]
@@ -32,10 +32,10 @@ module wb_uart_tx #(
 
 	assign uart_tx = !shift_reg[0];
 
-	always @(posedge wb_clk_i) begin
+	always @(posedge wbs_clk_i) begin
 		if (state == STATE_IDLE) begin
-			if (wb_stb_i) begin
-				shift_reg <= { 1'b0, wb_dat_i[7:0], 1'b1 };
+			if (wbs_stb_i) begin
+				shift_reg <= { 1'b0, wbs_dat_i[7:0], 1'b1 };
 				state <= STATE_START;
 			end
 		end else begin
@@ -48,7 +48,7 @@ module wb_uart_tx #(
 			end
 		end
 
-		if (wb_rst_i)
+		if (wbs_rst_i)
 			{ state, shift_reg, baud_cnt } <= 0;
 	end
 
@@ -56,8 +56,8 @@ module wb_uart_tx #(
 	reg f_rst_done = 0;
 
 	always @(*) begin
-		cover(wb_rst_i);
-		if (wb_rst_i)
+		cover(wbs_rst_i);
+		if (wbs_rst_i)
 			f_rst_done <= 1;
 	end
 

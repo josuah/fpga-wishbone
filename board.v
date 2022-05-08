@@ -8,19 +8,21 @@ module board (
 	output wire gpio_11,
 	output wire gpio_19,
 );
-	wire clock;
+	wire clk;
 
 	wire [6:0] charlie7x5_oe;
 	wire [6:0] charlie7x5_o;
 
-	// internal oscillator
+	// internal oscillator //
+
 	SB_HFOSC SB_HFOSC (
 		.CLKHFPU(1'b1),
 		.CLKHFEN(1'b1),
-		.CLKHF(clock)
+		.CLKHF(clk)
 	);
 
-	// I/O Cell
+	// i/o cell //
+
 	SB_IO #(
 		.PIN_TYPE({ 4'b1010, 2'b01 }),
 		.PULLUP(0),
@@ -37,12 +39,14 @@ module board (
 		.D_OUT_0(charlie7x5_o)
 	);
 
+	// top //
 
 	top #(
 		.TICKS_PER_BAUD(48000000/9600)
 	) top (
-		.clock(clock),
+		.clk(clk),
 		.charlie7x5_oe(charlie7x5_oe),
 		.charlie7x5_o(charlie7x5_o)
 	);
+
 endmodule

@@ -3,9 +3,10 @@
 module simulation #(
 	parameter TICKS_PER_BAUD = 4
 ) (
-	input wire clock,
+	// system
+	input wire clk,
 
-	// CHARLIE7X5
+	// charlie7x5
 	output wire [6:0] charlie7x5_o,
 	output wire [6:0] charlie7x5_oe
 );
@@ -13,11 +14,14 @@ module simulation #(
 	wire [6:0] charlie7x5_o;
 	wire unused = &{ charlie7x5_o , charlie7x5_oe };
 
+	// top //
+
 	top #(
 		.TICKS_PER_BAUD(4)
 	) top (
-		.clock(clock),
+		.clk(clk),
 		.charlie7x5_oe(charlie7x5_oe),
 		.charlie7x5_o(charlie7x5_o)
 	);
+
 endmodule

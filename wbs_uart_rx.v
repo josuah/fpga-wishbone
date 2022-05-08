@@ -1,18 +1,18 @@
 `default_nettype none
 
-module wb_uart_rx #(
+module wbs_uart_rx #(
 	parameter TICKS_PER_BAUD = 0
 ) (
-	// Wishbone B4 (subset)
-	input wire wb_clk_i,
-	input wire wb_rst_i,
-	input wire wb_stb_i,
-	output reg [7:0] wb_dat_o,
+	// wishbone b4 (subset)
+	input wire wbs_clk_i,
+	input wire wbs_rst_i,
+	input wire wbs_stb_i,
+	output reg [7:0] wbs_dat_o,
 
-	// Interrupts
-	output reg int_uart_rx,
+	// interrupts
+	output reg irq_uart_rx,
 
-	// UART
+	// uart
 	input wire uart_rx
 );
 	localparam [3:0]
@@ -34,7 +34,7 @@ module wb_uart_rx #(
 	reg [$size(TICKS_PER_BAUD)-1:0] baud_cnt = 0;
 	reg [7:0] shift_reg = 0;
 
-	always @(posedge wb_clk_i) begin
+	always @(posedge wbs_clk_i) begin
 		if (state == STATE_IDLE) begin
 			if (uart_rx == 0) begin
 				state <= STATE_START;
@@ -50,9 +50,9 @@ module wb_uart_rx #(
 			if (baud_cnt == TICKS_PER_BAUD - 1) begin
 				if (state == STATE_BIT_LAST) begin
 					// continuously update the data buffer
-					wb_dat_o <= shift_reg;
+					wbs_dat_o <= shift_reg;
 					// raise interrupt: dinner is served
-					int_uart_rx <= 1;
+					irq_uart_rx <= 1;
 				end
 
 				state <= (state == STATE_LAST) ? 0 : state + 1;
@@ -60,11 +60,11 @@ module wb_uart_rx #(
 			end
 		end
 
-		if (wb_stb_i)
-			int_uart_rx <= 0;	// what if we read the data register just now? should be set for one clock and disappear?
+		if (wbs_stb_i)
+			irq_uart_rx <= 0;	// what if we read the data register just now? should be set for one clock and disappear?
 
-		if (wb_rst_i) begin
-			{ state, shift_reg, baud_cnt, wb_dat_o } <= 0;
+		if (wbs_rst_i) begin
+			{ state, shift_reg, baud_cnt, wbs_dat_o } <= 0;
 		end
 	end
 
@@ -74,8 +74,8 @@ module wb_uart_rx #(
 	assert property (baud_cnt < TICKS_PER_BAUD);
 
 	always @(*) begin
-		cover(wb_rst_i);
-		if (wb_rst_i)
+		cover(wbs_rst_i);
+		if (wbs_rst_i)
 			f_rst <= 1;
 	end
 `endif

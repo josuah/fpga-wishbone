@@ -16,24 +16,24 @@
 //      One address per channel for setting the current duty cycle value.
 //	Set to 0xFF is a 100% duty cycle.
 
-module wb_pwm #(
+module wbs_pwm #(
 	parameter WB_CLK_HZ = 0,
 	parameter OUTPUT_HZ = 0,
 	parameter CHANNEL_NUM = 0
 ) (
-	// Wishbone B4 pipelined
-	input wire wb_clk_i,
-	input wire wb_rst_i,
-	input wire wb_cyc_i,
-	input wire wb_stb_i,
-	input wire wb_we_i,
-	input wire [3:0] wb_adr_i,
-	input wire [31:0] wb_dat_i,
-	output wire [31:0] wb_dat_o,
-	output wire wb_stall_o,
-	output wire wb_ack_o,
+	// wishbone b4 pipelined
+	input wire wbs_clk_i,
+	input wire wbs_rst_i,
+	input wire wbs_cyc_i,
+	input wire wbs_stb_i,
+	input wire wbs_we_i,
+	input wire [3:0] wbs_adr_i,
+	input wire [31:0] wbs_dat_i,
+	output wire [31:0] wbs_dat_o,
+	output wire wbs_stall_o,
+	output wire wbs_ack_o,
 
-	// PWM output
+	// pwm i/o
 	output wire [CHANNEL_NUM-1:0] pwm_channel
 );
 	localparam TICKS_PER_CYCLE = WB_CLK_HZ / OUTPUT_HZ;
@@ -42,22 +42,22 @@ module wb_pwm #(
 	reg [7:0] counter1;
 	reg [$clog2(TICKS_PER_CYCLE)-1:0] counter0;
 
-	wire request = wb_cyc_i & wb_stb_i & wb_we_i;
-	wire unused = &{ wb_dat_i };
+	wire request = wbs_cyc_i & wbs_stb_i & wbs_we_i;
+	wire unused = &{ wbs_dat_i };
 
-	assign { wb_stall_o, wb_dat_o } = 0;
+	assign { wbs_stall_o, wbs_dat_o } = 0;
 
-	wb_pwm_channel channel [CHANNEL_NUM-1:0] (
-		.wb_clk_i(wb_clk_i),
-		.wb_rst_i(wb_rst_i),
-		.wb_stb_i({ {CHANNEL_NUM-1{1'b0}}, request } << wb_adr_i),
-		.wb_dat_i(wb_dat_i[7:0]),
+	wbs_pwm_channel channel [CHANNEL_NUM-1:0] (
+		.wbs_clk_i(wbs_clk_i),
+		.wbs_rst_i(wbs_rst_i),
+		.wbs_stb_i({ {CHANNEL_NUM-1{1'b0}}, request } << wbs_adr_i),
+		.wbs_dat_i(wbs_dat_i[7:0]),
 		.pwm_counter(counter1),
 		.pwm_channel(pwm_channel)
 	);
 
-	always @(posedge wb_clk_i) begin
-		wb_ack_o <= wb_cyc_i & wb_stb_i;
+	always @(posedge wbs_clk_i) begin
+		wbs_ack_o <= wbs_cyc_i & wbs_stb_i;
 
 		counter0 <= counter0 + 1;
 
@@ -68,7 +68,7 @@ module wb_pwm #(
 			counter1 <= counter1 + 1;
 		end
 
-		if (wb_rst_i)
+		if (wbs_rst_i)
 			{ counter0, counter1 } <= 0;
 	end
 
@@ -77,10 +77,10 @@ module wb_pwm #(
 	reg f_past_valid = 0;
 	reg f_should_pulse = 0;
 
-	always @(posedge wb_clk_i) begin
+	always @(posedge wbs_clk_i) begin
 		f_past_valid <= 1;
 
-		if (wb_stb_i)
+		if (wbs_stb_i)
 			f_should_pulse <= 1;
 
 		if (f_should_pulse)

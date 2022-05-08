@@ -21,7 +21,7 @@ simulation_tick_begin(Vsimulation *v)
 	v->eval();
 	tick_vcd->dump(tick_count * 10 - 1);
 
-	v->clock = 1;
+	v->clk = 1;
 
 	v->eval();
 	tick_vcd->dump(tick_count * 10);
@@ -30,7 +30,7 @@ simulation_tick_begin(Vsimulation *v)
 static void
 simulation_tick_end(Vsimulation *v)
 {
-	v->clock = 0;
+	v->clk = 0;
 
 	v->eval();
 	tick_vcd->dump(tick_count * 10 + 5);
