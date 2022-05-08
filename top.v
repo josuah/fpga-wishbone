@@ -14,6 +14,7 @@ module top #(
 	reg rst_n = 0;
 
 	wire rst = !rst_n;
+	wire unused = &{ spi_miso };
 
 	always @(posedge clk)
 		rst_n <= 1;
@@ -24,7 +25,8 @@ module top #(
 
 	// slave wires
 	wire wbs_stb_i, wbs_we_i;
-	wire [31:0] wbs_dat_i, wbs_adr_i;
+	wire [31:0] wbs_dat_i;
+	wire [3:0] wbs_adr_i;
 	wire [4*WISHBONE_PERIPH_NUM-1:0] wbs_sel_i;
 	wire [32*WISHBONE_PERIPH_NUM-1:0] wbs_dat_o;
 	wire [WISHBONE_PERIPH_NUM-1:0] wbs_stall_o, wbs_ack_o, wbs_cyc_i;
@@ -43,9 +45,9 @@ module top #(
 		.wbs_cyc_i(wbs_cyc_i),
 		.wbs_stb_i(wbs_stb_i),
 		.wbs_we_i(wbs_we_i),
+		.wbs_adr_i(wbs_adr_i),
 		.wbs_sel_i(wbs_sel_i),
 		.wbs_dat_i(wbs_dat_i),
-		.wbs_adr_i(wbs_adr_i),
 		.wbs_dat_o(wbs_dat_o),
 		.wbs_stall_o(wbs_stall_o),
 		.wbs_ack_o(wbs_ack_o),
@@ -53,7 +55,7 @@ module top #(
 		.wbm_cyc_o(wbm_cyc_o),
 		.wbm_stb_o(wbm_stb_o),
 		.wbm_we_o(wbm_we_o),
-		.wbm_adr_o(wbm_adr_o[3:0]),
+		.wbm_adr_o(wbm_adr_o),
 		.wbm_sel_o(wbm_sel_o),
 		.wbm_dat_o(wbm_dat_o),
 		.wbm_dat_i(wbm_dat_i),
@@ -63,10 +65,13 @@ module top #(
 
 	// master //
 
+	wire spi_miso;
+
 	wbm_spi wbm_spi (
 		.wbm_clk_i(wb_clk_i),
 		.wbm_rst_i(wb_rst_i),
 
+		.wbm_cyc_o(wbm_cyc_o),
 		.wbm_stb_o(wbm_stb_o),
 		.wbm_we_o(wbm_we_o),
 		.wbm_sel_o(wbm_sel_o),
@@ -74,7 +79,12 @@ module top #(
 		.wbm_adr_o(wbm_adr_o),
 		.wbm_dat_i(wbm_dat_i),
 		.wbm_stall_i(wbm_stall_i),
-		.wbm_ack_i(wbm_ack_i)
+		.wbm_ack_i(wbm_ack_i),
+
+		.spi_ss(0),
+		.spi_sck(0),
+		.spi_mosi(0),
+		.spi_miso(spi_miso)
 	);
 
 	// slaves //
@@ -86,7 +96,7 @@ module top #(
 	.wbs_cyc_i(wbs_cyc_i[ID]), \
 	.wbs_stb_i(wbs_stb_i), \
 	.wbs_we_i(wbs_we_i), \
-	.wbs_adr_i(wbs_adr_i[15:0]), \
+	.wbs_adr_i(wbs_adr_i), \
 	.wbs_sel_i(wbs_sel_i),  \
 	.wbs_dat_i(wbs_dat_i), \
 	.wbs_dat_o(wbs_dat_o[32*(ID+1)-1:32*ID]), \

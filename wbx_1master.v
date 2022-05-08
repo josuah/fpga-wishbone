@@ -19,10 +19,10 @@ module wbx_1master #(
 	output wire wbs_cyc_i,
 	output wire wbs_stb_i,
 	output wire wbs_we_i,
-	output wire [31:0] wbs_adr_i,
+	output wire [3:0] wbs_adr_i,
 	output wire [3:0] wbs_sel_i,
 	output wire [31:0] wbs_dat_i,
-	input wire [PERIPH_NUM-1:0] wbs_dat_o,
+	input wire [PERIPH_NUM*32-1:0] wbs_dat_o,
 	input wire [PERIPH_NUM-1:0] wbs_stall_o,
 	input wire [PERIPH_NUM-1:0] wbs_ack_o,
 
@@ -33,13 +33,22 @@ module wbx_1master #(
 	input wire [31:0] wbm_adr_o,
 	input wire [3:0] wbm_sel_o,
 	input wire [31:0] wbm_dat_o,
-	output wire wbm_dat_i,
+	output wire [31:0] wbm_dat_i,
 	output wire wbm_stall_i,
 	output wire wbm_ack_i
 
 );
 	localparam CPU_CLK_HZ = 48_000_000;
 
-	wire unused = &{ wbs_adr_i[15:4] };
+	wire unused = &{
+		wb_clk_i, wb_rst_i,
+		wbs_dat_o, wbs_stall_o, wbs_ack_o,
+		wbm_cyc_o, wbm_stb_o, wbm_we_o, wbm_adr_o, wbm_sel_o, wbm_dat_o
+	};
+
+	assign {
+		wbs_cyc_i, wbs_stb_i, wbs_we_i, wbs_adr_i, wbs_sel_i, wbs_dat_i,
+		wbm_dat_i, wbm_stall_i, wbm_ack_i
+	} = 0;
 
 endmodule
