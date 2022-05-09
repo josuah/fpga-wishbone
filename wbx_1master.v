@@ -16,7 +16,7 @@ module wbx_1master #(
 	input wire wb_rst_i,
 
 	// wishbone b4 pipelined slaves
-	output wire wbs_cyc_i,
+	output wire [PERIPH_NUM-1:0] wbs_cyc_i,
 	output wire wbs_stb_i,
 	output wire wbs_we_i,
 	output wire [3:0] wbs_adr_i,
@@ -36,19 +36,43 @@ module wbx_1master #(
 	output wire [31:0] wbm_dat_i,
 	output wire wbm_stall_i,
 	output wire wbm_ack_i
-
 );
 	localparam CPU_CLK_HZ = 48_000_000;
 
-	wire unused = &{
-		wb_clk_i, wb_rst_i,
-		wbs_dat_o, wbs_stall_o, wbs_ack_o,
-		wbm_cyc_o, wbm_stb_o, wbm_we_o, wbm_adr_o, wbm_sel_o, wbm_dat_o
-	};
+	wire unused = &{ wbm_adr_o[15:4] };
 
-	assign {
-		wbs_cyc_i, wbs_stb_i, wbs_we_i, wbs_adr_i, wbs_sel_i, wbs_dat_i,
-		wbm_dat_i, wbm_stall_i, wbm_ack_i
-	} = 0;
+        // add persistence to `wbm_adr_i`
+	reg [15:0] periph_addr_reg = 0;
+	wire [15:0] periph_addr = wbm_cyc_o && wbm_stb_o ? wbm_adr_o[31:16] : periph_addr_reg;
+	always @(posedge wb_clk_i)
+		periph_addr_reg <= periph_addr;
+
+        // signals from master to slave, that are just direct wires, controlled
+	// by CYC signal that tells whether to react or not to them
+	assign wbs_cyc_i = wbm_cyc_o << periph_addr_reg;
+	assign wbs_stb_i = wbm_stb_o;
+	assign wbs_we_i = wbm_we_o;
+	assign wbs_adr_i = wbm_adr_o[3:0];
+	assign wbs_sel_i = wbm_sel_o;
+	assign wbs_dat_i = wbm_dat_o;
+
+	// signals that select which input to transmit depending on address
+	always @(*) begin
+		{ wbm_dat_i, wbm_ack_i, wbm_stall_i } = 0;
+	end
+generate genvar i; for (i = 0; i < PERIPH_NUM; i++) begin
+	always @(*) begin
+		if (periph_addr == i) begin
+			wbm_dat_i = wbs_dat_o[32*(i+1)-1:32*i];
+			wbm_ack_i = wbs_ack_o[i];
+			wbm_stall_i = wbs_stall_o[i];
+		end
+	end
+end endgenerate
+
+	always @(posedge wb_clk_i) begin
+		if (wb_rst_i)
+			periph_addr_reg <= 0;
+	end
 
 endmodule

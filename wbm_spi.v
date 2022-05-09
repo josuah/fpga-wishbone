@@ -30,8 +30,9 @@ module wbm_spi #(
 	};
 
 	assign {
-		wbm_stb_o, wbm_cyc_o, wbm_we_o, wbm_sel_o, wbm_adr_o, wbm_dat_o,
+		wbm_stb_o, wbm_cyc_o, wbm_we_o, wbm_sel_o, wbm_dat_o,
 		spi_miso
-	} = 0;
+	} = -1;
+	assign wbm_adr_o = 32'h00000000;
 
 endmodule

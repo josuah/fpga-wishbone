@@ -42,6 +42,7 @@ module top #(
 		.wb_clk_i(wb_clk_i),
 		.wb_rst_i(wb_rst_i),
 
+		// plug all the slaves
 		.wbs_cyc_i(wbs_cyc_i),
 		.wbs_stb_i(wbs_stb_i),
 		.wbs_we_i(wbs_we_i),
@@ -52,6 +53,7 @@ module top #(
 		.wbs_stall_o(wbs_stall_o),
 		.wbs_ack_o(wbs_ack_o),
 
+		// plug the single master
 		.wbm_cyc_o(wbm_cyc_o),
 		.wbm_stb_o(wbm_stb_o),
 		.wbm_we_o(wbm_we_o),
@@ -70,7 +72,6 @@ module top #(
 	wbm_spi wbm_spi (
 		.wbm_clk_i(wb_clk_i),
 		.wbm_rst_i(wb_rst_i),
-
 		.wbm_cyc_o(wbm_cyc_o),
 		.wbm_stb_o(wbm_stb_o),
 		.wbm_we_o(wbm_we_o),
@@ -80,7 +81,6 @@ module top #(
 		.wbm_dat_i(wbm_dat_i),
 		.wbm_stall_i(wbm_stall_i),
 		.wbm_ack_i(wbm_ack_i),
-
 		.spi_ss(0),
 		.spi_sck(0),
 		.spi_mosi(0),
@@ -92,7 +92,6 @@ module top #(
 `define WISHBONE_B4_PIPELINED(ID) \
 	.wbs_clk_i(wb_clk_i), \
 	.wbs_rst_i(wb_rst_i), \
-	\
 	.wbs_cyc_i(wbs_cyc_i[ID]), \
 	.wbs_stb_i(wbs_stb_i), \
 	.wbs_we_i(wbs_we_i), \
