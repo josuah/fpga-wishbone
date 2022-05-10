@@ -30,7 +30,7 @@ module wbx_1master #(
 	input wire wbm_cyc_o,
 	input wire wbm_stb_o,
 	input wire wbm_we_o,
-	input wire [31:0] wbm_adr_o,
+	input wire [7:0] wbm_adr_o,
 	input wire [3:0] wbm_sel_o,
 	input wire [31:0] wbm_dat_o,
 	output wire [31:0] wbm_dat_i,
@@ -39,11 +39,9 @@ module wbx_1master #(
 );
 	localparam CPU_CLK_HZ = 48_000_000;
 
-	wire unused = &{ wbm_adr_o[15:4] };
-
         // add persistence to `wbm_adr_i`
-	reg [15:0] periph_addr_reg = 0;
-	wire [15:0] periph_addr = wbm_cyc_o && wbm_stb_o ? wbm_adr_o[31:16] : periph_addr_reg;
+	reg [3:0] periph_addr_reg = 0;
+	wire [3:0] periph_addr = wbm_cyc_o && wbm_stb_o ? wbm_adr_o[7:4] : periph_addr_reg;
 	always @(posedge wb_clk_i)
 		periph_addr_reg <= periph_addr;
 

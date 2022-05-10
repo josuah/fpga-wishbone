@@ -11,7 +11,7 @@ module wbm_spi #(
 	output wire wbm_stb_o,
 	output wire wbm_we_o,
 	output wire [3:0] wbm_sel_o,
-	output wire [31:0] wbm_adr_o,
+	output wire [7:0] wbm_adr_o,
 	output wire [31:0] wbm_dat_o,
 	input wire [31:0] wbm_dat_i,
 	input wire wbm_stall_i,
@@ -33,6 +33,6 @@ module wbm_spi #(
 		wbm_stb_o, wbm_cyc_o, wbm_we_o, wbm_sel_o, wbm_dat_o,
 		spi_miso
 	} = -1;
-	assign wbm_adr_o = 32'h00000000;
+	assign wbm_adr_o = 8'h00;
 
 endmodule

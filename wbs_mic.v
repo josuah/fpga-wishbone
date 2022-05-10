@@ -10,9 +10,9 @@ module wbs_mic #(
 	input wire wbs_rst_i,
 	input wire wbs_cyc_i,
 	input wire wbs_stb_i,
-	input wire wbs_adr_i,
-	input wire wbs_dat_i,
-	output reg wbs_dat_o,
+	input wire [3:0] wbs_adr_i,
+	input wire [31:0] wbs_dat_i,
+	output reg [31:0] wbs_dat_o,
 	output wire wbs_stall_o,
 	output reg wbs_ack_o,
 

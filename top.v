@@ -34,7 +34,8 @@ module top #(
 	// master wires
         wire wbm_stb_o, wbm_we_o, wbm_stall_i, wbm_ack_i, wbm_cyc_o;
 	wire [3:0] wbm_sel_o;
-	wire [31:0] wbm_dat_o, wbm_adr_o, wbm_dat_i;
+	wire [7:0] wbm_adr_o;
+	wire [31:0] wbm_dat_o, wbm_dat_i;
 
 	wbx_1master #(
 		.PERIPH_NUM(WISHBONE_PERIPH_NUM)
