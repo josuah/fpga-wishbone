@@ -11,7 +11,7 @@ YOSYS = yosys
 PCF = upduino.pcf
 V =	top.v wbs_uart.v wbs_uart_tx.v wbs_uart_rx.v wbs_pwm.v \
 	wbs_pwm_channel.v wbs_pdm.v wbs_pdm_channel.v wbs_charlie7x5.v \
-	wbs_mic.v wbx_1master.v wbm_spi.v
+	wbs_mic.v wbx_1master.v wbm_spi.v wbm_spi_tx.v wbm_spi_rx.v
 
 all: board.bit simulation.vcd
 

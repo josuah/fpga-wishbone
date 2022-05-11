@@ -7,6 +7,12 @@ module top #(
 ) (
 	input wire clk,
 
+        // SPI slave I/O
+        input wire spi_sck,
+        input wire spi_csn,
+        input wire spi_sdi,
+        output wire spi_sdo,
+
 	// charlie7x5
 	output wire [6:0] charlie7x5_o,
 	output wire [6:0] charlie7x5_oe
@@ -14,7 +20,6 @@ module top #(
 	reg rst_n = 0;
 
 	wire rst = !rst_n;
-	wire unused = &{ spi_miso };
 
 	always @(posedge clk)
 		rst_n <= 1;
@@ -68,8 +73,6 @@ module top #(
 
 	// master //
 
-	wire spi_miso;
-
 	wbm_spi wbm_spi (
 		.wbm_clk_i(wb_clk_i),
 		.wbm_rst_i(wb_rst_i),
@@ -82,10 +85,10 @@ module top #(
 		.wbm_dat_i(wbm_dat_i),
 		.wbm_stall_i(wbm_stall_i),
 		.wbm_ack_i(wbm_ack_i),
-		.spi_ss(0),
-		.spi_sck(0),
-		.spi_mosi(0),
-		.spi_miso(spi_miso)
+		.spi_sck(spi_sck),
+		.spi_csn(spi_csn),
+		.spi_sdi(spi_sdi),
+		.spi_sdo(spi_sdo)
 	);
 
 	// slaves //

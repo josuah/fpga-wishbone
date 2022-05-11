@@ -4,7 +4,7 @@
 
 module wbm_spi #(
 ) (
-	// wishbone b4 pipelined
+	// Wishbone B4 pipelined
 	input wire wbm_clk_i,
 	input wire wbm_rst_i,
 	output wire wbm_cyc_o,
@@ -17,22 +17,37 @@ module wbm_spi #(
 	input wire wbm_stall_i,
 	input wire wbm_ack_i,
 
-	// spi slave i/o
-	input wire spi_ss,
+	// SPI slave I/O
 	input wire spi_sck,
-	input wire spi_mosi,
-	output wire spi_miso
+	input wire spi_csn,
+	input wire spi_sdi,
+	output wire spi_sdo
 );
+	wire rx_handshake_wb, rx_handshake_spi;
+	wire tx_handshake_wb, tx_handshake_spi;
+	wire [7:0] rx_handshake_data;
+	wire [7:0] tx_handshake_data;
 
-	wire unused = &{
-		wbm_clk_i, wbm_rst_i, wbm_dat_i, wbm_stall_i, wbm_ack_i,
-		spi_ss, spi_sck, spi_mosi
-	};
+	wbm_spi_rx rx (
+		.spi_sck(spi_sck),
+		.spi_csn(spi_csn),
+		.spi_sdi(spi_sdi),
+		.spi_sdo(spi_sdo),
+		.handshake_wb(rx_handshake_wb),
+		.handshake_spi(rx_handshake_spi),
+		.handshake_data(rx_handshake_data)
+	);
 
-	assign {
-		wbm_stb_o, wbm_cyc_o, wbm_we_o, wbm_sel_o, wbm_dat_o,
-		spi_miso
-	} = -1;
-	assign wbm_adr_o = 8'h00;
+	wbm_spi_tx tx (
+		.spi_sck(spi_sck),
+		.spi_csn(spi_csn),
+		.spi_sdi(spi_sdi),
+		.spi_sdo(spi_sdo),
+		.handshake_wb(tx_handshake_wb),
+		.handshake_spi(tx_handshake_spi),
+		.handshake_data(tx_handshake_data)
+	);
 
 endmodule
+
+// la la la la not listenning and only saying la la la la
