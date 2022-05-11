@@ -23,10 +23,10 @@ module wbm_spi #(
 	input wire spi_sdi,
 	output wire spi_sdo
 );
-	wire rx_handshake_wb, rx_handshake_spi;
-	wire tx_handshake_wb, tx_handshake_spi;
-	wire [7:0] rx_handshake_data;
-	wire [7:0] tx_handshake_data;
+	reg rx_handshake_wb, rx_handshake_spi;
+	reg tx_handshake_wb, tx_handshake_spi;
+	reg [7:0] rx_handshake_data;
+	reg [7:0] tx_handshake_data;
 
 	wbm_spi_rx rx (
 		.spi_sck(spi_sck),
@@ -47,6 +47,10 @@ module wbm_spi #(
 		.handshake_spi(tx_handshake_spi),
 		.handshake_data(tx_handshake_data)
 	);
+
+	always @(posedge wbm_clk_i) begin
+		
+	end
 
 endmodule
 
