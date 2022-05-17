@@ -13,7 +13,7 @@ module board (
 	wire [6:0] charlie7x5_oe;
 	wire [6:0] charlie7x5_o;
 
-	// internal oscillator //
+	// Internal Oscillator //
 
 	SB_HFOSC SB_HFOSC (
 		.CLKHFPU(1'b1),
@@ -21,7 +21,7 @@ module board (
 		.CLKHF(clk)
 	);
 
-	// i/o cell //
+	// I/O Cell //
 
 	SB_IO #(
 		.PIN_TYPE({ 4'b1010, 2'b01 }),
@@ -39,7 +39,7 @@ module board (
 		.D_OUT_0(charlie7x5_o)
 	);
 
-	// top //
+	// Toplevel //
 
 	top #(
 		.TICKS_PER_BAUD(48000000/9600)

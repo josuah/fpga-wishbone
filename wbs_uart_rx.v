@@ -1,18 +1,20 @@
 `default_nettype none
 
+// Simple sampling UART receiver with static baud rate
+
 module wbs_uart_rx #(
 	parameter TICKS_PER_BAUD = 0
 ) (
-	// wishbone b4 (subset)
-	input wire wbs_clk_i,
-	input wire wbs_rst_i,
-	input wire wbs_stb_i,
-	output reg [7:0] wbs_dat_o,
+	// Wishbone B4 (subset)
+	input wire wb_clk_i,
+	input wire wb_rst_i,
+	input wire wb_stb_i,
+	output reg [7:0] wb_dat_o,
 
-	// interrupts
+	// Interrupts
 	output reg irq_uart_rx,
 
-	// uart
+	// UART
 	input wire uart_rx
 );
 	localparam [3:0]
@@ -34,14 +36,16 @@ module wbs_uart_rx #(
 	reg [$size(TICKS_PER_BAUD)-1:0] baud_cnt = 0;
 	reg [7:0] shift_reg = 0;
 
-	always @(posedge wbs_clk_i) begin
-		if (state == STATE_IDLE) begin
+	always @(posedge wb_clk_i) begin
+		case (state)
+		STATE_IDLE: begin
 			if (uart_rx == 0) begin
 				state <= STATE_START;
 				// 1 to compensate register delay
 				baud_cnt <= (TICKS_PER_BAUD > 1) ? 1 : 0;
 			end
-		end else begin
+		end
+		default: begin
 			baud_cnt <= baud_cnt + 1;
 
 			if (baud_cnt == TICKS_PER_BAUD / 2)
@@ -50,7 +54,7 @@ module wbs_uart_rx #(
 			if (baud_cnt == TICKS_PER_BAUD - 1) begin
 				if (state == STATE_BIT_LAST) begin
 					// continuously update the data buffer
-					wbs_dat_o <= shift_reg;
+					wb_dat_o <= shift_reg;
 					// raise interrupt: dinner is served
 					irq_uart_rx <= 1;
 				end
@@ -59,12 +63,15 @@ module wbs_uart_rx #(
 				baud_cnt <= 0;
 			end
 		end
+		endcase
 
-		if (wbs_stb_i)
-			irq_uart_rx <= 0;	// what if we read the data register just now? should be set for one clock and disappear?
+		if (wb_stb_i)
+			// TODO: What if we read the data register just now?
+			// Should the IRQ be set for one clock and disappear?
+			irq_uart_rx <= 0;
 
-		if (wbs_rst_i) begin
-			{ state, shift_reg, baud_cnt, wbs_dat_o } <= 0;
+		if (wb_rst_i) begin
+			{ state, shift_reg, baud_cnt, wb_dat_o } <= 0;
 		end
 	end
 
@@ -74,8 +81,8 @@ module wbs_uart_rx #(
 	assert property (baud_cnt < TICKS_PER_BAUD);
 
 	always @(*) begin
-		cover(wbs_rst_i);
-		if (wbs_rst_i)
+		cover(wb_rst_i);
+		if (wb_rst_i)
 			f_rst <= 1;
 	end
 `endif

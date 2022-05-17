@@ -39,7 +39,7 @@ module top #(
 	// master wires
         wire wbm_stb_o, wbm_we_o, wbm_stall_i, wbm_ack_i, wbm_cyc_o;
 	wire [3:0] wbm_sel_o;
-	wire [7:0] wbm_adr_o;
+	wire [15:0] wbm_adr_o;
 	wire [31:0] wbm_dat_o, wbm_dat_i;
 
 	wbx_1master #(
@@ -74,17 +74,17 @@ module top #(
 	// master //
 
 	wbm_spi wbm_spi (
-		.wbm_clk_i(wb_clk_i),
-		.wbm_rst_i(wb_rst_i),
-		.wbm_cyc_o(wbm_cyc_o),
-		.wbm_stb_o(wbm_stb_o),
-		.wbm_we_o(wbm_we_o),
-		.wbm_sel_o(wbm_sel_o),
-		.wbm_dat_o(wbm_dat_o),
-		.wbm_adr_o(wbm_adr_o),
-		.wbm_dat_i(wbm_dat_i),
-		.wbm_stall_i(wbm_stall_i),
-		.wbm_ack_i(wbm_ack_i),
+		.wb_clk_i(wb_clk_i),
+		.wb_rst_i(wb_rst_i),
+		.wb_cyc_o(wbm_cyc_o),
+		.wb_stb_o(wbm_stb_o),
+		.wb_we_o(wbm_we_o),
+		.wb_sel_o(wbm_sel_o),
+		.wb_dat_o(wbm_dat_o),
+		.wb_adr_o(wbm_adr_o),
+		.wb_dat_i(wbm_dat_i),
+		.wb_stall_i(wbm_stall_i),
+		.wb_ack_i(wbm_ack_i),
 		.spi_sck(spi_sck),
 		.spi_csn(spi_csn),
 		.spi_sdi(spi_sdi),
@@ -94,17 +94,17 @@ module top #(
 	// slaves //
 
 `define WISHBONE_B4_PIPELINED(ID) \
-	.wbs_clk_i(wb_clk_i), \
-	.wbs_rst_i(wb_rst_i), \
-	.wbs_cyc_i(wbs_cyc_i[ID]), \
-	.wbs_stb_i(wbs_stb_i), \
-	.wbs_we_i(wbs_we_i), \
-	.wbs_adr_i(wbs_adr_i), \
-	.wbs_sel_i(wbs_sel_i),  \
-	.wbs_dat_i(wbs_dat_i), \
-	.wbs_dat_o(wbs_dat_o[32*(ID+1)-1:32*ID]), \
-	.wbs_stall_o(wbs_stall_o[ID]), \
-	.wbs_ack_o(wbs_ack_o[ID])
+	.wb_clk_i(wb_clk_i), \
+	.wb_rst_i(wb_rst_i), \
+	.wb_cyc_i(wbs_cyc_i[ID]), \
+	.wb_stb_i(wbs_stb_i), \
+	.wb_we_i(wbs_we_i), \
+	.wb_adr_i(wbs_adr_i), \
+	.wb_sel_i(wbs_sel_i),  \
+	.wb_dat_i(wbs_dat_i), \
+	.wb_dat_o(wbs_dat_o[32*(ID+1)-1:32*ID]), \
+	.wb_stall_o(wbs_stall_o[ID]), \
+	.wb_ack_o(wbs_ack_o[ID])
 
 	wbs_charlie7x5 #(
 		.WB_CLK_HZ(CPU_CLK_HZ)

@@ -11,11 +11,11 @@
 module wbx_1master #(
 	parameter PERIPH_NUM = 0
 ) (
-	// wishbone b4 pipelined
+	// Wishbone B4 Pipelined
 	input wire wb_clk_i,
 	input wire wb_rst_i,
 
-	// wishbone b4 pipelined slaves
+	// Wishbone B4 pipelined slaves
 	output wire [PERIPH_NUM-1:0] wbs_cyc_i,
 	output wire wbs_stb_i,
 	output wire wbs_we_i,
@@ -30,7 +30,7 @@ module wbx_1master #(
 	input wire wbm_cyc_o,
 	input wire wbm_stb_o,
 	input wire wbm_we_o,
-	input wire [7:0] wbm_adr_o,
+	input wire [15:0] wbm_adr_o,
 	input wire [3:0] wbm_sel_o,
 	input wire [31:0] wbm_dat_o,
 	output wire [31:0] wbm_dat_i,
@@ -39,9 +39,9 @@ module wbx_1master #(
 );
 	localparam CPU_CLK_HZ = 48_000_000;
 
-        // add persistence to `wbm_adr_i`
-	reg [3:0] periph_addr_reg = 0;
-	wire [3:0] periph_addr = wbm_cyc_o && wbm_stb_o ? wbm_adr_o[7:4] : periph_addr_reg;
+        // add persistence to `wbs_adr_i`
+	reg [11:0] periph_addr_reg = 0;
+	wire [11:0] periph_addr = wbm_cyc_o && wbm_stb_o ? wbm_adr_o[15:4] : periph_addr_reg;
 	always @(posedge wb_clk_i)
 		periph_addr_reg <= periph_addr;
 
@@ -54,7 +54,7 @@ module wbx_1master #(
 	assign wbs_sel_i = wbm_sel_o;
 	assign wbs_dat_i = wbm_dat_o;
 
-	// signals that select which input to transmit depending on address
+	// selecting which peripheral's signal to transmit depending on address
 	always @(*) begin
 		{ wbm_dat_i, wbm_ack_i, wbm_stall_i } = 0;
 	end

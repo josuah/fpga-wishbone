@@ -1,56 +1,99 @@
-// Make data cross two clock domains
+/*
 
-module clock_domain_export (
+This clock domain crossing strategy is the same as the well-known
+Valid/Ready with Ack signal, except that Ready and Ack are merged
+onto an unique signal. Ack set low is the same as valid set high.
+
+We end-up with the same protocol, but only two signals for controlling
+the transfer of `handshake_data`:
+
+* The source module sending the data to another clock domain writes to
+  `handshake_ack` (and reads `handshake_valid`).
+* The destination module receiving data from another clock domain writes to
+  `handshake_valid` (and reads `handshake_ack`).
+
+```
+		 :    :   :   :   :        :       :
+		 :    :____________________:       :
+handshake_data	XXXXXXX____________________XXXXXXXXXXXXX
+		 :    :    ________________:       :
+handshake_valid	__________/   :   :        \____________
+		 :    :   :   :   :________________:
+handshake_ack	__________________/        :       \____
+		 :    :   :   :   :        :       :
+		(1)  (2) (3) (4) (5)      (6)     (7)
+```
+
+* When the source has data to transfer (1),
+  it first asserts `handshake_data` to the appropriate content (2) then sets `handshake_valid` high (3).
+* Once the destination notices it,
+  it copies `handshake_data` to a local register (4) and sets* `handshake_ack` high (5).
+* Once the source notices it,
+  it sets `handshake_valid` low, and `handshake_valid` can be set to the next value.
+* Once the destination notices it,
+  it sets `handshake_ack` back to low. It is ready for another cycle.
+
+This is the export part, to call from the source module.
+It transmits a buffer of data to other clock domain.
+
+Rising `stb` for one clock queue `data` for transfer unless `busy` is set.
+
+*/
+
+
+// Safely transmit data to another clock domain.
+
+module clock_domain_export #(
+	parameter SIZE = 7
+) (
 	input wire clk,
 
-	// "other" clock domain I/O
-	output reg [7:0] handshake_buffer,
-	input wire handshake_other,
-	output reg handshake_local,
+	// control interface
+	input wire [SIZE-1:0] data,
+	input wire stb,
+	output wire busy,
 
-	// "local" clock domain I/O
-	input wire [7:0] data,
-	input wire ack
+	// the "other" clock domain I/O
+	output reg [SIZE-1:0] handshake_data,
+	output reg handshake_valid,
+	input wire handshake_ack
 );
-	localparam STATE_1_WAIT_THEM_UP = 0;
-	// Extra state to avoid metastable state on handshake_buffer:
-	localparam STATE_3_WAIT_DATA_STABLE = 1;
-	localparam STATE_4_WAIT_THEM_DOWN = 2;
+	localparam STATE_LOAD_DATA = 0;
+	localparam STATE_WAIT_ACK = 1;
+	localparam STATE_TERMINATE_HANDSHAKE = 2;
 
-	reg [1:0] state;
+	reg [1:0] state = 0;
+	reg handshake_ack_x;
 
-	reg data_ready_reg;
-	wire data_ready = ack || data_ready_reg;
+	assign busy = (state != STATE_LOAD_DATA);
 
-	// TODO: predict, eventually proove the number of clocks
-	// required for this to work as some modules might need a
-	// good lattency of data through this gate.
 	always @(posedge clk) begin
+		// prevent metastable state propagation
+		handshake_ack_x <= handshake_ack;
+
 		case (state)
-		STATE_1_WAIT_THEM_UP: begin
-			// Also wait that we are ready to transmit the next byte.
-			if (handshake_other == 1 && data_ready) begin
-				// We just checked on both side: we can cross
-				// the street, err... I mean the clock domain.
-				handshake_buffer <= data;
-				data_ready_reg <= 0;
-				state <= STATE_3_WAIT_DATA_STABLE;
+		STATE_LOAD_DATA: begin
+			if (stb) begin
+				// data and valid can be sent at the same time,
+				// as data does not have an extra flip-flop pair
+				// and will arrive earlier, as in Fig 1. of
+				// https://zipcpu.com/blog/2018/07/06/afifo.html
+				handshake_data <= data;
+				handshake_valid <= 1;
+				state <= STATE_WAIT_ACK;
 			end
 		end
-		STATE_3_WAIT_DATA_STABLE: begin
-			// Inform the parent module that we have the data.
-			handshake_local <= 1;
-			state <= STATE_4_WAIT_THEM_DOWN;
+		STATE_WAIT_ACK: begin
+			if (handshake_ack_x)
+				state <= STATE_TERMINATE_HANDSHAKE;
 		end
-		STATE_4_WAIT_THEM_DOWN: begin
-			if (handshake_other == 0) begin
-				handshake_local <= 0;
+		STATE_TERMINATE_HANDSHAKE: begin
+			if (handshake_ack_x == 0) begin
+				state <= STATE_LOAD_DATA;
+				handshake_valid <= 0;
 			end
 		end
 		endcase
-
-		if (ack)
-			data_ready_reg <= 1;
 	end
 
 endmodule

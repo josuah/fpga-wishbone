@@ -1,5 +1,12 @@
 // Dear passenger, we are clossing clock domain. Seat comfortably
 // and fasten your belt to overcome any turbulence there could be.
+//
+// The `data` register is sampled each time a byte is sent, and the
+// parent module has to fill it at regular interval, not too close
+// to the last moment to avoid missing a cycle.
+//
+// The RX signal can be used as a trigger for when to feed the TX data
+// on a regular basis.
 
 module wbm_spi_tx (
 	// SPI slave posedge I/O
@@ -8,31 +15,32 @@ module wbm_spi_tx (
 	output wire spi_sdo,
 
 	// clock domain crossing
-	input wire handshake_wb,
-	output reg handshake_spi,
-	input wire [7:0] handshake_buffer
+	input wire handshake_valid,
+	output reg handshake_ack,
+	input wire [7:0] handshake_data
 );
 	reg [7:0] shift_reg = 0;
 	reg [2:0] cnt = 0;
-	reg ack;
 
 	wire [7:0] data;
+	wire unused = &{ stb };
+	wire stb;
 
 	// import the value to send over SPI from the wishbone clock domain
-	clock_domain_import cross_import (
+	clock_domain_import #(
+		.SIZE(8)
+	) cross_import (
 		.clk(spi_sck),
-		.handshake_buffer(handshake_buffer),
-		.handshake_other(handshake_wb),
-		.handshake_local(handshake_spi),
+		.handshake_data(handshake_data),
+		.handshake_valid(handshake_valid),
+		.handshake_ack(handshake_ack),
 		.data(data),
-		.ack(ack)
+		.stb(stb)
 	);
 
 	assign spi_sdo = shift_reg[7];
 
 	always @(posedge spi_sck) begin
-		ack <= 0;
-
 		// if we are selected by the SPI controller
 		if (spi_csn == 0) begin
 			cnt <= cnt + 1;
@@ -42,9 +50,6 @@ module wbm_spi_tx (
 			if (cnt + 1 == 0) begin
 				// continuously transmit the `data`
 				shift_reg <= data;
-
-				// release data to the clock_domainer
-				ack <= 1;
 			end
 		end
 	end
