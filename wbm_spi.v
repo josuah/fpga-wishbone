@@ -46,7 +46,6 @@ module wbm_spi (
 	wire tx_handshake_valid, tx_handshake_ack, tx_busy;
 	wire unused = &{ tx_busy };
 
-
 	// transmitter connection //
 
 	clock_domain_export #(
@@ -70,7 +69,6 @@ module wbm_spi (
 		.handshake_data(tx_handshake_data)
 	);
 
-
 	// receiver connection //
 
 	clock_domain_import #(
@@ -92,8 +90,6 @@ module wbm_spi (
 		.handshake_ack(rx_handshake_ack),
 		.handshake_data(rx_handshake_data)
 	);
-
-
 
 	// wishbone master //
 

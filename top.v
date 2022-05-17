@@ -26,7 +26,7 @@ module top #(
 
         wire wb_clk_i = clk, wb_rst_i = rst;
 
-	// interconnect //
+	// Interconnect //
 
 	// slave wires
 	wire wbs_stb_i, wbs_we_i;
@@ -71,7 +71,7 @@ module top #(
 		.wbm_ack_i(wbm_ack_i)
 	);
 
-	// master //
+	// Master //
 
 	wbm_spi wbm_spi (
 		.wb_clk_i(wb_clk_i),
@@ -91,7 +91,7 @@ module top #(
 		.spi_sdo(spi_sdo)
 	);
 
-	// slaves //
+	// Peripherals //
 
 `define WISHBONE_B4_PIPELINED(ID) \
 	.wb_clk_i(wb_clk_i), \

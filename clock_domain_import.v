@@ -1,50 +1,41 @@
-/*
-
-This clock domain crossing strategy is the same as the well-known
-Valid/Ready with Ack signal, except that Ready and Ack are merged
-onto an unique signal. Ack set low is the same as valid set high.
-
-We end-up with the same protocol, but only two signals for controlling
-the transfer of `handshake_data`:
-
-* The source module sending the data to another clock domain writes to
-  `handshake_ack` (and reads `handshake_valid`).
-* The destination module receiving data from another clock domain writes to
-  `handshake_valid` (and reads `handshake_ack`).
-
-```
-		 :    :   :   :   :        :       :
-		 :    :____________________:       :
-handshake_data	XXXXXXX____________________XXXXXXXXXXXXX
-		 :    :    ________________:       :
-handshake_valid	__________/   :   :        \____________
-		 :    :   :   :   :________________:
-handshake_ack	__________________/        :       \____
-		 :    :   :   :   :        :       :
-		(1)  (2) (3) (4) (5)      (6)     (7)
-```
-
-* When the source has data to transfer (1),
-  it first asserts `handshake_data` to the appropriate content (2) then sets `handshake_valid` high (3).
-* Once the destination notices it,
-  it copies `handshake_data` to a local register (4) and sets `handshake_ack` high (5).
-* Once the source notices it,
-  it sets `handshake_valid` low, and `handshake_valid` can be set to the next value.
-* Once the destination notices it,
-  it sets `handshake_ack` back to low. It is ready for another cycle.
-
-This part is called from the destination module.
-It imports a buffer of data from the other clock domain.
-
-As `data` becomes valid, `stb` rises for one clock.
-
-*/
-
-
-// Safely receive data to another clock domain.
+// This clock domain crossing strategy is the same as the well-known
+// Valid/Ready with Ack signal, except that Ready and Ack are merged
+// onto an unique signal. Ack set low is the same as valid set high.
+// 
+// We end-up with the same protocol, but only two signals for controlling
+// the transfer of `handshake_data`:
+// 
+// * The source module sending the data to another clock domain writes to
+//   `handshake_ack` (and reads `handshake_valid`).
+// * The destination module receiving data from another clock domain writes to
+//   `handshake_valid` (and reads `handshake_ack`).
+// 
+//			 :    :   :   :   :        :       :
+//			 :    :____________________:       :
+//	handshake_data	XXXXXXX____________________XXXXXXXXXXXXX
+//			 :    :    ________________:       :
+//	handshake_valid	__________/   :   :        \____________
+//			 :    :   :   :   :________________:
+//	handshake_ack	__________________/        :       \____
+//			 :    :   :   :   :        :       :
+//			(1)  (2) (3) (4) (5)      (6)     (7)
+// 
+// * When the source has data to transfer (1),
+//   it first asserts `handshake_data` to the appropriate content (2) then sets `handshake_valid` high (3).
+// * Once the destination notices it,
+//   it copies `handshake_data` to a local register (4) and sets `handshake_ack` high (5).
+// * Once the source notices it,
+//   it sets `handshake_valid` low, and `handshake_valid` can be set to the next value.
+// * Once the destination notices it,
+//   it sets `handshake_ack` back to low. It is ready for another cycle.
+// 
+// This part is called from the destination module.
+// It imports a buffer of data from the other clock domain.
+// 
+// As `data` becomes valid, `stb` rises for one clock.
 
 module clock_domain_import #(
-	parameter SIZE = 7
+	parameter SIZE = 8
 ) (
 	input wire clk,
 

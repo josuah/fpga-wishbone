@@ -1,6 +1,11 @@
-static uint64_t tick_count;
-static uint64_t tick_max = 0x10000;
-VerilatedVcdC *tick_vcd;
+struct simulation {
+	static uint64_t tick_count;
+	static uint64_t tick_max;
+
+	Vsimulation *v;
+	VerilatedVcdC *vcd;
+};
+
 
 static void
 simulation_put(char const *var, uint64_t u64, uint8_t size)
@@ -11,46 +16,44 @@ simulation_put(char const *var, uint64_t u64, uint8_t size)
 }
 
 static void
-simulation_tick_begin(Vsimulation *v)
+simulation_tick_posedge(struct simulation *sim)
 {
-	if (++tick_count > tick_max) {
+	if (++sim->tick_count > sim->tick_max) {
 		fprintf(stderr, "warning: max tick count reached, exiting\n");
 		exit(0);
 	}
 
-	v->eval();
-	tick_vcd->dump(tick_count * 10 - 1);
+	sim->v->eval();
+	sim->vcd->dump(sim->tick_count * 10 - 1);
 
-	v->clk = 1;
+	sim->v->clk = 1;
 
-	v->eval();
-	tick_vcd->dump(tick_count * 10);
+	sim->v->eval();
+	sim->vcd->dump(sim->tick_count * 10);
 }
 
 static void
-simulation_tick_end(Vsimulation *v)
+simulation_tick_negedge(struct simulation *sim)
 {
-	v->clk = 0;
+	sim->v->clk = 0;
 
-	v->eval();
-	tick_vcd->dump(tick_count * 10 + 5);
+	sim->v->eval();
+	sim->vcd->dump(sim->tick_count * 10 + 5);
 
-	tick_vcd->flush();
+	sim->vcd->flush();
 }
 
-static Vsimulation *
-simulation_init(int argc, char **argv)
+static void
+simulation_init(struct simulation *sim, int argc, char **argv)
 {
-	Vsimulation *v;
-
 	Verilated::commandArgs(argc, argv);
 	Verilated::traceEverOn(true);
 
-	v = new Vsimulation;
-	tick_vcd = new VerilatedVcdC;
+	sim->v = new Vsimulation;
+	sim->vcd = new VerilatedVcdC;
 
-	v->trace(tick_vcd, 99);
-	tick_vcd->open("simulation.vcd");
+	sim->v->trace(sim->vcd, 99);
+	sim->vcd->open("simulation.vcd");
 
-	return v;
+	sim->tick_max = 0x10000;
 }
