@@ -16,6 +16,7 @@ module wbm_spi_rx (
 	reg stb = 0;
 	reg [2:0] cnt = 0;
 	reg [7:0] shift_reg = 0;
+	wire [7:0] shift_reg_next = { shift_reg[6:0], spi_sdi };
 	wire unused = &{ busy, shift_reg[7] };
 	wire busy;
 
@@ -38,11 +39,11 @@ module wbm_spi_rx (
 		// if we are selected by the SPI controller
 		if (spi_csn == 0) begin
 			cnt <= cnt + 1;
-			shift_reg <= { shift_reg[6:0], spi_sdi };
+			shift_reg <= shift_reg_next;
 
 			if (cnt == 0) begin
 				// continuously receive into `data`
-				data <= shift_reg;
+				data <= shift_reg_next;
 				stb <= 1;
 			end
 		end

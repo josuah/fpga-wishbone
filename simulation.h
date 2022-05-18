@@ -19,6 +19,21 @@ simulation_eval(nanosecond_t ns)
 }
 
 static void
+simulation_init(int argc, char **argv)
+{
+	Verilated::commandArgs(argc, argv);
+	Verilated::traceEverOn(true);
+
+	vsim = new Vsimulation;
+	vcd = new VerilatedVcdC;
+
+	vsim->trace(vcd, 99);
+	vcd->open("simulation.vcd");
+
+	simulation_eval(0);
+}
+
+static void
 simulation_tick_posedge(nanosecond_t ns)
 {
 	vsim->clk = 1;
@@ -30,19 +45,6 @@ simulation_tick_negedge(nanosecond_t ns)
 {
 	vsim->clk = 0;
 	simulation_eval(ns);
-}
-
-static void
-simulation_init(int argc, char **argv)
-{
-	Verilated::commandArgs(argc, argv);
-	Verilated::traceEverOn(true);
-
-	vsim = new Vsimulation;
-	vcd = new VerilatedVcdC;
-
-	vsim->trace(vcd, 99);
-	vcd->open("simulation.vcd");
 }
 
 static void

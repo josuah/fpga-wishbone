@@ -8,19 +8,23 @@
 #define CLK_MAIN_PERIOD 30
 #define CLK_MAIN_PHASE 3
 
-#define CLK_SPI_PERIOD 11
+#define CLK_SPI_PERIOD 31
 #define CLK_SPI_PHASE 0
 
 int
 main(int argc, char **argv)
 {
-	char buf[32] = {0};
+	uint8_t rx[32] = {0};
+	uint8_t tx[] = { 0x8F, 0x00, 0xAA, 0xAA, 0xAA, 0xAA };
 
 	simulation_init(argc, argv);
+	vsim->spi_csn = 1;
+	simulation_eval(0);
 
-	vsim->spi_csn = 0;
+	spi_queue_read(rx, sizeof rx);
+	spi_queue_write(tx, 4);
 
-	for (nanosecond_t ns = 0; ns < 20000; ns++) {
+	for (nanosecond_t ns = 100; ns < 50000; ns++) {
 		// main clock domain
 		if (ns % CLK_MAIN_PERIOD == CLK_MAIN_PHASE)
 			simulation_tick_posedge(ns);
@@ -30,8 +34,9 @@ main(int argc, char **argv)
 
 		// spi clock domain
 		if (ns % CLK_SPI_PERIOD == CLK_SPI_PHASE) {
-			spi_queue_read(buf, sizeof buf);
-			spi_queue_write("0123", 4);
+			vsim->spi_csn = 0;
+			spi_queue_read(rx, sizeof rx);
+			spi_queue_write(tx, 4);
 			spi_tick_posedge(ns);
 		}
 		if (ns % CLK_SPI_PERIOD ==
