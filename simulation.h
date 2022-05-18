@@ -1,6 +1,6 @@
 struct simulation {
-	static uint64_t tick_count;
-	static uint64_t tick_max;
+	uint64_t tick_count;
+	uint64_t tick_max;
 
 	Vsimulation *v;
 	VerilatedVcdC *vcd;
@@ -16,30 +16,24 @@ simulation_put(char const *var, uint64_t u64, uint8_t size)
 }
 
 static void
-simulation_tick_posedge(struct simulation *sim)
+simulation_eval(struct simulation *sim, uint64_t ns)
 {
-	if (++sim->tick_count > sim->tick_max) {
-		fprintf(stderr, "warning: max tick count reached, exiting\n");
-		exit(0);
-	}
-
 	sim->v->eval();
-	sim->vcd->dump(sim->tick_count * 10 - 1);
-
-	sim->v->clk = 1;
-
-	sim->v->eval();
-	sim->vcd->dump(sim->tick_count * 10);
+	sim->vcd->dump(ns);
 }
 
 static void
-simulation_tick_negedge(struct simulation *sim)
+simulation_tick_posedge(struct simulation *sim, uint64_t ns)
+{
+	sim->v->clk = 1;
+	simulation_eval(sim, ns);
+}
+
+static void
+simulation_tick_negedge(struct simulation *sim, uint64_t ns)
 {
 	sim->v->clk = 0;
-
-	sim->v->eval();
-	sim->vcd->dump(sim->tick_count * 10 + 5);
-
+	simulation_eval(sim, ns);
 	sim->vcd->flush();
 }
 

@@ -17,24 +17,24 @@ spi_init(struct spi *spi, struct simulation *sim)
 }
 
 static void
-spi_tick_posedge(struct spi *spi)
+spi_tick_posedge(struct spi *spi, uint64_t ns)
 {
 	spi->sim->v->spi_sck = 1;
 	if (spi->tx.len > 0)
 		spi->sim->v->spi_sdi = *spi->tx.buf & 0x01;
-	spi->sim->v->eval();
-}
-
-static void
-spi_tick_negedge(struct spi *spi)
-{
-	spi->sim->v->spi_sck = 0;
-	spi->sim->v->eval();
+	simulation_eval(spi->sim, ns);
 
 	if (spi->rx.len > 0)
 		*spi->rx.buf = *spi->rx.buf << 1 | spi->sim->v->spi_sdo;
 	if (spi->tx.len > 0)
 		*spi->tx.buf = *spi->tx.buf >> 1;
+}
+
+static void
+spi_tick_negedge(struct spi *spi, uint64_t ns)
+{
+	spi->sim->v->spi_sck = 0;
+	simulation_eval(spi->sim, ns);
 
 	if (++spi->bits_sent == 8) {
 		spi->bits_sent = 0;
