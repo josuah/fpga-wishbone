@@ -1,10 +1,7 @@
-struct simulation {
-	uint64_t tick_count;
-	uint64_t tick_max;
+Vsimulation *vsim;
+VerilatedVcdC *vcd;
 
-	Vsimulation *v;
-	VerilatedVcdC *vcd;
-};
+typedef uint64_t nanosecond_t;
 
 
 static void
@@ -16,38 +13,41 @@ simulation_put(char const *var, uint64_t u64, uint8_t size)
 }
 
 static void
-simulation_eval(struct simulation *sim, uint64_t ns)
+simulation_eval(nanosecond_t ns)
 {
-	sim->v->eval();
-	sim->vcd->dump(ns);
+	vsim->eval();
+	vcd->dump(ns);
 }
 
 static void
-simulation_tick_posedge(struct simulation *sim, uint64_t ns)
+simulation_tick_posedge(nanosecond_t ns)
 {
-	sim->v->clk = 1;
-	simulation_eval(sim, ns);
+	vsim->clk = 1;
+	simulation_eval(ns);
 }
 
 static void
-simulation_tick_negedge(struct simulation *sim, uint64_t ns)
+simulation_tick_negedge(nanosecond_t ns)
 {
-	sim->v->clk = 0;
-	simulation_eval(sim, ns);
-	sim->vcd->flush();
+	vsim->clk = 0;
+	simulation_eval(ns);
 }
 
 static void
-simulation_init(struct simulation *sim, int argc, char **argv)
+simulation_init(int argc, char **argv)
 {
 	Verilated::commandArgs(argc, argv);
 	Verilated::traceEverOn(true);
 
-	sim->v = new Vsimulation;
-	sim->vcd = new VerilatedVcdC;
+	vsim = new Vsimulation;
+	vcd = new VerilatedVcdC;
 
-	sim->v->trace(sim->vcd, 99);
-	sim->vcd->open("simulation.vcd");
+	vsim->trace(vcd, 99);
+	vcd->open("simulation.vcd");
+}
 
-	sim->tick_max = 0x10000;
+static void
+simulation_finish(void)
+{
+	vcd->flush();
 }
