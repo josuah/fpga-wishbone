@@ -13,7 +13,7 @@ spi_tick_posedge(uint64_t ns)
 {
 	vsim->spi_sck = 1;
 	if (spi.tx.len > 0)
-		vsim->spi_sdi = *spi.tx.buf & 0x01;
+		vsim->spi_sdi = spi.tx.byte & 0x01;
 	simulation_eval(ns);
 
 	if (spi.rx.len > 0)

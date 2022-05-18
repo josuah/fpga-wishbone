@@ -3,7 +3,6 @@ VerilatedVcdC *vcd;
 
 typedef uint64_t nanosecond_t;
 
-
 static void
 simulation_put(char const *var, uint64_t u64, uint8_t size)
 {
