@@ -21,7 +21,6 @@ module wbm_spi_tx (
 );
 	reg [7:0] shift_reg = 0;
 	reg [2:0] cnt = 0;
-
 	wire [7:0] data;
 	wire unused = &{ stb };
 	wire stb;
@@ -44,10 +43,9 @@ module wbm_spi_tx (
 		// if we are selected by the SPI controller
 		if (spi_csn == 0) begin
 			cnt <= cnt + 1;
-
 			shift_reg <= { shift_reg[6:0], 1'b0 };
 
-			if (cnt + 1 == 0) begin
+			if (cnt == 0) begin
 				// continuously transmit the `data`
 				shift_reg <= data;
 			end

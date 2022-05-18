@@ -76,13 +76,14 @@ module clock_domain_export #(
 			end
 		end
 		STATE_WAIT_ACK: begin
-			if (handshake_ack_x)
+			if (handshake_ack_x) begin
+				handshake_valid <= 0;
 				state <= STATE_TERMINATE_HANDSHAKE;
+			end
 		end
 		STATE_TERMINATE_HANDSHAKE: begin
 			if (handshake_ack_x == 0) begin
 				state <= STATE_LOAD_DATA;
-				handshake_valid <= 0;
 			end
 		end
 		endcase

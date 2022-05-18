@@ -12,13 +12,12 @@ module wbm_spi_rx (
 	output reg handshake_valid,
 	output reg [7:0] handshake_data
 );
-	reg [7:0] shift_reg = 0;
+	reg [7:0] data = 0;
+	reg stb = 0;
 	reg [2:0] cnt = 0;
-
+	reg [7:0] shift_reg = 0;
 	wire unused = &{ busy, shift_reg[7] };
-	wire stb, busy;
-	wire [7:0] data = 0;
-	wire [7:0] shift_reg_next = { shift_reg[6:0], spi_sdi };
+	wire busy;
 
 	// export the value read from SPI to the wishbone clock domain
 	clock_domain_export #(
@@ -34,17 +33,16 @@ module wbm_spi_rx (
 	);
 
 	always @(posedge spi_sck) begin
+		stb <= 0;
 
 		// if we are selected by the SPI controller
 		if (spi_csn == 0) begin
 			cnt <= cnt + 1;
-			shift_reg <= shift_reg_next;
+			shift_reg <= { shift_reg[6:0], spi_sdi };
 
-			if (cnt + 1 == 0) begin
+			if (cnt == 0) begin
 				// continuously receive into `data`
-				data <= shift_reg_next;
-
-				// release `data` to the clock_domainer
+				data <= shift_reg;
 				stb <= 1;
 			end
 		end
