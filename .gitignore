@@ -12,3 +12,4 @@
 *.pdf
 *.dot
 /testbench
+__pycache__

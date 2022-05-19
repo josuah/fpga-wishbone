@@ -7,6 +7,8 @@ VERILATOR_ROOT = /usr/local/share/verilator
 VERILATOR_SRC = ${VERILATOR_ROOT}/include/verilated.cpp ${VERILATOR_ROOT}/include/verilated_vcd_c.cpp
 NEXTPNR = nextpnr-ice40 --randomize-seed --up5k --package sg48
 YOSYS = yosys
+GTKWAVE = gtkwave -CM6
+W = simulation
 
 PCF = upduino.pcf
 V =	top.v wbs_uart.v wbs_uart_tx.v wbs_uart_rx.v wbs_pwm.v \
@@ -22,8 +24,8 @@ clean:
 flash: board.bit
 	${ICEPROG} -d i:0x0403:0x6014 board.bit
 
-wave: simulation.vcd
-	gtkwave simulation.vcd
+wave: $W.gtkw simulation.vcd
+	${GTKWAVE} -a $W.gtkw simulation.vcd
 
 test: ${V} simulation.v testbench.sby
 	sby -f testbench.sby
@@ -32,7 +34,7 @@ board.json: ${V}
 
 simulation.elf: ${V} simulation.cpp simulation.h simulation.uart.h
 
-.SUFFIXES: .v .elf .vcd .json .asc .bit .dfu .hex .dot .pdf
+.SUFFIXES: .v .elf .vcd .json .asc .bit .dfu .hex .dot .pdf .py .gtkw
 
 .v.elf:
 	${VERILATOR} -cc --Mdir $*.d $<
@@ -50,6 +52,9 @@ simulation.elf: ${V} simulation.cpp simulation.h simulation.uart.h
 
 .asc.bit:
 	${ICEPACK} $< $@
+
+.py.gtkw:
+	python $< $*
 
 .bit.dfu:
 	cp $< $@

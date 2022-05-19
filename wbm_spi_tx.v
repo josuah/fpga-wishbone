@@ -45,10 +45,9 @@ module wbm_spi_tx (
 			cnt <= cnt + 1;
 			shift_reg <= { shift_reg[6:0], 1'b0 };
 
-			if (cnt == 0) begin
-				// continuously transmit the `data`
+			if (cnt == 0)
+				// continuously transmit `data`
 				shift_reg <= data;
-			end
 		end
 	end
 
