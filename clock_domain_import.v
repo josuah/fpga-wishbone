@@ -1,12 +1,4 @@
-// This clock domain crossing strategy is similar to the well-known
-// Valid/Ready with Ack, except that Ready and Ack are merged
-// onto an unique signal, and Valid was renamed Req (for request).
-// In addition, instead on focusing on these signals being up or
-// down, the information is carried by whether they have different
-// value (request in progress) or the same value (request completed).
-// 
-// We end-up with the same protocol, but only two signals for controlling
-// the transfer of `handshake_data`:
+// Simple handshake protocol for crossing clock domain.
 // 
 // * The source module sending the data to another clock domain writes to
 //   `handshake_ack` (and reads `handshake_req`).
@@ -33,9 +25,7 @@
 // http://www.sunburst-design.com/papers/CummingsSNUG2008Boston_CDC.pdf
 // https://zipcpu.com/blog/2018/07/06/afifo.html
 // 
-// This part is called from the destination module.
-// It imports a buffer of data from the other clock domain.
-// 
+// This part imports a buffer of data from the other clock domain.
 // As `data` becomes valid, `stb` rises for one clock.
 
 module clock_domain_import #(
@@ -43,7 +33,7 @@ module clock_domain_import #(
 ) (
 	input wire clk,
 
-	// data reception interface
+	// data reception
 	output reg [SIZE-1:0] data,
 	output reg stb,
 
