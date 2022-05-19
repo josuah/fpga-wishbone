@@ -1,33 +1,37 @@
-// This clock domain crossing strategy is the same as the well-known
-// Valid/Ready with Ack signal, except that Ready and Ack are merged
-// onto an unique signal. Ack set low is the same as valid set high.
+// This clock domain crossing strategy is similar to the well-known
+// Valid/Ready with Ack, except that Ready and Ack are merged
+// onto an unique signal, and Valid was renamed Req (for request).
+// In addition, instead on focusing on these signals being up or
+// down, the information is carried by whether they have different
+// value (request in progress) or the same value (request completed).
 // 
 // We end-up with the same protocol, but only two signals for controlling
 // the transfer of `handshake_data`:
 // 
 // * The source module sending the data to another clock domain writes to
-//   `handshake_ack` (and reads `handshake_valid`).
+//   `handshake_ack` (and reads `handshake_req`).
 // * The destination module receiving data from another clock domain writes to
-//   `handshake_valid` (and reads `handshake_ack`).
+//   `handshake_req` (and reads `handshake_ack`).
 // 
-//			 :    :   :   :   :        :       :
-//			 :    :____________________:       :
-//	handshake_data	XXXXXXX____________________XXXXXXXXXXXXX
-//			 :    :    ________________:       :
-//	handshake_valid	__________/   :   :        \____________
-//			 :    :   :   :   :________________:
-//	handshake_ack	__________________/        :       \____
-//			 :    :   :   :   :        :       :
-//			(1)  (2) (3) (4) (5)      (6)     (7)
+//			  :   :   :   :   :   :   :   :   :   :   :   :  
+//			__:_______________:_______________:______________
+//	handshake_data	__X_______________X_______________X______________
+//			  :    _______________:   :   :   :    __________
+//	handshake_req	______/   :   :   :   \_______________/   :   :  
+//			  :   :   :   :_______________:   :   :   :   :__
+//	handshake_ack	______________/   :   :   :   \_______________/  
+//			  :   :   :   :   :   :   :   :   :   :   :   :  
+//			 (1) (2) (3) (4) (1) (2) (3) (4) (1) (2) (3) (4) 
 // 
-// * When the source has data to transfer (1),
-//   it first asserts `handshake_data` to the appropriate content (2) then sets `handshake_valid` high (3).
+// * When the source has data to transfer,
+//   it first asserts `handshake_data` to the data to transfer (1) then invert `handshake_req` (2).
 // * Once the destination notices it,
-//   it copies `handshake_data` to a local register (4) and sets `handshake_ack` high (5).
-// * Once the source notices it,
-//   it sets `handshake_valid` low, and `handshake_valid` can be set to the next value.
-// * Once the destination notices it,
-//   it sets `handshake_ack` back to low. It is ready for another cycle.
+//   it copies `handshake_data` to a local register (3) then sets `handshake_ack` to the same value as `handshake_req` (4).
+//
+// References:
+// http://web.cse.msu.edu/~cse820/readings/sutherlandMicropipelinesTuring.pdf
+// http://www.sunburst-design.com/papers/CummingsSNUG2008Boston_CDC.pdf
+// https://zipcpu.com/blog/2018/07/06/afifo.html
 // 
 // This part is called from the destination module.
 // It imports a buffer of data from the other clock domain.
@@ -45,37 +49,20 @@ module clock_domain_import #(
 
 	// handshake with the other clock domain
 	input wire [SIZE-1:0] handshake_data,
-	input wire handshake_valid,
+	input wire handshake_req,
 	output reg handshake_ack
 );
-	localparam STATE_LOAD_DATA = 0;
-	localparam STATE_ACKNOWLEDGE_DATA = 1;
-
-	reg [0:0] state = 0;
-	reg handshake_valid_x = 0;
+	reg handshake_req_x = 0;
 
 	always @(posedge clk) begin
 		// prevent metastable state propagation
-		handshake_valid_x <= handshake_valid;
+		handshake_req_x <= handshake_req;
 
 		stb <= 0;
-
-		case (state)
-		STATE_LOAD_DATA: begin
-			if (handshake_valid_x) begin
-				data <= handshake_data;
-				stb <= 1;
-				state <= STATE_ACKNOWLEDGE_DATA;
-			end
+		if (handshake_req_x != handshake_ack) begin
+			data <= handshake_data;
+			stb <= 1;
+			handshake_ack <= handshake_req_x;
 		end
-		STATE_ACKNOWLEDGE_DATA: begin
-			handshake_ack <= 1;
-			if (handshake_valid_x == 0) begin
-				handshake_ack <= 0;
-				state <= STATE_LOAD_DATA;
-			end
-		end
-		endcase
 	end
-
 endmodule

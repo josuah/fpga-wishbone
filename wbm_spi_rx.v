@@ -9,16 +9,16 @@ module wbm_spi_rx (
 
 	// clock domain crossing
 	input wire handshake_ack,
-	output reg handshake_valid,
+	output reg handshake_req,
 	output reg [7:0] handshake_data
 );
 	reg [7:0] data = 0;
-	reg stb = 0;
-	reg [2:0] cnt = 0;
+	reg stb = 0, stb_next = 0;
+	reg [2:0] cnt = 7;
 	reg [7:0] shift_reg = 0;
 	wire [7:0] shift_reg_next = { shift_reg[6:0], spi_sdi };
-	wire unused = &{ busy, shift_reg[7] };
-	wire busy;
+	wire unused = &{ ready, shift_reg[7] };
+	wire ready;
 
 	// export the value read from SPI to the wishbone clock domain
 	clock_domain_export #(
@@ -27,8 +27,8 @@ module wbm_spi_rx (
 		.clk(spi_sck),
 		.data(data),
 		.stb(stb),
-		.busy(busy),
-		.handshake_valid(handshake_valid),
+		.ready(ready),
+		.handshake_req(handshake_req),
 		.handshake_ack(handshake_ack),
 		.handshake_data(handshake_data)
 	);
@@ -41,10 +41,12 @@ module wbm_spi_rx (
 			cnt <= cnt + 1;
 			shift_reg <= shift_reg_next;
 
-			if (cnt == 0) begin
+			// TODO: why does starts at 1?
+			if (cnt == 7) begin
 				// continuously receive into `data`
 				data <= shift_reg_next;
-				stb <= 1;
+				stb <= stb_next;
+				stb_next <= 1;
 			end
 		end
 	end

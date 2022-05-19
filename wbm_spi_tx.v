@@ -15,7 +15,7 @@ module wbm_spi_tx (
 	output wire spi_sdo,
 
 	// clock domain crossing
-	input wire handshake_valid,
+	input wire handshake_req,
 	output reg handshake_ack,
 	input wire [7:0] handshake_data
 );
@@ -31,7 +31,7 @@ module wbm_spi_tx (
 	) cross_import (
 		.clk(spi_sck),
 		.handshake_data(handshake_data),
-		.handshake_valid(handshake_valid),
+		.handshake_req(handshake_req),
 		.handshake_ack(handshake_ack),
 		.data(data),
 		.stb(stb)
