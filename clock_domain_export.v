@@ -43,13 +43,13 @@ module clock_domain_export #(
 	output reg handshake_req,
 	input wire handshake_ack
 );
-	reg handshake_ack_x;
+	reg [1:0] handshake_ack_ff;
 
-	assign ready = (handshake_ack_x == handshake_req);
+	assign ready = (handshake_ack_ff[0] == handshake_req);
 
 	always @(posedge clk) begin
-		// prevent metastable state propagation
-		handshake_ack_x <= handshake_ack;
+		// 2FF buffer to prevent metastable state propagation
+		handshake_ack_ff <= { handshake_ack, handshake_ack_ff[1] };
 
 		if (ready && stb) begin
 			handshake_data <= data;

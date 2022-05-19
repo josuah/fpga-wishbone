@@ -14,7 +14,7 @@ module wbm_spi_rx (
 );
 	reg [7:0] data = 0;
 	reg stb = 0, stb_next = 0;
-	reg [2:0] cnt = 7;
+	reg [2:0] cnt = 0;
 	reg [7:0] shift_reg = 0;
 	wire [7:0] shift_reg_next = { shift_reg[6:0], spi_sdi };
 	wire unused = &{ ready, shift_reg[7] };
@@ -41,10 +41,11 @@ module wbm_spi_rx (
 			cnt <= cnt + 1;
 			shift_reg <= shift_reg_next;
 
-			// TODO: why does starts at 1?
-			if (cnt == 7) begin
+			// note: cnt starts at 1
+			if (cnt == 0) begin
 				// continuously receive into `data`
 				data <= shift_reg_next;
+				// prevent the first clock to send an empty buffer
 				stb <= stb_next;
 				stb_next <= 1;
 			end

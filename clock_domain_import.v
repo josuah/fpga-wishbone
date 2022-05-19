@@ -42,17 +42,17 @@ module clock_domain_import #(
 	input wire handshake_req,
 	output reg handshake_ack
 );
-	reg handshake_req_x = 0;
+	reg [1:0] handshake_req_ff = 0;
 
 	always @(posedge clk) begin
-		// prevent metastable state propagation
-		handshake_req_x <= handshake_req;
+		// 2FF buffer to prevent metastable state propagation
+		handshake_req_ff <= { handshake_req, handshake_req_ff[1] };
 
 		stb <= 0;
-		if (handshake_req_x != handshake_ack) begin
+		if (handshake_req_ff[0] != handshake_ack) begin
+			handshake_ack <= handshake_req_ff[0];
 			data <= handshake_data;
 			stb <= 1;
-			handshake_ack <= handshake_req_x;
 		end
 	end
 endmodule
