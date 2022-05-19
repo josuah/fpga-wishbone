@@ -40,8 +40,8 @@ module wbm_spi (
 	output wire spi_sdo
 );
 	reg tx_stb = 0;
-	reg [7:0] tx_data = 0, rx_data = 0;
-	wire [7:0] rx_handshake_data, tx_handshake_data;
+	reg [7:0] tx_data = 0;
+	wire [7:0] rx_handshake_data, tx_handshake_data, rx_data;
 	wire rx_handshake_req, rx_handshake_ack, rx_stb;
 	wire tx_handshake_req, tx_handshake_ack, tx_ready;
 	wire unused = &{ tx_ready };
@@ -192,7 +192,7 @@ module wbm_spi (
 
 	always @(posedge wb_clk_i) begin
 		if (wb_rst_i)
-			{ tx_data, rx_data, tx_stb, wb_data, state } <= 0;
+			{ tx_data, tx_stb, wb_data, state } <= 0;
 	end
 
 endmodule

@@ -34,8 +34,8 @@ module clock_domain_import #(
 	input wire clk,
 
 	// data reception
-	output reg [SIZE-1:0] data,
-	output reg stb,
+	output wire [SIZE-1:0] data,
+	output wire stb,
 
 	// handshake with the other clock domain
 	input wire [SIZE-1:0] handshake_data,
@@ -44,15 +44,13 @@ module clock_domain_import #(
 );
 	reg [1:0] handshake_req_ff = 0;
 
+	assign data = handshake_data;
+	assign stb = (handshake_req_ff[0] != handshake_ack);
+
 	always @(posedge clk) begin
 		// 2FF buffer to prevent metastable state propagation
 		handshake_req_ff <= { handshake_req, handshake_req_ff[1] };
-
-		stb <= 0;
-		if (handshake_req_ff[0] != handshake_ack) begin
-			handshake_ack <= handshake_req_ff[0];
-			data <= handshake_data;
-			stb <= 1;
-		end
+		// have the `ack` signal follow the `req` signal
+		handshake_ack <= handshake_req_ff[0];
 	end
 endmodule
