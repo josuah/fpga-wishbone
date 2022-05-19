@@ -132,7 +132,8 @@ module wbm_spi (
 				wb_we_o <= rx_data[7];
 				wb_sel_o <= rx_data[3:0];
 				tx_data <= 8'hFF;	// TX 11111111
-				state <= STATE_GET_ADDRESS;
+				if (|rx_data) // skip 0x00
+					state <= STATE_GET_ADDRESS;
 			end
 			STATE_GET_ADDRESS: begin	// RX AAAAAAAA
 				wb_adr_o <= { 6'b00, rx_data, 2'b00 };

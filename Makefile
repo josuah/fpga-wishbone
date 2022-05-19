@@ -34,6 +34,8 @@ board.json: ${V}
 
 simulation.elf: ${V} simulation.cpp simulation.h simulation.uart.h
 
+simulation.cpp: simulation.h simulation.spi.h simulation.uart.h simulation.wbm.h simulation.wb.h
+
 .SUFFIXES: .v .elf .vcd .json .asc .bit .dfu .hex .dot .pdf .py .gtkw
 
 .v.elf:
