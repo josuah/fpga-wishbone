@@ -4,7 +4,7 @@ from sys import argv
 prefix = 'TOP.simulation.top.wbm_spi'
 
 traces = [
-    ('spi',
+    ('io',
      [('spi_sck', 'clk'), ('spi_csn', 'io'), ('spi_sdi', 'io'),
       ('spi_sdo', 'io')]),
     ('tx',
@@ -13,7 +13,8 @@ traces = [
     ('rx',
      ['rx_handshake_ack', 'rx_handshake_req', 'rx_handshake_data[7:0]',
       'rx_data', 'rx_stb', 'tx_ready']),
-    ('state[3:0]', 'state'),
+    ('state',
+     [('state[3:0]', 'state')]),
     ('wb',
      [('wb_clk_i', 'clk'), 'wb_rst_i', 'wb_cyc_o', 'wb_stb_o',
       'wb_stall_i', 'wb_ack_i', 'wb_we_o', 'wb_adr_o[15:0]',

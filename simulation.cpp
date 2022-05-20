@@ -20,7 +20,7 @@ main(int argc, char **argv)
 
 	wbm_queue_write(0x00, 0xF, 0x12345678);
 
-	for (nanosecond_t ns = 100; ns < 50000; ns++) {
+	for (nanosecond_t ns = 100; ns < 1000000; ns++) {
 		printf(".");
 
 		// main clock domain

@@ -1,7 +1,7 @@
 [dumpfile] "/home/josuah/Code/josuah/fpga-sdr/simulation.vcd"
 *-9.580719 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 @800200
--spi
+-io
 @22
 [color] 1
 TOP.simulation.top.wbm_spi.spi_sck
@@ -12,7 +12,7 @@ TOP.simulation.top.wbm_spi.spi_sdi
 [color] 3
 TOP.simulation.top.wbm_spi.spi_sdo
 @1000200
--spi
+-io
 @800200
 -tx
 @22
@@ -34,9 +34,13 @@ TOP.simulation.top.wbm_spi.rx_stb
 TOP.simulation.top.wbm_spi.tx_ready
 @1000200
 -rx
+@800200
+-state
 @24
 [color] 7
 TOP.simulation.top.wbm_spi.state[3:0]
+@1000200
+-state
 @800200
 -wb
 @22
