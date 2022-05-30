@@ -15,7 +15,11 @@ module top #(
 
 	// charlie7x5
 	output wire [6:0] charlie7x5_o,
-	output wire [6:0] charlie7x5_oe
+	output wire [6:0] charlie7x5_oe,
+
+	// debug
+	output wire gpio_25,
+	output wire gpio_26
 );
 	reg rst_n = 0;
 
@@ -88,7 +92,9 @@ module top #(
 		.spi_sck(spi_sck),
 		.spi_csn(spi_csn),
 		.spi_sdi(spi_sdi),
-		.spi_sdo(spi_sdo)
+		.spi_sdo(spi_sdo),
+		.gpio_25(gpio_25),
+		.gpio_26(gpio_26)
 	);
 
 	// Peripherals //

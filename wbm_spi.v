@@ -37,7 +37,11 @@ module wbm_spi (
 	input wire spi_sck,
 	input wire spi_csn,
 	input wire spi_sdi,
-	output wire spi_sdo
+	output wire spi_sdo,
+
+	// Debug
+	output wire gpio_25,
+	output wire gpio_26
 );
 	reg tx_stb = 0;
 	reg [7:0] tx_data = 0;
@@ -79,7 +83,9 @@ module wbm_spi (
 		.stb(rx_stb),
 		.handshake_req(rx_handshake_req),
 		.handshake_ack(rx_handshake_ack),
-		.handshake_data(rx_handshake_data)
+		.handshake_data(rx_handshake_data),
+		.gpio_25(gpio_25),
+		.gpio_26(gpio_26)
 	);
 
 	wbm_spi_rx wbm_spi_rx (

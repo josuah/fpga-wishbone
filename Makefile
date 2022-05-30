@@ -22,13 +22,16 @@ clean:
 	rm -fr testbench *.log *.json *.asc *.bit *.hex *.elf *.d *.vcd *.dot *.pdf
 
 flash: board.bit
-	${ICEPROG} -d i:0x0403:0x6014 board.bit
+	${ICEPROG} -d i:0x0403:0x6014:0 board.bit
 
 wave: $W.gtkw simulation.vcd
 	${GTKWAVE} -a $W.gtkw simulation.vcd
 
 test: ${V} simulation.v testbench.sby
 	sby -f testbench.sby
+
+lint:
+	${VERILATOR} --lint-only board.v
 
 board.json: ${V}
 

@@ -18,7 +18,8 @@ module simulation #(
 );
 	wire [6:0] charlie7x5_oe;
 	wire [6:0] charlie7x5_o;
-	wire unused = &{ charlie7x5_o , charlie7x5_oe };
+	wire unused = &{ charlie7x5_o , charlie7x5_oe, gpio_25, gpio_26 };
+	wire gpio_25, gpio_26;
 
 	// top //
 
@@ -31,7 +32,9 @@ module simulation #(
                 .spi_sdi(spi_sdi),
                 .spi_sdo(spi_sdo),
 		.charlie7x5_oe(charlie7x5_oe),
-		.charlie7x5_o(charlie7x5_o)
+		.charlie7x5_o(charlie7x5_o),
+		.gpio_25(gpio_25),
+		.gpio_26(gpio_26)
 	);
 
 endmodule

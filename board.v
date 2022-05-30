@@ -1,4 +1,5 @@
 module board (
+
 	// charlie7x5
 	output wire gpio_2,
 	output wire gpio_47,
@@ -7,11 +8,26 @@ module board (
 	output wire gpio_6,
 	output wire gpio_11,
 	output wire gpio_19,
-);
-	wire clk;
 
+	// SPI
+	output wire gpio_34,
+	input wire gpio_37,
+	input wire gpio_31,
+	input wire gpio_35,
+
+	// debug
+	output wire gpio_25,
+	output wire gpio_26,
+	output wire gpio_27
+);
 	wire [6:0] charlie7x5_oe;
 	wire [6:0] charlie7x5_o;
+
+	reg x = 0;
+
+	always @(posedge clk)
+		x <= !x;
+	assign gpio_27 = x;
 
 	// Internal Oscillator //
 
@@ -39,6 +55,25 @@ module board (
 		.D_OUT_0(charlie7x5_o)
 	);
 
+	// RGB LED Driver //
+
+/*
+	SB_RGBA_DRV #(
+		.CURRENT_MODE("0b1"),           // half current
+		.RGB0_CURRENT("0b000011"),      // 4 mA
+		.RGB1_CURRENT("0b000011"),      // 4 mA
+		.RGB2_CURRENT("0b000011")       // 4 mA
+	) sb_rgba_drv (
+		.CURREN(1'b1),
+		.RGBLEDEN(1'b1),
+		.RGB2PWM(led_r),
+		.RGB0PWM(led_g),
+		.RGB1PWM(led_b),
+		.RGB1(rgb1),
+		.RGB0(rgb0),
+		.RGB2(rgb2)
+	);
+*/
 	// Toplevel //
 
 	top #(
@@ -46,7 +81,13 @@ module board (
 	) top (
 		.clk(clk),
 		.charlie7x5_oe(charlie7x5_oe),
-		.charlie7x5_o(charlie7x5_o)
+		.charlie7x5_o(charlie7x5_o),
+		.spi_sck(gpio_31),
+		.spi_csn(gpio_37),
+		.spi_sdi(gpio_35),
+		.spi_sdo(gpio_34),
+		.gpio_25(gpio_25),
+		.gpio_26(gpio_26)
 	);
 
 endmodule

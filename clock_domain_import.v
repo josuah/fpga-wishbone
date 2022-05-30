@@ -40,16 +40,23 @@ module clock_domain_import #(
 	// handshake with the other clock domain
 	input wire [SIZE-1:0] handshake_data,
 	input wire handshake_req,
-	output reg handshake_ack
+	output reg handshake_ack,
+
+	// Debug
+	output wire gpio_25,
+	output wire gpio_26
 );
 	reg [1:0] handshake_req_ff = 0;
 
 	assign data = handshake_data;
 	assign stb = (handshake_req_ff[0] != handshake_ack);
 
+	assign gpio_25 = handshake_req_ff[0], gpio_26 = handshake_req_ff[1];
+
 	always @(posedge clk) begin
 		// 2FF buffer to prevent metastable state propagation
 		handshake_req_ff <= { handshake_req, handshake_req_ff[1] };
+
 		// have the `ack` signal follow the `req` signal
 		handshake_ack <= handshake_req_ff[0];
 	end

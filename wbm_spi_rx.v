@@ -7,7 +7,7 @@ module wbm_spi_rx (
 	input wire spi_csn,
 	input wire spi_sdi,
 
-	// clock domain crossing
+	// Clock Domain Crossing
 	input wire handshake_ack,
 	output reg handshake_req,
 	output reg [7:0] handshake_data
