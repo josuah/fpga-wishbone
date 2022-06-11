@@ -49,7 +49,7 @@ module wbm_spi (
 	wire tx_handshake_req, tx_handshake_ack, tx_ready;
 	wire unused = &{ tx_ready };
 
-	assign debug = { 2'b01, wb_rst_i, rx_stb, tx_stb, debug_flag, 2'b10 };
+	assign debug = { 2'b01, wb_rst_i, rx_stb, tx_stb, 3'b010 };
 
 	// transmitter connection //
 
@@ -122,9 +122,7 @@ module wbm_spi (
 			wb_cyc_o <= 0;
 			wb_data <= wb_dat_i; // OK if bad: only used if valid
 		end
-	end
 
-	always @(posedge wb_clk_i) begin
 		// on each byte read, queue one byte to write
 		tx_stb <= rx_stb;
 
@@ -194,9 +192,7 @@ module wbm_spi (
 			end
 			endcase
 		end
-	end
 
-	always @(posedge wb_clk_i) begin
 		if (wb_rst_i)
 			{ tx_data, tx_stb, wb_data, state } <= 0;
 	end
