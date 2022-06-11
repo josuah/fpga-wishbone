@@ -22,8 +22,7 @@ module wbm_spi_tx (
 	reg [7:0] shift_reg = 0;
 	reg [2:0] cnt = 0;
 	wire [7:0] data;
-	wire unused = &{ stb, dummy };
-	wire [1:0] dummy;
+	wire unused = &{ stb };
 	wire stb;
 
 	// import the value to send over SPI from the wishbone clock domain
@@ -35,9 +34,7 @@ module wbm_spi_tx (
 		.handshake_req(handshake_req),
 		.handshake_ack(handshake_ack),
 		.data(data),
-		.stb(stb),
-		.gpio_25(dummy[0]),
-		.gpio_26(dummy[1])
+		.stb(stb)
 	);
 
 	assign spi_sdo = shift_reg[7];

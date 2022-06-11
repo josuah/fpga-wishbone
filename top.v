@@ -13,17 +13,19 @@ module top #(
         input wire spi_sdi,
         output wire spi_sdo,
 
+/*
 	// charlie7x5
 	output wire [6:0] charlie7x5_o,
 	output wire [6:0] charlie7x5_oe,
+*/
 
 	// debug
-	output wire gpio_25,
-	output wire gpio_26
+	output wire [7:0] debug
 );
 	reg rst_n = 0;
-
 	wire rst = !rst_n;
+	wire [13:0] dummy;
+	wire unused = &{ dummy };
 
 	always @(posedge clk)
 		rst_n <= 1;
@@ -93,8 +95,7 @@ module top #(
 		.spi_csn(spi_csn),
 		.spi_sdi(spi_sdi),
 		.spi_sdo(spi_sdo),
-		.gpio_25(gpio_25),
-		.gpio_26(gpio_26)
+		.debug(debug)
 	);
 
 	// Peripherals //
@@ -116,8 +117,8 @@ module top #(
 		.WB_CLK_HZ(CPU_CLK_HZ)
 	) wbs0 (
 		`WISHBONE_B4_PIPELINED(0),
-		.charlie7x5_o(charlie7x5_o),
-		.charlie7x5_oe(charlie7x5_oe)
+		.charlie7x5_o(dummy[13:7]),
+		.charlie7x5_oe(dummy[6:0])
 	);
 
 endmodule

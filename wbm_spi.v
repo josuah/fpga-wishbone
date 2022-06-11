@@ -6,17 +6,17 @@
 //
 //	W000SSSS AAAAAAAA :::::::: :::::::: :::::::: :::::::: :::::::: ::::::::
 //	│   ├──┘ ├──────┘
-//	│:::│::: │::::::: 11111111 00000000 DDDDDDDD DDDDDDDD DDDDDDDD DDDDDDDD
+//	│:::│::: │::::::: 00000000 11111111 DDDDDDDD DDDDDDDD DDDDDDDD DDDDDDDD
 //	│   │    │        ├──────┘ ├──────┘ ├─────────────────────────────────┘
-//	WE  SEL  ADR      WAIT     ACK      DAT
+//	WE  SEL  ADR      STALL    ACK      DAT
 //
 // Wishbone write:
 //
 //	W000SSSS AAAAAAAA DDDDDDDD DDDDDDDD DDDDDDDD DDDDDDDD :::::::: ::::::::
 //	│   ├──┘ ├──────┘ ├─────────────────────────────────┘
-//	│:::│::: │::::::: │::::::: :::::::: :::::::: :::::::: 11111111 00000000
+//	│:::│::: │::::::: │::::::: :::::::: :::::::: :::::::: 00000000 11111111
 //	│   │    │        │                                   ├──────┘ ├──────┘
-//	WE  SEL  ADR      DAT                                 WAIT     ACK
+//	WE  SEL  ADR      DAT                                 STALL    ACK
 //
 
 module wbm_spi (
@@ -40,8 +40,7 @@ module wbm_spi (
 	output wire spi_sdo,
 
 	// Debug
-	output wire gpio_25,
-	output wire gpio_26
+	output wire [7:0] debug
 );
 	reg tx_stb = 0;
 	reg [7:0] tx_data = 0;
@@ -49,6 +48,8 @@ module wbm_spi (
 	wire rx_handshake_req, rx_handshake_ack, rx_stb;
 	wire tx_handshake_req, tx_handshake_ack, tx_ready;
 	wire unused = &{ tx_ready };
+
+	assign debug = { 2'b01, wb_rst_i, rx_stb, tx_stb, debug_flag, 2'b10 };
 
 	// transmitter connection //
 
@@ -83,9 +84,7 @@ module wbm_spi (
 		.stb(rx_stb),
 		.handshake_req(rx_handshake_req),
 		.handshake_ack(rx_handshake_ack),
-		.handshake_data(rx_handshake_data),
-		.gpio_25(gpio_25),
-		.gpio_26(gpio_26)
+		.handshake_data(rx_handshake_data)
 	);
 
 	wbm_spi_rx wbm_spi_rx (
@@ -102,7 +101,7 @@ module wbm_spi (
 	localparam STATE_DONE = 0; // same as STATE_GET_COMMAND
 	localparam STATE_GET_COMMAND = 0;
 	localparam STATE_GET_ADDRESS = 1;
-	localparam STATE_READ_WAIT_ACK = 2;
+	localparam STATE_READ_STALL_ACK = 2;
 	localparam STATE_READ_DATA_0 = 3;
 	localparam STATE_READ_DATA_1 = 4;
 	localparam STATE_READ_DATA_2 = 5;
@@ -111,7 +110,7 @@ module wbm_spi (
 	localparam STATE_WRITE_DATA_1 = 8;
 	localparam STATE_WRITE_DATA_2 = 9;
 	localparam STATE_WRITE_DATA_3 = 10;
-	localparam STATE_WRITE_WAIT_ACK = 11;
+	localparam STATE_WRITE_STALL_ACK = 11;
 
 	reg [31:0] wb_data = 0;
 	reg [3:0] state = 0;
@@ -126,7 +125,7 @@ module wbm_spi (
 	end
 
 	always @(posedge wb_clk_i) begin
-		// continuously send whatever is in `wb_data`
+		// on each byte read, queue one byte to write
 		tx_stb <= rx_stb;
 
 		if (rx_stb) begin
@@ -137,7 +136,7 @@ module wbm_spi (
 			STATE_GET_COMMAND: begin	// RX W000SSSS
 				wb_we_o <= rx_data[7];
 				wb_sel_o <= rx_data[3:0];
-				tx_data <= 8'hFF;	// TX 11111111
+				tx_data <= 8'h00;	// TX 00000000
 				if (|rx_data) // skip 0x00
 					state <= STATE_GET_ADDRESS;
 			end
@@ -150,15 +149,15 @@ module wbm_spi (
 					// wishbone read with that address
 					wb_stb_o <= 1;
 					wb_cyc_o <= 1;
-					state <= STATE_READ_WAIT_ACK;
+					state <= STATE_READ_STALL_ACK;
 				end
 			end
 
 			// Wishbone read branch
 
-			STATE_READ_WAIT_ACK: begin	// TX 11111111
-				if (!wb_cyc_o) begin	// TX 00000000
-					tx_data <= 8'h00;
+			STATE_READ_STALL_ACK: begin	// TX 00000000
+				if (!wb_cyc_o) begin	// TX 11111111
+					tx_data <= 8'h01;
 					state <= STATE_READ_DATA_0;
 				end
 			end
@@ -185,11 +184,11 @@ module wbm_spi (
 				wb_dat_o <= { wb_dat_o[23:0], rx_data };
 				wb_stb_o <= 1;
 				wb_cyc_o <= 1;
-				state <= STATE_WRITE_WAIT_ACK;
+				state <= STATE_WRITE_STALL_ACK;
 			end
-			STATE_WRITE_WAIT_ACK: begin	// TX 11111111
-				if (!wb_cyc_o) begin	// TX 00000000
-					tx_data <= 8'h00;
+			STATE_WRITE_STALL_ACK: begin	// TX 00000000
+				if (!wb_cyc_o) begin	// TX 11111111
+					tx_data <= 8'h01;
 					state <= STATE_DONE;
 				end
 			end
@@ -201,5 +200,4 @@ module wbm_spi (
 		if (wb_rst_i)
 			{ tx_data, tx_stb, wb_data, state } <= 0;
 	end
-
 endmodule

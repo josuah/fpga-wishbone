@@ -14,7 +14,7 @@ module wbm_spi_rx (
 );
 	reg [2:0] cnt = 0;
 	reg [7:0] shift_reg = 0;
-	reg stb = 0;
+	reg started = 0;
 	wire unused = &{ ready, shift_reg[7] };
 	wire ready;
 
@@ -26,7 +26,7 @@ module wbm_spi_rx (
 	) cross_export (
 		.clk(spi_sck),
 		.data(shift_reg_next),
-		.stb(spi_csn == 0 && cnt == 0 && stb),
+		.stb(spi_csn == 0 && started),
 		.ready(ready),
 		.handshake_req(handshake_req),
 		.handshake_ack(handshake_ack),
@@ -35,11 +35,10 @@ module wbm_spi_rx (
 
 	always @(posedge spi_sck) begin
 		// prevent to send empty data on first clock
-		stb <= 1;
+		started <= 1;
 		if (spi_csn == 0) begin
 			cnt <= cnt + 1;
 			shift_reg <= shift_reg_next;
 		end
 	end
-
 endmodule

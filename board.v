@@ -1,5 +1,5 @@
 module board (
-
+/*
 	// charlie7x5
 	output wire gpio_2,
 	output wire gpio_47,
@@ -8,6 +8,7 @@ module board (
 	output wire gpio_6,
 	output wire gpio_11,
 	output wire gpio_19,
+*/
 
 	// SPI
 	output wire gpio_34,
@@ -16,20 +17,23 @@ module board (
 	input wire gpio_35,
 
 	// debug
-	output wire gpio_25,
-	output wire gpio_26,
-	output wire gpio_27
-);
+	output wire gpio_2,
+	output wire gpio_46,
+	output wire gpio_47,
+	output wire gpio_45,
+	output wire gpio_48,
+	output wire gpio_3,
+	output wire gpio_4,
+	output wire gpio_44
+	);
+/*
 	wire [6:0] charlie7x5_oe;
 	wire [6:0] charlie7x5_o;
-
-	reg x = 0;
-
-	always @(posedge clk)
-		x <= !x;
-	assign gpio_27 = x;
+*/
 
 	// Internal Oscillator //
+
+	assign gpio_36 = clk;
 
 	SB_HFOSC SB_HFOSC (
 		.CLKHFPU(1'b1),
@@ -39,6 +43,7 @@ module board (
 
 	// I/O Cell //
 
+/*
 	SB_IO #(
 		.PIN_TYPE({ 4'b1010, 2'b01 }),
 		.PULLUP(0),
@@ -54,40 +59,25 @@ module board (
 		.OUTPUT_ENABLE(charlie7x5_oe),
 		.D_OUT_0(charlie7x5_o)
 	);
-
-	// RGB LED Driver //
-
-/*
-	SB_RGBA_DRV #(
-		.CURRENT_MODE("0b1"),           // half current
-		.RGB0_CURRENT("0b000011"),      // 4 mA
-		.RGB1_CURRENT("0b000011"),      // 4 mA
-		.RGB2_CURRENT("0b000011")       // 4 mA
-	) sb_rgba_drv (
-		.CURREN(1'b1),
-		.RGBLEDEN(1'b1),
-		.RGB2PWM(led_r),
-		.RGB0PWM(led_g),
-		.RGB1PWM(led_b),
-		.RGB1(rgb1),
-		.RGB0(rgb0),
-		.RGB2(rgb2)
-	);
 */
+
 	// Toplevel //
 
 	top #(
 		.TICKS_PER_BAUD(48000000/9600)
 	) top (
 		.clk(clk),
+/*
 		.charlie7x5_oe(charlie7x5_oe),
 		.charlie7x5_o(charlie7x5_o),
+*/
 		.spi_sck(gpio_31),
 		.spi_csn(gpio_37),
 		.spi_sdi(gpio_35),
 		.spi_sdo(gpio_34),
-		.gpio_25(gpio_25),
-		.gpio_26(gpio_26)
+		.debug({
+			gpio_2, gpio_46, gpio_47, gpio_45, gpio_48, gpio_3, gpio_4, gpio_44
+		}),
 	);
 
 endmodule

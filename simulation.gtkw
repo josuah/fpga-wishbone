@@ -1,4 +1,4 @@
-[dumpfile] "/home/josuah/Code/josuah/fpga-sdr/simulation.vcd"
+[dumpfile] "/home/src/fpga-sdr/simulation.vcd"
 *-9.580719 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 @800200
 -io
@@ -20,7 +20,7 @@ TOP.simulation.top.wbm_spi.tx_handshake_ack
 TOP.simulation.top.wbm_spi.tx_handshake_req
 TOP.simulation.top.wbm_spi.tx_handshake_data[7:0]
 TOP.simulation.top.wbm_spi.rx_data
-TOP.simulation.top.wbm_spi.rx_stb
+TOP.simulation.top.wbm_spi.tx_stb
 @1000200
 -tx
 @800200

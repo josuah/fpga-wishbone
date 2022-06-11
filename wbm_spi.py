@@ -9,7 +9,7 @@ traces = [
       ('spi_sdo', 'io')]),
     ('tx',
      ['tx_handshake_ack', 'tx_handshake_req', 'tx_handshake_data[7:0]',
-      'rx_data', 'rx_stb']),
+      'rx_data', 'tx_stb']),
     ('rx',
      ['rx_handshake_ack', 'rx_handshake_req', 'rx_handshake_data[7:0]',
       'rx_data', 'rx_stb', 'tx_ready']),
