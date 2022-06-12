@@ -19,6 +19,21 @@
 //	WE  SEL  ADR      DAT                                 STALL    ACK
 //
 
+typedef enum {
+	STATE_IDLE = 0,
+	STATE_GET_ADDRESS = 1,
+	STATE_READ_STALL_ACK = 2,
+	STATE_READ_DATA_0 = 3,
+	STATE_READ_DATA_1 = 4,
+	STATE_READ_DATA_2 = 5,
+	STATE_READ_DATA_3 = 6,
+	STATE_WRITE_DATA_0 = 7,
+	STATE_WRITE_DATA_1 = 8,
+	STATE_WRITE_DATA_2 = 9,
+	STATE_WRITE_DATA_3 = 10,
+	STATE_WRITE_STALL_ACK = 11
+} WbmState;
+
 module wbm_spi (
 	// Wishbone B4 pipelined
 	input wire wb_clk_i,
@@ -47,9 +62,9 @@ module wbm_spi (
 	wire [7:0] rx_handshake_data, tx_handshake_data, rx_data;
 	wire rx_handshake_req, rx_handshake_ack, rx_stb;
 	wire tx_handshake_req, tx_handshake_ack, tx_ready;
-	wire unused = &{ tx_ready };
+	wire unused = |{ tx_ready };
 
-	assign debug = { 2'b01, wb_rst_i, rx_stb, tx_stb, 3'b010 };
+	assign debug = { state[3:0], wb_cyc_o, wb_stb_o, rx_stb, tx_stb };
 
 	// transmitter connection //
 
@@ -98,24 +113,10 @@ module wbm_spi (
 
 	// wishbone master //
 
-	localparam STATE_DONE = 0; // same as STATE_GET_COMMAND
-	localparam STATE_GET_COMMAND = 0;
-	localparam STATE_GET_ADDRESS = 1;
-	localparam STATE_READ_STALL_ACK = 2;
-	localparam STATE_READ_DATA_0 = 3;
-	localparam STATE_READ_DATA_1 = 4;
-	localparam STATE_READ_DATA_2 = 5;
-	localparam STATE_READ_DATA_3 = 6;
-	localparam STATE_WRITE_DATA_0 = 7;
-	localparam STATE_WRITE_DATA_1 = 8;
-	localparam STATE_WRITE_DATA_2 = 9;
-	localparam STATE_WRITE_DATA_3 = 10;
-	localparam STATE_WRITE_STALL_ACK = 11;
-
 	reg [31:0] wb_data = 0;
-	reg [3:0] state = 0;
+	WbmState state = 0;
 
-	always @(posedge wb_clk_i) begin
+	always_ff @(posedge wb_clk_i) begin
 		if (wb_stb_o && !wb_stall_i)
 			wb_stb_o <= 0;
 		if (wb_ack_i) begin
@@ -131,7 +132,7 @@ module wbm_spi (
 
 			// Common branch
 
-			STATE_GET_COMMAND: begin	// RX W000SSSS
+			STATE_IDLE: begin		// RX W000SSSS
 				wb_we_o <= rx_data[7];
 				wb_sel_o <= rx_data[3:0];
 				tx_data <= 8'h00;	// TX 00000000
@@ -167,7 +168,7 @@ module wbm_spi (
 			end
 			STATE_READ_DATA_3: begin	// TX DDDDDDDD
 				tx_data <= wb_data[7:0];
-				state <= STATE_DONE;
+				state <= STATE_IDLE;
 			end
 
 			// Wishbone write branch
@@ -187,7 +188,7 @@ module wbm_spi (
 			STATE_WRITE_STALL_ACK: begin	// TX 00000000
 				if (!wb_cyc_o) begin	// TX 11111111
 					tx_data <= 8'h01;
-					state <= STATE_DONE;
+					state <= STATE_IDLE;
 				end
 			end
 			endcase

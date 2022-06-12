@@ -77,7 +77,7 @@ module board (
 		.spi_sdo(gpio_34),
 		.debug({
 			gpio_2, gpio_46, gpio_47, gpio_45, gpio_48, gpio_3, gpio_4, gpio_44
-		}),
+		})
 	);
 
 endmodule
