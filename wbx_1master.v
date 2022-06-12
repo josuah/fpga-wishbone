@@ -55,18 +55,11 @@ module wbx_1master #(
 	assign wbs_dat_i = wbm_dat_o;
 
 	// selecting which peripheral's signal to transmit depending on address
-	always @(*) begin
-		{ wbm_dat_i, wbm_ack_i, wbm_stall_i } = 0;
+	always_comb begin
+		wbm_dat_i = wbs_dat_o >> periph_addr * 32;
+		wbm_ack_i = wbs_ack_o >> periph_addr;
+		wbm_stall_i = wbs_stall_o >> periph_addr;
 	end
-generate genvar i; for (i = 0; i < PERIPH_NUM; i++) begin
-	always @(*) begin
-		if (periph_addr == i) begin
-			wbm_dat_i = wbs_dat_o[32*(i+1)-1:32*i];
-			wbm_ack_i = wbs_ack_o[i];
-			wbm_stall_i = wbs_stall_o[i];
-		end
-	end
-end endgenerate
 
 	always @(posedge wb_clk_i) begin
 		if (wb_rst_i)
