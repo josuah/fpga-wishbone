@@ -32,7 +32,7 @@ typedef enum {
 	STATE_WRITE_DATA_2 = 9,
 	STATE_WRITE_DATA_3 = 10,
 	STATE_WRITE_STALL_ACK = 11
-} WbmState;
+} wbm_state_e;
 
 module wbm_spi (
 	// Wishbone B4 pipelined
@@ -114,7 +114,7 @@ module wbm_spi (
 	// wishbone master //
 
 	reg [31:0] wb_data = 0;
-	WbmState state = 0;
+	wbm_state_e state = 0;
 
 	always_ff @(posedge wb_clk_i) begin
 		if (wb_stb_o && !wb_stall_i)
@@ -140,7 +140,7 @@ module wbm_spi (
 					state <= STATE_GET_ADDRESS;
 			end
 			STATE_GET_ADDRESS: begin	// RX AAAAAAAA
-				wb_adr_o <= { 6'b00, rx_data, 2'b00 };
+				wb_adr_o <= { 8'b00, rx_data };
 				if (wb_we_o) begin
 					// wait to have data to write
 					state <= STATE_WRITE_DATA_0;
