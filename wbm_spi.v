@@ -19,21 +19,6 @@
 //	WE  SEL  ADR      DAT                                 STALL    ACK
 //
 
-typedef enum {
-	STATE_IDLE = 0,
-	STATE_GET_ADDRESS = 1,
-	STATE_READ_STALL_ACK = 2,
-	STATE_READ_DATA_0 = 3,
-	STATE_READ_DATA_1 = 4,
-	STATE_READ_DATA_2 = 5,
-	STATE_READ_DATA_3 = 6,
-	STATE_WRITE_DATA_0 = 7,
-	STATE_WRITE_DATA_1 = 8,
-	STATE_WRITE_DATA_2 = 9,
-	STATE_WRITE_DATA_3 = 10,
-	STATE_WRITE_STALL_ACK = 11
-} wbm_state_e;
-
 module wbm_spi (
 	// Wishbone B4 pipelined
 	input wire wb_clk_i,
@@ -57,6 +42,21 @@ module wbm_spi (
 	// Debug
 	output wire [7:0] debug
 );
+
+	localparam
+		STATE_IDLE = 0,
+		STATE_GET_ADDRESS = 1,
+		STATE_READ_STALL_ACK = 2,
+		STATE_READ_DATA_0 = 3,
+		STATE_READ_DATA_1 = 4,
+		STATE_READ_DATA_2 = 5,
+		STATE_READ_DATA_3 = 6,
+		STATE_WRITE_DATA_0 = 7,
+		STATE_WRITE_DATA_1 = 8,
+		STATE_WRITE_DATA_2 = 9,
+		STATE_WRITE_DATA_3 = 10,
+		STATE_WRITE_STALL_ACK = 11;
+
 	reg tx_stb = 0;
 	reg [7:0] tx_data = 0;
 	wire [7:0] rx_handshake_data, tx_handshake_data, rx_data;
@@ -114,9 +114,9 @@ module wbm_spi (
 	// wishbone master //
 
 	reg [31:0] wb_data = 0;
-	wbm_state_e state = 0;
+	reg [3:0] state = 0;
 
-	always_ff @(posedge wb_clk_i) begin
+	always @(posedge wb_clk_i) begin
 		if (wb_stb_o && !wb_stall_i)
 			wb_stb_o <= 0;
 		if (wb_ack_i) begin

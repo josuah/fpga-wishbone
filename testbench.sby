@@ -9,7 +9,7 @@ wb_pwm_channel.v
 smtbmc
 
 [script]
-read -formal simulation.v top.v wb_pwm.v wb_pwm_channel.v
+read -formal simulation.sv top.sv wb_pwm.sv wb_pwm_channel.v
 prep -top simulation
 
 [options]

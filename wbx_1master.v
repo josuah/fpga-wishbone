@@ -39,13 +39,7 @@ module wbx_1master #(
 );
 	localparam CPU_CLK_HZ = 48_000_000;
 
-        // add persistence to `wbs_adr_i`
-	reg [11:0] periph_addr_reg = 0;
-	wire [11:0] periph_addr = wbm_cyc_o && wbm_stb_o ? wbm_adr_o[15:4] : periph_addr_reg;
-	always @(posedge wb_clk_i)
-		periph_addr_reg <= periph_addr;
-
-        // signals from master to slave, that are just direct wires, controlled
+	// signals from master to slave, that are just direct wires, controlled
 	// by CYC signal that tells whether to react or not to them
 	assign wbs_cyc_i = wbm_cyc_o << periph_addr_reg;
 	assign wbs_stb_i = wbm_stb_o;
@@ -55,13 +49,18 @@ module wbx_1master #(
 	assign wbs_dat_i = wbm_dat_o;
 
 	// selecting which peripheral's signal to transmit depending on address
-	always_comb begin
+	always @(*) begin
 		wbm_dat_i = wbs_dat_o >> periph_addr * 32;
 		wbm_ack_i = wbs_ack_o >> periph_addr;
 		wbm_stall_i = wbs_stall_o >> periph_addr;
 	end
 
+	// add persistence to `wbs_adr_i`
+	reg [11:0] periph_addr_reg = 0;
+	wire [11:0] periph_addr = wbm_cyc_o && wbm_stb_o ? wbm_adr_o[15:4] : periph_addr_reg;
 	always @(posedge wb_clk_i) begin
+		periph_addr_reg <= periph_addr;
+
 		if (wb_rst_i)
 			periph_addr_reg <= 0;
 	end

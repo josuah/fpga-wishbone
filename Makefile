@@ -25,7 +25,7 @@ flash: board.bit
 	${ICEPROG} -d i:0x0403:0x6014:0 board.bit
 
 wave: $W.gtkw simulation.vcd
-	${GTKWAVE} -a $W.gtkw simulation.vcd
+	${GTKWAVE} -a $W.gtkw simulation.vcd >/dev/null 2>&1 &
 
 test: ${V} simulation.v testbench.sby
 	sby -f testbench.sby
@@ -50,7 +50,7 @@ simulation.cpp: simulation.h simulation.spi.h simulation.uart.h simulation.wbm.h
 	./$<
 
 .v.json: ${V}
-	${YOSYS} -p "read_verilog -sv $< ${V}; synth_ice40 -top $* -json $@" >$*.yosys.log
+	${YOSYS} -p "read_verilog $< ${V}; synth_ice40 -top $* -json $@" >$*.yosys.log
 
 .json.asc: ${PCF}
 	${NEXTPNR} -q -l $*.nextpnr.log --pcf ${PCF} --json $< --asc $@

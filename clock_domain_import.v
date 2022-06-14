@@ -18,7 +18,8 @@
 // * When the source has data to transfer,
 //   it first asserts `handshake_data` to the data to transfer (1) then invert `handshake_req` (2).
 // * Once the destination notices it,
-//   it copies `handshake_data` to a local register (3) then sets `handshake_ack` to the same value as `handshake_req` (4).
+//   it copies `handshake_data` to a local register (3) then sets `handshake_ack` to
+//   the same value as `handshake_req` (4).
 //
 // References:
 // http://web.cse.msu.edu/~cse820/readings/sutherlandMicropipelinesTuring.pdf

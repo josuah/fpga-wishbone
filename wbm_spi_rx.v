@@ -26,7 +26,7 @@ module wbm_spi_rx (
 	) cross_export (
 		.clk(spi_sck),
 		.data(shift_reg_next),
-		.stb(spi_csn == 0 && started),
+		.stb(spi_csn == 0 && cnt == 0 && started),
 		.ready(ready),
 		.handshake_req(handshake_req),
 		.handshake_ack(handshake_ack),
