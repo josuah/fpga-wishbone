@@ -25,13 +25,10 @@ module board (
 	output wire gpio_3,
 	output wire gpio_4,
 	output wire gpio_44
-	);
-/*
+);
 	wire [6:0] charlie7x5_oe;
 	wire [6:0] charlie7x5_o;
-*/
-
-	// Internal Oscillator //
+	wire unused = |{ charlie7x5_oe, charlie7x5_o };
 
 	assign gpio_36 = clk;
 
@@ -40,8 +37,6 @@ module board (
 		.CLKHFEN(1'b1),
 		.CLKHF(clk)
 	);
-
-	// I/O Cell //
 
 /*
 	SB_IO #(
@@ -61,16 +56,12 @@ module board (
 	);
 */
 
-	// Toplevel //
-
 	top #(
 		.TICKS_PER_BAUD(48000000/9600)
 	) top (
 		.clk(clk),
-/*
 		.charlie7x5_oe(charlie7x5_oe),
 		.charlie7x5_o(charlie7x5_o),
-*/
 		.spi_sck(gpio_31),
 		.spi_csn(gpio_37),
 		.spi_sdi(gpio_35),

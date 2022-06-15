@@ -2,19 +2,6 @@
 
 `default_nettype none
 
-localparam
-	STATE_IDLE	= 0,
-	STATE_START	= 1,
-	STATE_BIT_0	= 2,
-	STATE_BIT_1	= 3,
-	STATE_BIT_2	= 4,
-	STATE_BIT_3	= 5,
-	STATE_BIT_4	= 6,
-	STATE_BIT_5	= 7,
-	STATE_BIT_6	= 8,
-	STATE_BIT_7	= 9,
-	STATE_STOP	= 10;
-
 module wbs_uart_tx #(
 	parameter TICKS_PER_BAUD = 0
 ) (
@@ -27,6 +14,17 @@ module wbs_uart_tx #(
 	// uart
 	output wire uart_tx
 );
+	localparam STATE_IDLE = 0;
+	localparam STATE_START = 1;
+	localparam STATE_BIT_0 = 2;
+	localparam STATE_BIT_1 = 3;
+	localparam STATE_BIT_2 = 4;
+	localparam STATE_BIT_3 = 5;
+	localparam STATE_BIT_4 = 6;
+	localparam STATE_BIT_5 = 7;
+	localparam STATE_BIT_6 = 8;
+	localparam STATE_BIT_7 = 9;
+	localparam STATE_STOP = 10;
 	reg [3:0] state = 0;
 	reg [9:0] shift_reg = 0;
 	reg [$size(TICKS_PER_BAUD)-1:0] baud_cnt = 0;

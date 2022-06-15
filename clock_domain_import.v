@@ -55,4 +55,5 @@ module clock_domain_import #(
 		// have the `ack` signal follow the `req` signal
 		handshake_ack <= handshake_req_ff[0];
 	end
+
 endmodule

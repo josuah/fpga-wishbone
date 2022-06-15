@@ -29,10 +29,11 @@ module wbs_pdm #(
 	// pdm i/o, 1 bit per channel
 	output [CHANNEL_NUM-1:0] pdm_channel
 );
-	wire request = wb_cyc_i & wb_stb_i & wb_we_i;
+	wire request;
 	wire unused = &{ wb_dat_i };
 
 	assign { wb_stall_o, wb_dat_o } = 0;
+	assign request = wb_cyc_i & wb_stb_i & wb_we_i;
 
 	wbs_pdm_channel #(
 		.BIT_RESOLUTION(BIT_RESOLUTION)

@@ -13,27 +13,17 @@ module top #(
         input wire spi_sdi,
         output wire spi_sdo,
 
-/*
 	// charlie7x5
 	output wire [6:0] charlie7x5_o,
 	output wire [6:0] charlie7x5_oe,
-*/
 
 	// debug
 	output wire [7:0] debug
 );
 	reg rst_n = 0;
 	wire rst = !rst_n;
-	wire [13:0] dummy;
-	wire unused = &{ dummy };
-
-	always @(posedge clk)
-		rst_n <= 1;
-
-        wire wb_clk_i = clk, wb_rst_i = rst;
-
-	// Interconnect //
-
+        wire wb_clk_i = clk;
+	wire wb_rst_i = rst;
 	// slave wires
 	wire wbs_stb_i, wbs_we_i;
 	wire [31:0] wbs_dat_i;
@@ -41,7 +31,6 @@ module top #(
 	wire [4*WISHBONE_PERIPH_NUM-1:0] wbs_sel_i;
 	wire [32*WISHBONE_PERIPH_NUM-1:0] wbs_dat_o;
 	wire [WISHBONE_PERIPH_NUM-1:0] wbs_stall_o, wbs_ack_o, wbs_cyc_i;
-
 	// master wires
         wire wbm_stb_o, wbm_we_o, wbm_stall_i, wbm_ack_i, wbm_cyc_o;
 	wire [3:0] wbm_sel_o;
@@ -77,8 +66,6 @@ module top #(
 		.wbm_ack_i(wbm_ack_i)
 	);
 
-	// Master //
-
 	wbm_spi wbm_spi (
 		.wb_clk_i(wb_clk_i),
 		.wb_rst_i(wb_rst_i),
@@ -98,8 +85,6 @@ module top #(
 		.debug(debug)
 	);
 
-	// Peripherals //
-
 `define WISHBONE_B4_PIPELINED(ID) \
 	.wb_clk_i(wb_clk_i), \
 	.wb_rst_i(wb_rst_i), \
@@ -117,8 +102,11 @@ module top #(
 		.WB_CLK_HZ(CPU_CLK_HZ)
 	) wbs0 (
 		`WISHBONE_B4_PIPELINED(0),
-		.charlie7x5_o(dummy[13:7]),
-		.charlie7x5_oe(dummy[6:0])
+		.charlie7x5_o(charlie7x5_o),
+		.charlie7x5_oe(charlie7x5_oe)
 	);
+
+	always @(posedge clk)
+		rst_n <= 1;
 
 endmodule

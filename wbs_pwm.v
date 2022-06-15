@@ -37,15 +37,14 @@ module wbs_pwm #(
 	output wire [CHANNEL_NUM-1:0] pwm_channel
 );
 	localparam TICKS_PER_CYCLE = WB_CLK_HZ / OUTPUT_HZ;
-
 	// one less bit, to permit reaching 100% duty cycle
 	reg [7:0] counter1;
 	reg [$clog2(TICKS_PER_CYCLE)-1:0] counter0;
-
-	wire request = wb_cyc_i & wb_stb_i & wb_we_i;
+	wire request;
 	wire unused = &{ wb_dat_i };
 
 	assign { wb_stall_o, wb_dat_o } = 0;
+	assign request = wb_cyc_i & wb_stb_i & wb_we_i;
 
 	wbs_pwm_channel channel [CHANNEL_NUM-1:0] (
 		.wb_clk_i(wb_clk_i),

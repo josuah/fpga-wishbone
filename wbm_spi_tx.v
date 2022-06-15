@@ -25,6 +25,8 @@ module wbm_spi_tx (
 	wire unused = &{ stb };
 	wire stb;
 
+	assign spi_sdo = shift_reg[7];
+
 	// import the value to send over SPI from the wishbone clock domain
 	clock_domain_import #(
 		.SIZE(8)
@@ -36,8 +38,6 @@ module wbm_spi_tx (
 		.data(data),
 		.stb(stb)
 	);
-
-	assign spi_sdo = shift_reg[7];
 
 	always @(posedge spi_sck) begin
 		// if we are selected by the SPI controller

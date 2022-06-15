@@ -24,7 +24,6 @@ module wbs_uart #(
 	output wire uart_tx
 );
 	localparam TICKS_PER_BAUD = WB_CLK_HZ / OUTPUT_HZ;
-
 	wire unused = &{ wb_dat_i[31:8], wb_dat_o[31:8], wb_adr_i };
 
 	assign wb_dat_o[31:8] = 0;

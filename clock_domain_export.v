@@ -45,6 +45,7 @@ module clock_domain_export #(
 	input wire handshake_ack
 );
 	reg [1:0] handshake_ack_ff;
+
 	assign ready = (handshake_ack_ff[0] == handshake_req);
 
 	always @(posedge clk) begin
@@ -56,4 +57,5 @@ module clock_domain_export #(
 			handshake_req <= !handshake_req;
 		end
 	end
+
 endmodule

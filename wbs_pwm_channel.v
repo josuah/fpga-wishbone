@@ -18,7 +18,9 @@ module wbs_pwm_channel (
 	always @(posedge wb_clk_i) begin
 		if (wb_stb_i)
 			duty_cycle <= wb_dat_i;
+
 		if (wb_rst_i)
 			duty_cycle <= 0;
 	end
+
 endmodule

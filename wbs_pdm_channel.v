@@ -22,7 +22,9 @@ module wbs_pdm_channel #(
 
 		if (wb_stb_i)
 			level <= wb_dat_i;
+
 		if (wb_rst_i)
 			{ level, accumulator } <= 0;
 	end
+
 endmodule

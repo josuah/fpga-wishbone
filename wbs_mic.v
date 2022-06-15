@@ -23,21 +23,14 @@ module wbs_mic #(
 	output reg mic_clk,
 	input wire mic_dat
 );
-	// wishbone b4 pipelined
-
-	assign wb_stall_o = 0;
-
-	always @(posedge wb_clk_i)
-		wb_ack_o <= wb_cyc_i && wb_stb_i;
-
-	// pdm microphone I/O
-
 	localparam TICKS_PER_HZ = WB_CLK_HZ / MIC_CLK_HZ / 2;
-
 	reg [$clog2(TICKS_PER_HZ)-1:0] mic_clk_cnt = 0;
 	reg [AUDIO_BIT_DEPTH-1:0] sample_buf = 0, sample_cnt = 0;
 
+	assign wb_stall_o = 0;
+
 	always @(posedge wb_clk_i) begin
+		wb_ack_o <= wb_cyc_i && wb_stb_i;
 
 		// clock divider out to the microphone clock pin
 		mic_clk_cnt <= mic_clk_cnt + 1;
