@@ -1,25 +1,23 @@
 module board (
-/*
-	// charlie7x5
-	output wire gpio_2,
-	output wire gpio_47,
-	output wire gpio_48,
-	output wire gpio_4,
-	output wire gpio_6,
-	output wire gpio_11,
-	output wire gpio_19,
-*/
-
 	// SPI
-	output wire gpio_34,
-	input wire gpio_37,
-	input wire gpio_31,
-	input wire gpio_35,
+	output wire gpio_20,
+	input wire gpio_10,
+	input wire gpio_12,
+	input wire gpio_21,
 
 	// RGB LED
 	output wire rgb0,	// red
 	output wire rgb1,	// green
 	output wire rgb2,	// blue
+
+	// charlie7x5
+	output wire gpio_38,
+	output wire gpio_36,
+	output wire gpio_34,
+	output wire gpio_31,
+	output wire gpio_32,
+	output wire gpio_26,
+	output wire gpio_23,
 
 	// Debug
 	output wire gpio_2,
@@ -33,7 +31,6 @@ module board (
 );
 	wire [6:0] charlie7x5_oe;
 	wire [6:0] charlie7x5_o;
-	wire unused = |{ charlie7x5_oe, charlie7x5_o };
 	wire led_r, led_g, led_b;
 
 	assign gpio_36 = clk;
@@ -60,23 +57,19 @@ module board (
 		.RGB2(rgb2)
 	);
 
-/*
 	SB_IO #(
 		.PIN_TYPE({ 4'b1010, 2'b01 }),
 		.PULLUP(0),
 		.NEG_TRIGGER(0),
 		.IO_STANDARD("SB_LVCMOS")
-	) SB_IO [6:0] (
-		.PACKAGE_PIN({
-			gpio_2, gpio_47, gpio_48, gpio_4, gpio_6, gpio_11,
-			gpio_19
-		}),
+	) SB_IO_charlie7x5 (
+		.PACKAGE_PIN({ gpio_38, gpio_36, gpio_34, gpio_31, gpio_32,
+				gpio_26, gpio_23 }),
 		.LATCH_INPUT_VALUE(1'b0),
 		.CLOCK_ENABLE(1'b0),
 		.OUTPUT_ENABLE(charlie7x5_oe),
 		.D_OUT_0(charlie7x5_o)
 	);
-*/
 
 	top #(
 		.TICKS_PER_BAUD(48000000/9600)
@@ -84,17 +77,15 @@ module board (
 		.clk(clk),
 		.charlie7x5_oe(charlie7x5_oe),
 		.charlie7x5_o(charlie7x5_o),
-		.spi_sck(gpio_31),
-		.spi_csn(gpio_37),
-		.spi_sdi(gpio_35),
-		.spi_sdo(gpio_34),
+		.spi_sck(gpio_12),
+		.spi_csn(gpio_10),
+		.spi_sdi(gpio_21),
+		.spi_sdo(gpio_20),
 		.led_r(led_r),
 		.led_g(led_g),
 		.led_b(led_b),
-		.debug({
-			gpio_2, gpio_46, gpio_47, gpio_45,
-			gpio_48, gpio_3, gpio_4, gpio_44
-		})
+		.debug({ gpio_2, gpio_46, gpio_47, gpio_45, gpio_48, gpio_3,
+				gpio_4, gpio_44 })
 	);
 
 endmodule
