@@ -14,12 +14,19 @@ module simulation #(
 
 	// charlie7x5
 	output wire [6:0] charlie7x5_o,
-	output wire [6:0] charlie7x5_oe
+	output wire [6:0] charlie7x5_oe,
+
+	// RGB LEDs
+	output wire led_r,
+	output wire led_g,
+	output wire led_b,
+
+	// Debug
+	output wire [7:0] debug
 );
 	wire [6:0] charlie7x5_oe;
 	wire [6:0] charlie7x5_o;
-	wire unused = &{ /*charlie7x5_o , charlie7x5_oe,*/ dummy };
-	wire [7:0] dummy;
+	wire [7:0] debug;
 
 	top #(
 		.TICKS_PER_BAUD(4)
@@ -31,7 +38,10 @@ module simulation #(
                 .spi_sdo(spi_sdo),
 		.charlie7x5_oe(charlie7x5_oe),
 		.charlie7x5_o(charlie7x5_o),
-		.debug(dummy)
+		.led_r(led_r),
+		.led_g(led_g),
+		.led_b(led_b),
+		.debug(debug)
 	);
 
 endmodule

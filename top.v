@@ -17,6 +17,11 @@ module top #(
 	output wire [6:0] charlie7x5_o,
 	output wire [6:0] charlie7x5_oe,
 
+	// rgb
+	output wire led_r,
+	output wire led_g,
+	output wire led_b,
+
 	// debug
 	output wire [7:0] debug
 );
@@ -98,12 +103,23 @@ module top #(
 	.wb_stall_o(wbs_stall_o[ID]), \
 	.wb_ack_o(wbs_ack_o[ID])
 
+	assign charlie7x5_o = 0;
+	assign charlie7x5_oe = 0;
+/*
 	wbs_charlie7x5 #(
 		.WB_CLK_HZ(CPU_CLK_HZ)
 	) wbs0 (
 		`WISHBONE_B4_PIPELINED(0),
 		.charlie7x5_o(charlie7x5_o),
 		.charlie7x5_oe(charlie7x5_oe)
+	);
+*/
+
+	wbs_rgb wbs0 (
+		`WISHBONE_B4_PIPELINED(0),
+		.led_r(led_r),
+		.led_g(led_g),
+		.led_b(led_b)
 	);
 
 	always @(posedge clk)

@@ -13,8 +13,8 @@ W = simulation
 PCF = upduino.pcf
 V =	top.v wbs_uart.v wbs_uart_tx.v wbs_uart_rx.v wbs_pwm.v \
 	wbs_pwm_channel.v wbs_pdm.v wbs_pdm_channel.v wbs_charlie7x5.v \
-	wbs_mic.v wbx_1master.v wbm_spi.v wbm_spi_tx.v wbm_spi_rx.v \
-	clock_domain_export.v clock_domain_import.v
+	wbs_mic.v wbs_rgb.v wbx_1master.v wbm_spi.v wbm_spi_tx.v \
+	wbm_spi_rx.v clock_domain_export.v clock_domain_import.v
 
 all: board.bit simulation.vcd
 

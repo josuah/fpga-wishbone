@@ -63,8 +63,6 @@ module wbm_spi (
 	wire tx_handshake_req, tx_handshake_ack, tx_ready;
 	wire unused = |{ tx_ready };
 
-	assign debug = { state[3:0], wb_cyc_o, wb_stb_o, rx_stb, tx_stb };
-
 	// transmitter connection
 	clock_domain_export #(
 		.SIZE(8)
@@ -98,7 +96,6 @@ module wbm_spi (
 		.handshake_ack(rx_handshake_ack),
 		.handshake_data(rx_handshake_data)
 	);
-
 	wbm_spi_rx wbm_spi_rx (
 		.spi_sck(spi_sck),
 		.spi_csn(spi_csn),
@@ -107,6 +104,8 @@ module wbm_spi (
 		.handshake_ack(rx_handshake_ack),
 		.handshake_data(rx_handshake_data)
 	);
+
+	assign debug = { state, wb_cyc_o, wb_stb_o, wb_we_o, wb_ack_i };
 
 	always @(posedge wb_clk_i) begin
 		if (wb_stb_o && !wb_stall_i)
@@ -121,9 +120,6 @@ module wbm_spi (
 
 		if (rx_stb) begin
 			case (state)
-
-			// Common branch
-
 			STATE_IDLE: begin		// RX W000SSSS
 				wb_we_o <= rx_data[7];
 				wb_sel_o <= rx_data[3:0];
@@ -143,12 +139,9 @@ module wbm_spi (
 					state <= STATE_READ_STALL_ACK;
 				end
 			end
-
-			// Wishbone read branch
-
 			STATE_READ_STALL_ACK: begin	// TX 00000000
 				if (!wb_cyc_o) begin	// TX 11111111
-					tx_data <= 8'h01;
+					tx_data <= 8'hFF;
 					state <= STATE_READ_DATA_0;
 				end
 			end
@@ -162,9 +155,6 @@ module wbm_spi (
 				tx_data <= wb_data[7:0];
 				state <= STATE_IDLE;
 			end
-
-			// Wishbone write branch
-
 			STATE_WRITE_DATA_0,		// RX DDDDDDDD
 			STATE_WRITE_DATA_1,		// RX DDDDDDDD
 			STATE_WRITE_DATA_2: begin	// RX DDDDDDDD
@@ -179,7 +169,7 @@ module wbm_spi (
 			end
 			STATE_WRITE_STALL_ACK: begin	// TX 00000000
 				if (!wb_cyc_o) begin	// TX 11111111
-					tx_data <= 8'h01;
+					tx_data <= 8'hFF;
 					state <= STATE_IDLE;
 				end
 			end

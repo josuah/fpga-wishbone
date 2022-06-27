@@ -68,12 +68,12 @@ send_command:
 		wbm.state = WBM_STATE_WAIT_WRITE_ACK;
 		return wbm.wb_dat_o >> 0;
 	case WBM_STATE_WAIT_WRITE_ACK:
-		if (rx == 0x01)
+		if (rx == 0xFF)
 			// next clock is already the next cycle
 			goto send_command;
 		return 0;
 	case WBM_STATE_WAIT_READ_ACK:
-		if (rx == 0x01)
+		if (rx == 0xFF)
 			wbm.state = WBM_STATE_READ_DATA_0;
 		return 0;
 	case WBM_STATE_READ_DATA_0:

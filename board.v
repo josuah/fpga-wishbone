@@ -16,7 +16,12 @@ module board (
 	input wire gpio_31,
 	input wire gpio_35,
 
-	// debug
+	// RGB LED
+	output wire rgb0,	// red
+	output wire rgb1,	// green
+	output wire rgb2,	// blue
+
+	// Debug
 	output wire gpio_2,
 	output wire gpio_46,
 	output wire gpio_47,
@@ -29,6 +34,7 @@ module board (
 	wire [6:0] charlie7x5_oe;
 	wire [6:0] charlie7x5_o;
 	wire unused = |{ charlie7x5_oe, charlie7x5_o };
+	wire led_r, led_g, led_b;
 
 	assign gpio_36 = clk;
 
@@ -36,6 +42,22 @@ module board (
 		.CLKHFPU(1'b1),
 		.CLKHFEN(1'b1),
 		.CLKHF(clk)
+	);
+
+	SB_RGBA_DRV #(
+		.CURRENT_MODE("0b1"),		/* half current */
+		.RGB0_CURRENT("0b000011"), 	/* 4 mA */
+		.RGB1_CURRENT("0b000011"),	/* 4 mA */
+		.RGB2_CURRENT("0b000011")	/* 4 mA */
+	) RGBA_DRIVER (
+		.CURREN(1'b1),
+		.RGBLEDEN(1'b1),
+		.RGB0PWM(led_g),
+		.RGB0(rgb0),
+		.RGB1PWM(led_r),
+		.RGB1(rgb1),
+		.RGB2PWM(led_b),
+		.RGB2(rgb2)
 	);
 
 /*
@@ -66,8 +88,12 @@ module board (
 		.spi_csn(gpio_37),
 		.spi_sdi(gpio_35),
 		.spi_sdo(gpio_34),
+		.led_r(led_r),
+		.led_g(led_g),
+		.led_b(led_b),
 		.debug({
-			gpio_2, gpio_46, gpio_47, gpio_45, gpio_48, gpio_3, gpio_4, gpio_44
+			gpio_2, gpio_46, gpio_47, gpio_45,
+			gpio_48, gpio_3, gpio_4, gpio_44
 		})
 	);
 
