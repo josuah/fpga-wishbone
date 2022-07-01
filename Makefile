@@ -13,13 +13,14 @@ W = simulation
 PCF = upduino.pcf
 V =	top.v wbs_uart.v wbs_uart_tx.v wbs_uart_rx.v wbs_pwm.v \
 	wbs_pwm_channel.v wbs_pdm.v wbs_pdm_channel.v wbs_charlie7x5.v \
-	wbs_mic.v wbs_rgb.v wbx_1master.v wbm_spi.v wbm_spi_tx.v \
-	wbm_spi_rx.v clock_domain_export.v clock_domain_import.v
+	wbs_debug.v wbs_mic.v wbs_rgb.v wbx_1master.v wbm_blinkenlight.v \
+	wbm_spi.v wbm_spi_tx.v wbm_spi_rx.v clock_domain_export.v \
+	clock_domain_import.v
 
-all: board.bit simulation.vcd
+all: board.bit simulation.vcd test
 
 clean:
-	rm -fr testbench *.log *.json *.asc *.bit *.hex *.elf *.d *.vcd *.dot *.pdf
+	rm -fr simulation *.log *.json *.asc *.bit *.hex *.elf *.d *.vcd *.dot *.pdf
 
 flash: board.bit
 	${ICEPROG} -d i:0x0403:0x6014:0 board.bit
@@ -27,17 +28,22 @@ flash: board.bit
 wave: $W.gtkw simulation.vcd
 	${GTKWAVE} -a $W.gtkw simulation.vcd >/dev/null 2>&1 &
 
-test: ${V} simulation.v testbench.sby
-	sby -f testbench.sby
+test: simulation_prove/logfile.txt simulation_cover/logfile.txt
 
 lint:
 	${VERILATOR} --lint-only board.v
 
-board.json: ${V}
+simulation.sby: simulation.sby.sh Makefile
+	sh simulation.sby.sh simulation.v $V >$@
+
+simulation_prove/logfile.txt simulation_cover/logfile.txt: simulation.sby simulation.v ${V}
+	sby -f simulation.sby
 
 simulation.elf: ${V} simulation.cpp simulation.h simulation.uart.h
 
 simulation.cpp: simulation.h simulation.spi.h simulation.uart.h simulation.wbm.h simulation.wb.h
+
+board.json: ${V}
 
 .SUFFIXES: .v .elf .vcd .json .asc .bit .dfu .hex .dot .pdf .py .gtkw
 

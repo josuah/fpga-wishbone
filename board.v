@@ -5,6 +5,9 @@ module board (
 	input wire gpio_12,
 	input wire gpio_21,
 
+	// SPI debug
+	output wire gpio_13,
+
 	// RGB LED
 	output wire rgb0,	// red
 	output wire rgb1,	// green
@@ -27,13 +30,11 @@ module board (
 	output wire gpio_48,
 	output wire gpio_3,
 	output wire gpio_4,
-	output wire gpio_44
+	output wire gpio_44,
 );
 	wire [6:0] charlie7x5_oe;
 	wire [6:0] charlie7x5_o;
 	wire led_r, led_g, led_b;
-
-	assign gpio_36 = clk;
 
 	SB_HFOSC SB_HFOSC (
 		.CLKHFPU(1'b1),
@@ -51,9 +52,9 @@ module board (
 		.RGBLEDEN(1'b1),
 		.RGB0PWM(led_g),
 		.RGB0(rgb0),
-		.RGB1PWM(led_r),
+		.RGB1PWM(led_b),
 		.RGB1(rgb1),
-		.RGB2PWM(led_b),
+		.RGB2PWM(led_r),
 		.RGB2(rgb2)
 	);
 

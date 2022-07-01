@@ -37,10 +37,7 @@ module wbm_spi (
 	input wire spi_sck,
 	input wire spi_csn,
 	input wire spi_sdi,
-	output wire spi_sdo,
-
-	// Debug
-	output wire [7:0] debug
+	output wire spi_sdo
 );
 	localparam STATE_IDLE = 0;
 	localparam STATE_GET_ADDRESS = 1;
@@ -56,7 +53,7 @@ module wbm_spi (
 	localparam STATE_WRITE_STALL_ACK = 11;
 	reg tx_stb = 0;
 	reg [7:0] tx_data = 0;
-	reg [31:0] wb_data = 0;
+	reg [31:0] tx_data_u32 = 0;
 	reg [3:0] state = 0;
 	wire [7:0] rx_handshake_data, tx_handshake_data, rx_data;
 	wire rx_handshake_req, rx_handshake_ack, rx_stb;
@@ -105,14 +102,12 @@ module wbm_spi (
 		.handshake_data(rx_handshake_data)
 	);
 
-	assign debug = { state, wb_cyc_o, wb_stb_o, wb_we_o, wb_ack_i };
-
 	always @(posedge wb_clk_i) begin
 		if (wb_stb_o && !wb_stall_i)
 			wb_stb_o <= 0;
 		if (wb_ack_i) begin
 			wb_cyc_o <= 0;
-			wb_data <= wb_dat_i; // OK if bad: only used if valid
+			tx_data_u32 <= wb_dat_i; // only used if wb_we_o
 		end
 
 		// on each byte read, queue one byte to write
@@ -141,18 +136,18 @@ module wbm_spi (
 			end
 			STATE_READ_STALL_ACK: begin	// TX 00000000
 				if (!wb_cyc_o) begin	// TX 11111111
-					tx_data <= 8'hFF;
+					tx_data <= 8'h55;
 					state <= STATE_READ_DATA_0;
 				end
 			end
 			STATE_READ_DATA_0,		// TX DDDDDDDD
 			STATE_READ_DATA_1,		// TX DDDDDDDD
 			STATE_READ_DATA_2: begin	// TX DDDDDDDD
-				{ wb_data, tx_data } <= { 8'h00, wb_data };
+				{ tx_data_u32, tx_data } <= { 8'h00, tx_data_u32 };
 				state <= state + 1;
 			end
 			STATE_READ_DATA_3: begin	// TX DDDDDDDD
-				tx_data <= wb_data[7:0];
+				tx_data <= tx_data_u32[7:0];
 				state <= STATE_IDLE;
 			end
 			STATE_WRITE_DATA_0,		// RX DDDDDDDD
@@ -169,7 +164,7 @@ module wbm_spi (
 			end
 			STATE_WRITE_STALL_ACK: begin	// TX 00000000
 				if (!wb_cyc_o) begin	// TX 11111111
-					tx_data <= 8'hFF;
+					tx_data <= 8'h55;
 					state <= STATE_IDLE;
 				end
 			end
@@ -177,7 +172,47 @@ module wbm_spi (
 		end
 
 		if (wb_rst_i)
-			{ tx_data, tx_stb, wb_data, state } <= 0;
+			{ tx_data, tx_stb, tx_data_u32, state } <= 0;
 	end
+
+`ifdef FORMAL
+
+	reg past = 0;
+
+	initial assume(wb_rst_i == 1);
+
+	always @(posedge wb_clk_i) begin
+		past <= 1;
+
+		if (wb_rst_i) begin
+			assume(rx_stb == 0);
+		end
+
+		if (past && $past(wb_rst_i) == 1)
+			assume(wb_rst_i == 0);
+		if (past && $past(wb_rst_i) == 0)
+			assume(wb_rst_i == 0);
+
+		// we are not expecting to see a slave answer before
+		// we actually wait for an answer from a slave
+		assume(state == STATE_READ_STALL_ACK || wb_ack_i == 0);
+
+		if (past && $stable(rx_stb)) begin
+			assert($stable(tx_data));
+			assert($stable(state));
+
+			if (state != STATE_READ_STALL_ACK) begin
+				assert($stable(tx_data_u32));
+			end
+		end
+
+		if (past && $past(rx_stb) == 1) begin
+			if ($past(state == STATE_IDLE) && $past(rx_data)) begin
+				assert(state != STATE_IDLE);
+			end
+		end
+	end
+
+`endif
 
 endmodule

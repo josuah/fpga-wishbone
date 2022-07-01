@@ -1,0 +1,38 @@
+
+[tasks]
+prove
+cover
+
+[files]
+simulation.v
+top.v
+wbs_uart.v
+wbs_uart_tx.v
+wbs_uart_rx.v
+wbs_pwm.v
+wbs_pwm_channel.v
+wbs_pdm.v
+wbs_pdm_channel.v
+wbs_charlie7x5.v
+wbs_debug.v
+wbs_mic.v
+wbs_rgb.v
+wbx_1master.v
+wbm_blinkenlight.v
+wbm_spi.v
+wbm_spi_tx.v
+wbm_spi_rx.v
+clock_domain_export.v
+clock_domain_import.v
+
+[engines]
+smtbmc
+
+[script]
+read -formal simulation.v top.v wbs_uart.v wbs_uart_tx.v wbs_uart_rx.v wbs_pwm.v wbs_pwm_channel.v wbs_pdm.v wbs_pdm_channel.v wbs_charlie7x5.v wbs_debug.v wbs_mic.v wbs_rgb.v wbx_1master.v wbm_blinkenlight.v wbm_spi.v wbm_spi_tx.v wbm_spi_rx.v clock_domain_export.v clock_domain_import.v
+prep -top simulation
+
+[options]
+prove: mode prove
+cover: mode cover
+depth 40

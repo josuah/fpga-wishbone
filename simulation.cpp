@@ -18,7 +18,7 @@ main(int argc, char **argv)
 	simulation_init(argc, argv);
 	simulation_eval(0);
 
-	wbm_queue_write(0x00, 0xF, 0x12345678);
+	wbm_queue_write(0x00, 0xF, 0x55);
 
 	for (nanosecond_t ns = 100; ns < 1000000; ns++) {
 

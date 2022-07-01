@@ -42,5 +42,4 @@ module wbm_spi_rx (
 			shift_reg <= shift_reg_next;
 		end
 	end
-
 endmodule

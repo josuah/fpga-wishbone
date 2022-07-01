@@ -13,3 +13,4 @@
 *.dot
 /testbench
 __pycache__
+simulation_*
