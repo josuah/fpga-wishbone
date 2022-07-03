@@ -5,21 +5,8 @@ module wbs_mic #(
 	parameter MIC_CLK_HZ = 3000000,
 	parameter AUDIO_BIT_DEPTH = 16
 ) (
-	// wishbone b4 pipelined
-	input wire wb_clk_i,
-	input wire wb_rst_i,
-	input wire wb_cyc_i,
-	input wire wb_stb_i,
-	input wire [3:0] wb_adr_i,
-	input wire [31:0] wb_dat_i,
-	output reg [31:0] wb_dat_o,
-	output wire wb_stall_o,
-	output reg wb_ack_o,
-
-	// interrupt
+	wishbone wb,
 	output wire irq_mic_data_ready,
-
-	// pdm microphone i/o
 	output reg mic_clk,
 	input wire mic_dat
 );
@@ -27,10 +14,8 @@ module wbs_mic #(
 	reg [$clog2(TICKS_PER_HZ)-1:0] mic_clk_cnt = 0;
 	reg [AUDIO_BIT_DEPTH-1:0] sample_buf = 0, sample_cnt = 0;
 
-	assign wb_stall_o = 0;
-
-	always @(posedge wb_clk_i) begin
-		wb_ack_o <= wb_cyc_i && wb_stb_i;
+	always_ff @(posedge wb.clk) begin
+		wb.ack <= wb.stb;
 
 		// clock divider out to the microphone clock pin
 		mic_clk_cnt <= mic_clk_cnt + 1;
@@ -47,8 +32,8 @@ module wbs_mic #(
 			// if next sample would overflow
 			if (sample_cnt + 1 == 0) begin
 
-				// continuously sample wb_dat_o
-				wb_dat_o <= sample_buf;
+				// continuously sample wb.dat_p
+				wb.dat_p <= sample_buf;
 				irq_mic_data_ready = 1;
 
 				// not starting at zero because we add
@@ -58,7 +43,7 @@ module wbs_mic #(
 			end
 		end
 
-		if (wb_rst_i)
+		if (wb.rst)
 			{ mic_clk, mic_clk_cnt, sample_buf, sample_cnt } <= 0;
 	end
 

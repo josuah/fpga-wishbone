@@ -1,40 +1,43 @@
-module board (
+`default_nettype none
+
+module mBoard (
 	// SPI
-	output wire gpio_20,
-	input wire gpio_10,
-	input wire gpio_12,
-	input wire gpio_21,
+	output	wire	gpio_20,
+	input	wire	gpio_10,
+	input	wire	gpio_12,
+	input	wire	gpio_21,
 
 	// SPI debug
-	output wire gpio_13,
+	output	wire	gpio_13,
 
 	// RGB LED
-	output wire rgb0,	// red
-	output wire rgb1,	// green
-	output wire rgb2,	// blue
+	output	wire	rgb0,	// red
+	output	wire	rgb1,	// green
+	output	wire	rgb2,	// blue
 
 	// charlie7x5
-	output wire gpio_38,
-	output wire gpio_36,
-	output wire gpio_34,
-	output wire gpio_31,
-	output wire gpio_32,
-	output wire gpio_26,
-	output wire gpio_23,
+	output	wire	gpio_38,
+	output	wire	gpio_36,
+	output	wire	gpio_34,
+	output	wire	gpio_31,
+	output	wire	gpio_32,
+	output	wire	gpio_26,
+	output	wire	gpio_23,
 
 	// Debug
-	output wire gpio_2,
-	output wire gpio_46,
-	output wire gpio_47,
-	output wire gpio_45,
-	output wire gpio_48,
-	output wire gpio_3,
-	output wire gpio_4,
-	output wire gpio_44,
+	output	wire	gpio_2,
+	output	wire	gpio_46,
+	output	wire	gpio_47,
+	output	wire	gpio_45,
+	output	wire	gpio_48,
+	output	wire	gpio_3,
+	output	wire	gpio_4,
+	output	wire	gpio_44,
 );
-	wire [6:0] charlie7x5_oe;
-	wire [6:0] charlie7x5_o;
-	wire led_r, led_g, led_b;
+	wire		clk;
+	wire	[6:0]	charlie7x5_oe;
+	wire	[6:0]	charlie7x5_o;
+	wire		led_r, led_g, led_b;
 
 	SB_HFOSC SB_HFOSC (
 		.CLKHFPU(1'b1),
@@ -72,7 +75,7 @@ module board (
 		.D_OUT_0(charlie7x5_o)
 	);
 
-	top #(
+	mTop #(
 		.TICKS_PER_BAUD(48000000/9600)
 	) top (
 		.clk(clk),

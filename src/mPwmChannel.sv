@@ -2,10 +2,10 @@
 
 module wbs_pwm_channel (
 	// wishbone b4 pipeline
-	input wire wb_rst_i,
-	input wire wb_clk_i,
-	input wire wb_stb_i,
-	input wire [7:0] wb_dat_i,
+	input wire rst,
+	input wire clk,
+	input wire stb,
+	input wire [7:0] data,
 
 	// pwm i/o
 	input wire [7:0] pwm_counter,
@@ -15,11 +15,11 @@ module wbs_pwm_channel (
 
 	assign pwm_channel = duty_cycle > pwm_counter;
 
-	always @(posedge wb_clk_i) begin
-		if (wb_stb_i)
-			duty_cycle <= wb_dat_i;
+	always_ff @(posedge clk) begin
+		if (stb)
+			duty_cycle <= dat;
 
-		if (wb_rst_i)
+		if (rst)
 			duty_cycle <= 0;
 	end
 

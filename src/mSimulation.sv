@@ -1,6 +1,6 @@
 `default_nettype none
 
-module simulation #(
+module mSimulation #(
 	parameter TICKS_PER_BAUD = 4
 ) (
 	// system

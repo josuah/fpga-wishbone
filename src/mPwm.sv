@@ -21,42 +21,31 @@ module wbs_pwm #(
 	parameter OUTPUT_HZ = 0,
 	parameter CHANNEL_NUM = 0
 ) (
-	// wishbone b4 pipelined
-	input wire wb_clk_i,
-	input wire wb_rst_i,
-	input wire wb_cyc_i,
-	input wire wb_stb_i,
-	input wire wb_we_i,
-	input wire [3:0] wb_adr_i,
-	input wire [31:0] wb_dat_i,
-	output wire [31:0] wb_dat_o,
-	output wire wb_stall_o,
-	output wire wb_ack_o,
-
-	// pwm i/o
+	wishbone wb,
 	output wire [CHANNEL_NUM-1:0] pwm_channel
 );
 	localparam TICKS_PER_CYCLE = WB_CLK_HZ / OUTPUT_HZ;
+
 	// one less bit, to permit reaching 100% duty cycle
 	reg [7:0] counter1;
 	reg [$clog2(TICKS_PER_CYCLE)-1:0] counter0;
 	wire request;
-	wire unused = &{ wb_dat_i };
+	wire unused = &{ wb.dat };
 
-	assign { wb_stall_o, wb_dat_o } = 0;
-	assign request = wb_cyc_i & wb_stb_i & wb_we_i;
+	assign { wb.dat_p } = 0;
+	assign request = wb.stb & wb.we;
 
 	wbs_pwm_channel channel [CHANNEL_NUM-1:0] (
-		.wb_clk_i(wb_clk_i),
-		.wb_rst_i(wb_rst_i),
-		.wb_stb_i({ {CHANNEL_NUM-1{1'b0}}, request } << wb_adr_i),
-		.wb_dat_i(wb_dat_i[7:0]),
+		.clk(wb.clk),
+		.rst(wb.rst),
+		.stb({ {CHANNEL_NUM-1{1'b0}}, request } << wb.adr),
+		.data(wb.dat_c[7:0]),
 		.pwm_counter(counter1),
 		.pwm_channel(pwm_channel)
 	);
 
-	always @(posedge wb_clk_i) begin
-		wb_ack_o <= wb_cyc_i & wb_stb_i;
+	always_ff @(posedge wb.clk) begin
+		wb.ack <= wb.stb;
 
 		counter0 <= counter0 + 1;
 
@@ -67,7 +56,7 @@ module wbs_pwm #(
 			counter1 <= counter1 + 1;
 		end
 
-		if (wb_rst_i)
+		if (wb.rst)
 			{ counter0, counter1 } <= 0;
 	end
 
@@ -76,10 +65,10 @@ module wbs_pwm #(
 	reg f_past_valid = 0;
 	reg f_should_pulse = 0;
 
-	always @(posedge wb_clk_i) begin
+	always_ff @(posedge wb.clk) begin
 		f_past_valid <= 1;
 
-		if (wb_stb_i)
+		if (wb.stb)
 			f_should_pulse <= 1;
 
 		if (f_should_pulse)

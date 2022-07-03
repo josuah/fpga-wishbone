@@ -8,7 +8,7 @@
 // The RX signal can be used as a trigger for when to feed the TX data
 // on a regular basis.
 
-module wbm_spi_tx (
+module mSpiTx (
 	// SPI slave posedge I/O
 	input wire spi_sck,
 	input wire spi_csn,
@@ -28,9 +28,9 @@ module wbm_spi_tx (
 	assign spi_sdo = shift_reg[7];
 
 	// import the value to send over SPI from the wishbone clock domain
-	clock_domain_import #(
+	mClockDomainImport #(
 		.SIZE(8)
-	) cross_import (
+	) mcdi (
 		.clk(spi_sck),
 		.handshake_data(handshake_data),
 		.handshake_req(handshake_req),
@@ -39,7 +39,7 @@ module wbm_spi_tx (
 		.stb(stb)
 	);
 
-	always @(posedge spi_sck) begin
+	always_ff @(posedge spi_sck) begin
 		// if we are selected by the SPI controller
 		if (spi_csn == 0) begin
 			cnt <= cnt + 1;

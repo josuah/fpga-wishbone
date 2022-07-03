@@ -3,13 +3,10 @@
 module wbs_pdm_channel #(
 	parameter BIT_RESOLUTION = 0
 ) (
-	// wishbone b4 pipeline
-	input wire wb_rst_i,
-	input wire wb_clk_i,
-	input wire wb_stb_i,
-	input wire [BIT_RESOLUTION-1:0] wb_dat_i,
-
-	// pdm i/o
+	input wire rst,
+	input wire clk,
+	input wire stb,
+	input wire [BIT_RESOLUTION-1:0] data,
 	output wire pdm_channel
 );
 	reg [BIT_RESOLUTION-1:0] level = 0;
@@ -17,13 +14,13 @@ module wbs_pdm_channel #(
 
 	assign pdm_channel = accumulator[BIT_RESOLUTION];
 
-	always @(posedge wb_clk_i) begin
+	always_ff @(posedge clk) begin
 		accumulator <= accumulator[BIT_RESOLUTION-1:0] + level;
 
-		if (wb_stb_i)
-			level <= wb_dat_i;
+		if (stb)
+			level <= data;
 
-		if (wb_rst_i)
+		if (rst)
 			{ level, accumulator } <= 0;
 	end
 
