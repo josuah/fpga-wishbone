@@ -1,4 +1,3 @@
-`default_nettype none
 
 // Simple handshake protocol for crossing clock domain.
 // 
@@ -31,25 +30,25 @@
 // This part imports a buffer of data from the other clock domain.
 // As `data` becomes valid, `stb` rises for one clock.
 
-module mClockDomainImport #(
+module mClockDomainImporter #(
 	parameter SIZE = 8
 ) (
 	input wire clk,
 	output wire [SIZE-1:0] data,
 	output wire stb,
-	iClockDomainCrossing.import icdc
+	iClockDomainCrossing.importer cdc
 );
 	reg [1:0] req_ff = 0;
 
-	assign data = icdc.data;
-	assign stb = (req_ff[0] != icdc.ack);
+	assign data = cdc.data;
+	assign stb = (req_ff[0] != cdc.ack);
 
 	always_ff @(posedge clk) begin
 		// 2FF buffer to prevent metastable state propagation
-		req_ff <= { icdc.req, req_ff[1] };
+		req_ff <= { cdc.req, req_ff[1] };
 
 		// have the `ack` signal follow the `req` signal
-		icdc.ack <= req_ff[0];
+		cdc.ack <= req_ff[0];
 	end
 
 endmodule

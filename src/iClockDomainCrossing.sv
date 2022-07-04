@@ -1,18 +1,18 @@
 
 interface iClockDomainCrossing #(
-	parameter SIZE = 8
+	parameter pSize = 8
 );
-	logic [SIZE-1:0] data;
+	logic[pSize-1:0] data;
 	logic req;
 	logic ack;
 
-	modport import (
+	modport importer (
 		input data,
 		input req,
 		output ack
 	);
 
-	modport export (
+	modport exporter (
 		output data,
 		output req,
 		input ack

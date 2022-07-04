@@ -1,25 +1,25 @@
 module mBlinkenLight #(
-	parameter NUM = 8
+	parameter pLeds = 8
 ) (
-	iWishbone.controller iw,
-	output [NUM-1:0] blinkenlights
+	iWishbone.controller wb,
+	output logic[pLeds-1:0] blinkenlights
 );
-	logic [3:0] counter = 0;
+	logic[3:0] counter;
 	logic request, we, dat_p, dat_c;
 
 	assign blinkenlights = { counter, request, we, dat_c, dat_p };
 
-	always_ff @(posedge iw.clk) begin
-		if (iw.ack) begin
+	always_ff @(posedge wb.clk) begin
+		if (wb.ack) begin
 			counter <= counter + 1;
-			iw.dat_p <= |iw.dat_p;
-			iw.dat_c <= 0;
+			wb.dat_p <= |wb.dat_p;
+			wwbdat_c <= 0;
 			request <= 0;
 		end
-		if (iw.stb) begin
-			dat_c <= |iw.dat_c;
+		if (wb.stb) begin
+			dat_c <= |wb.dat_c;
 			dat_i <= 0;
-			we <= iw.we;
+			we <= wb.we;
 			request <= 1;
 		end
 	end

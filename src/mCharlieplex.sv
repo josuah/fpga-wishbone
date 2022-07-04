@@ -1,22 +1,23 @@
-`default_nettype none
 
-module wbs_charlie7x5 #(
-	parameter WB_CLK_HZ = 0
+module mCharlieplex #(
+	parameter nClkHz = 0
 ) (
-	iWishbone wb,
-	output wire [6:0] charlie7x5_o,
-	output wire [6:0] charlie7x5_oe
+	iWishbone.peripheral wb,
+	output wire [6:0] charlieplex_o,
+	output wire [6:0] charlieplex_oe
 );
-	localparam MEM_SIZE = 1 << $clog2(5);
-	localparam DELAY_HZ = 100000;
-	reg [2:0] row = 0, col = 0;
+	localparam lpMemSize = 1 << $clog2(5);
+	localparam lpDelayHz = 100000;
+
+	logic[2:0] row = 0, col = 0;
 	// memory for the screen pixels
-	reg [MEM_SIZE-1:0] mem [4:0], mem_wr_data;
-	reg [$clog2(MEM_SIZE)-1:0] mem_wr_addr;
+	logic[lpMemSize-1:0] mem [4:0];
+	logic[lpMemSize-1:0] mem_wr_data;
+	logic[$clog2(lpMemSize)-1:0] mem_wr_addr;
 	// clock divider for reducing the refresh rate
-	reg [$clog2(WB_CLK_HZ / DELAY_HZ)-1:0] cnt = 0;
-	wire dot;
-	wire [2:0] col_pin, row_pin;
+	logic[$clog2(nClkHz / lpDelayHz)-1:0] cnt = 0;
+	logic dot;
+	logic[2:0] col_pin, row_pin;
 
 	// is the current pixel on or off?
 	assign dot = mem[row][col];
@@ -28,11 +29,12 @@ module wbs_charlie7x5 #(
 
 	assign { wb.dat_p  } = 0;
 
-	assign charlie7x5_o = dot ? (1 << row_pin) : 0;
-	assign charlie7x5_oe = dot ? (1 << row_pin) | (1 << col_pin) : 0;
+	assign charlieplex_o = dot ? (1 << row_pin) : 0;
+	assign charlieplex_oe = dot ? (1 << row_pin) | (1 << col_pin) : 0;
 
-	always_ff @(posedge wb.clk)
+	always_ff @(posedge wb.clk) begin
 		mem[mem_wr_addr] <= mem_wr_data;
+	end
 
 	always_ff @(posedge wb.clk) begin
 		wb.ack <= wb.stb;
@@ -58,11 +60,12 @@ module wbs_charlie7x5 #(
 
 		if (wb.stb && wb.we) begin
 			mem_wr_data <= wb.dat_c[7:0];
-			mem_wr_addr <= wb.adr[$clog2(MEM_SIZE)-1:0];
+			mem_wr_addr <= wb.adr[$clog2(lpMemSize)-1:0];
 		end
 
-		if (wb.rst)
+		if (wb.rst) begin
 			{ row, col, cnt, mem_wr_data, mem_wr_addr } <= 0;
+		end
 	end
 
 endmodule

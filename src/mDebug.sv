@@ -1,13 +1,8 @@
-`default_nettype none
 
-module wbs_debug (
-	wishbone wb,
-
-	// Debug LEDs
-	output reg [7:0] debug
+module mDebug (
+	iWishbone wb,
+	output logic[7:0] debug
 );
-	wire unused = |{ wb.we, wb.adr };
-
 	assign wb.dat_p = 0;
 
 	always_ff @(posedge wb.clk) begin

@@ -1,4 +1,3 @@
-`default_nettype none
 
 // Wishbone B4 controller, itself controlled through an SPI peripheral
 // the MCU on the other end is the SPI controller, and (via this
@@ -22,64 +21,42 @@
 //
 
 module mSpi (
-	iWishbone.controller iw,
-	iSpi.peripheral is
+	iWishbone.controller wb,
+	iSpi.peripheral spi
 );
-	wire [7:0] rx_handshake_data, tx_data;
-	wire [7:0] tx_handshake_data, rx_data;
-	wire rx_handshake_req, rx_handshake_ack, rx_stb;
-	wire tx_handshake_req, tx_handshake_ack, tx_stb, tx_ready;
-	wire unused = |{ tx_ready };
+	logic [7:0] rx_handshake_data, tx_data;
+	logic [7:0] tx_handshake_data, rx_data;
+	logic rx_handshake_req, rx_handshake_ack, rx_stb;
+	logic tx_handshake_req, tx_handshake_ack, tx_stb, tx_ready;
+	logic unused = |{ tx_ready };
 
-	iClockDomainCrossing.import
+	iClockDomainCrossing.importer cdci;
+	iClockDomainCrossing.exporter cdce;
 
-	clock_domain_export #(
-		.SIZE(8)
-	) export (
-		.clk(iw.clk),
-		.data(tx_data),
-		.stb(tx_stb),
-		.ready(tx_ready),
-		.handshake_req(tx_handshake_req),
-		.handshake_ack(tx_handshake_ack),
-		.handshake_data(tx_handshake_data)
+	mClockDomainExporter #( .SIZE(8) ) exporter (
+		.clk(wb.clk), .data(tx_data), .stb(tx_stb),
+		.cdc(cdce)
 	);
 
-	wbm_spi_tx tx (
-		.spi_sck(spi_sck),
-		.spi_csn(spi_csn),
-		.spi_sdo(spi_sdo),
-		.handshake_req(tx_handshake_req),
-		.handshake_ack(tx_handshake_ack),
-		.handshake_data(tx_handshake_data)
+	mSpiTx mtx (
+		.spi(spi),
+		.cdc(cdci)
 	);
 
-	mClockDomainImport #(
-		.SIZE(8)
-	) import (
-		.clk(iw.clk),
-		.data(rx_data),
-		.stb(rx_stb),
-		.icdc(cdci),
-		.handshake_ack(rx_handshake_ack),
-		.handshake_data(rx_handshake_data)
+	mClockDomainImporter #( .SIZE(8) ) importer (
+		.clk(wb.clk), .data(rx_data), .stb(rx_stb),
+		.cdc(cdci)
 	);
 
-	mClockDomainImport rx (
-		.spi_sck(spi_sck),
-		.spi_csn(spi_csn),
-		.spi_sdi(spi_sdi),
-		.handshake_req(rx_handshake_req),
-		.handshake_ack(rx_handshake_ack),
-		.handshake_data(rx_handshake_data)
+	mSpiRx mrx (
+		.spi,
+		.cdc(cdce)
 	);
 
-	wbm_spi_state state (
-		.iw(iw),
-		.rx_stb(rx_stb),
-		.rx_data(rx_data),
-		.tx_stb(tx_stb),
-		.tx_data(tx_data)
+	mSpiState state (
+		.wb,
+		.rx_stb(rx_stb), .rx_data(rx_data),
+		.tx_stb(tx_stb), .tx_data(tx_data)
 	);
 
 endmodule

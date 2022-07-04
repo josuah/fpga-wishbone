@@ -1,14 +1,13 @@
-`default_nettype none
 
 // Pulse-Width Modulation with 8bit resolution and adjustable frequency
 
-// WB_CLK_HZ:
+// pWbHz:
 //	Inform the module of the value of the input clock.
 //
-// OUTPUT_HZ:
+// pOutHz:
 //	Clock speed in Hz of the output PWM.
 //
-// CHANNEL_NUM:
+// pChannels:
 //	Number of pwm outputs privided through `pwm`. Affects the addresses
 //	at which it is possible to write duty-cycle length data.
 //
@@ -16,32 +15,32 @@
 //      One address per channel for setting the current duty cycle value.
 //	Set to 0xFF is a 100% duty cycle.
 
-module wbs_pwm #(
-	parameter WB_CLK_HZ = 0,
-	parameter OUTPUT_HZ = 0,
-	parameter CHANNEL_NUM = 0
+module mPwm #(
+	parameter pWbHz = 0,
+	parameter pOutHz = 0,
+	parameter pChannels = 0
 ) (
-	wishbone wb,
-	output wire [CHANNEL_NUM-1:0] pwm_channel
+	iWishbone wb,
+	output logic [pChannels-1:0] pwm
 );
-	localparam TICKS_PER_CYCLE = WB_CLK_HZ / OUTPUT_HZ;
+	localparam lpTicksPerCycle = pWbHz / pOutHz;
 
 	// one less bit, to permit reaching 100% duty cycle
-	reg [7:0] counter1;
-	reg [$clog2(TICKS_PER_CYCLE)-1:0] counter0;
-	wire request;
-	wire unused = &{ wb.dat };
+	logic[7:0] counter1;
+	logic[$clog2(lpTicksPerCycle)-1:0] counter0;
+	logic request;
+	logic unused = &{ wb.dat };
 
 	assign { wb.dat_p } = 0;
 	assign request = wb.stb & wb.we;
 
-	wbs_pwm_channel channel [CHANNEL_NUM-1:0] (
+	mPwmChannel mchannel[pChannels-1:0] (
 		.clk(wb.clk),
 		.rst(wb.rst),
-		.stb({ {CHANNEL_NUM-1{1'b0}}, request } << wb.adr),
+		.stb({ {pChannels-1{1'b0}}, request } << wb.adr),
 		.data(wb.dat_c[7:0]),
 		.pwm_counter(counter1),
-		.pwm_channel(pwm_channel)
+		.pwm(pwm)
 	);
 
 	always_ff @(posedge wb.clk) begin
@@ -51,7 +50,7 @@ module wbs_pwm #(
 
 		// start array at 8 to divide by 256, to compensate
 		// the chained counter `counter1`
-		if (counter0 == TICKS_PER_CYCLE[8 +: $size(counter0)]) begin
+		if (counter0 == lpTicksPerCycle[8 +: $size(counter0)]) begin
 			counter0 <= 0;
 			counter1 <= counter1 + 1;
 		end

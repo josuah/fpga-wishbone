@@ -2,8 +2,8 @@
 // and fasten your belt to overcome any turbulence there could be.
 
 module mSpiRx (
-	iSpi.peripheral ispi,
-	iClockDomainCrossing.export icdc
+	iSpi.peripheral spi,
+	iClockDomainCrossing.exporter cdc
 );
 	logic [2:0] cnt = 0;
 	logic [7:0] shift_reg = 0;
@@ -13,23 +13,22 @@ module mSpiRx (
 	logic [7:0] shift_reg_next;
 
 	// export the value read from SPI to the wishbone clock domain
-	mClockDomainExport#(.SIZE(8)) mcde (
-		.clk(ispi.sck),
+	mClockDomainExporter #(
+		.pBits(8)
+	) mcde (
+		.clk(spi.sck),
 		.data(shift_reg_next),
-		.stb(ispi.csn == 0 && cnt == 0 && started),
+		.stb(spi.csn == 0 && cnt == 0 && started),
 		.ready(ready),
-		.icdc(i)
-		.handshake_req(handshake_req),
-		.handshake_ack(handshake_ack),
-		.handshake_data(handshake_data)
+		.cdc(cdc)
 	);
 
-	assign shift_reg_next = { shift_reg[6:0], ispi.sdi };
+	assign shift_reg_next = { shift_reg[6:0], spi.sdi };
 
-	always_ff @(posedge ispi.sck) begin
+	always_ff @(posedge spi.sck) begin
 		// prevent to send empty data on first clock
 		started <= 1;
-		if (ispi.csn == 0) begin
+		if (spi.csn == 0) begin
 			cnt <= cnt + 1;
 			shift_reg <= shift_reg_next;
 		end

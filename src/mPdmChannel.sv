@@ -1,27 +1,28 @@
-`default_nettype none
 
-module wbs_pdm_channel #(
-	parameter BIT_RESOLUTION = 0
+module mPdmChannel #(
+	parameter pBits = 0
 ) (
-	input wire rst,
-	input wire clk,
-	input wire stb,
-	input wire [BIT_RESOLUTION-1:0] data,
-	output wire pdm_channel
+	input logic rst,
+	input logic clk,
+	input logic stb,
+	input logic [pBits-1:0] data,
+	output logic pdm
 );
-	reg [BIT_RESOLUTION-1:0] level = 0;
-	reg [BIT_RESOLUTION:0] accumulator = 0;
+	logic[pBits-1:0] level;
+	logic[pBits:0] accumulator;
 
-	assign pdm_channel = accumulator[BIT_RESOLUTION];
+	assign pdm = accumulator[pBits];
 
 	always_ff @(posedge clk) begin
-		accumulator <= accumulator[BIT_RESOLUTION-1:0] + level;
+		accumulator <= accumulator[pBits-1:0] + level;
 
-		if (stb)
+		if (stb) begin
 			level <= data;
+		end
 
-		if (rst)
+		if (rst) begin
 			{ level, accumulator } <= 0;
+		end
 	end
 
 endmodule

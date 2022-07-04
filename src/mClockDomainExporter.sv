@@ -1,6 +1,3 @@
-`default_nettype none
-`include "src/iClockDomainCrossing.sv"
-
 // Simple handshake protocol for crossing clock domain.
 // 
 // * The source module sending the data to another clock domain writes to
@@ -35,13 +32,13 @@
 //
 // TODO: SV: Add timing requirements tests for the interface using it
 
-module mClockDomainExport #(
+module mClockDomainExporter #(
 	parameter SIZE = 8
 ) (
 	input wire clk,
 	input wire [SIZE-1:0] data,
 	input wire stb,
-	iClockDomainCrossing.export cdc
+	iClockDomainCrossing.exporter cdc
 );
 	reg [1:0] ack_ff;
 

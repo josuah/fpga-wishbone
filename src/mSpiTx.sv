@@ -9,15 +9,8 @@
 // on a regular basis.
 
 module mSpiTx (
-	// SPI slave posedge I/O
-	input wire spi_sck,
-	input wire spi_csn,
-	output wire spi_sdo,
-
-	// clock domain crossing
-	input wire handshake_req,
-	output reg handshake_ack,
-	input wire [7:0] handshake_data
+	iSpi.peripheral spi,
+	iClockDomainCrossing.importer cdc
 );
 	reg [7:0] shift_reg = 0;
 	reg [2:0] cnt = 0;
@@ -25,29 +18,28 @@ module mSpiTx (
 	wire unused = &{ stb };
 	wire stb;
 
-	assign spi_sdo = shift_reg[7];
+	assign spi.sdo = shift_reg[7];
 
 	// import the value to send over SPI from the wishbone clock domain
-	mClockDomainImport #(
-		.SIZE(8)
+	mClockDomainImporter #(
+		.pBits(8)
 	) mcdi (
-		.clk(spi_sck),
-		.handshake_data(handshake_data),
-		.handshake_req(handshake_req),
-		.handshake_ack(handshake_ack),
+		.clk(spi.sck),
+		.cdc(cdc),
 		.data(data),
 		.stb(stb)
 	);
 
-	always_ff @(posedge spi_sck) begin
+	always_ff @(posedge spi.sck) begin
 		// if we are selected by the SPI controller
-		if (spi_csn == 0) begin
+		if (spi.csn == 0) begin
 			cnt <= cnt + 1;
 			shift_reg <= { shift_reg[6:0], 1'b0 };
 
-			if (cnt == 0)
+			if (cnt == 0) begin
 				// continuously transmit `data`
 				shift_reg <= data;
+			end
 		end
 	end
 

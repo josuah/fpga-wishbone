@@ -1,20 +1,5 @@
-`default_nettype none
 
 // Simple sampling UART transmitter with static baud rate
-
-typedef enum bit [3:0] {
-	STATE_IDLE,
-	STATE_START,
-	STATE_BIT_0,
-	STATE_BIT_1,
-	STATE_BIT_2,
-	STATE_BIT_3,
-	STATE_BIT_4,
-	STATE_BIT_5,
-	STATE_BIT_6,
-	STATE_BIT_7,
-	STATE_STOP
-} eUartTxState;
 
 module mUartTx #(
 	parameter TICKS_PER_BAUD = 0

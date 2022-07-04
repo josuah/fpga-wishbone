@@ -1,42 +1,59 @@
-`default_nettype none
 
-module wbs_uart #(
-	parameter WB_CLK_HZ = 0,
-	parameter OUTPUT_HZ = 9600
+typedef enum logic [3:0] {
+	eUartState_IDLE,
+	eUartState_START,
+	eUartState_BIT_0,
+	eUartState_BIT_1,
+	eUartState_BIT_2,
+	eUartState_BIT_3,
+	eUartState_BIT_4,
+	eUartState_BIT_5,
+	eUartState_BIT_6,
+	eUartState_BIT_7,
+	eUartState_STOP
+} eUartState;
+
+module mUart #(
+	parameter pClkHz = 0,
+	parameter pOutputHz = 9600
 ) (
-	iWishbone	iw,
+	iWishbone	wb,
 	output	wire	irq,
 	input	wire	rx,
 	output	wire	tx
 );
-	localparam TICKS_PER_BAUD = WB_CLK_HZ / OUTPUT_HZ;
-	wire unused = &{ iw.dat_c[31:8], iw.dat_p[31:8] };
+	localparam lpTicksPerBaud = pClkHz / pOutputHz;
+	wire unused = &{ wb.dat_c[31:8], wb.dat_p[31:8] };
 
-	assign iw.dat_p[31:8] = 0;
+	assign wb.dat_p[31:8] = 0;
 
-	wbs_uart_rx #(
-		.TICKS_PER_BAUD(TICKS_PER_BAUD)
-	) rx (
-		.clk(iw.clk),
-		.rst(iw.rst),
-		.stb(iw.stb & !iw.we),
-		.data(iw.dat_p[7:0]),
+	mUartRx #(
+		.pTicksPerBaud(lpTicksPerBaud)
+	) mrx (
+		.clk(wb.clk),
+		.rst(wb.rst),
+		.stb(wb.stb & !wb.we),
+		.data(wb.dat_p[7:0]),
 		.irq(irq),
 		.rx(rx)
 	);
 
-	wbs_uart_tx #(
-		.TICKS_PER_BAUD(TICKS_PER_BAUD)
-	) tx (
-		.clk(iw.clk),
-		.rst(iw.rst),
-		.stb(iw.stb & iw.we),
-		.data(iw.dat_c[7:0]),
+	mUartTx #(
+		.pTicksPerBaud(lpTicksPerBaud)
+	) mtx (
+		.clk(wb.clk),
+		.rst(wb.rst),
+		.stb(wb.stb & wb.we),
+		.data(wb.dat_c[7:0]),
 		.tx(tx)
 	);
 
-	always_ff @(posedge iw.clk) begin
-		iw.ack_o <= iw.cyc && iw.stb;
+	always_ff @(posedge wb.clk) begin
+		wb.ack_o <= wb.cyc && wb.stb;
+
+		if (wb.rst) begin
+			wb.ack_o <= 0;
+		end
 	end
 
 endmodule
