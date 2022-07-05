@@ -6,16 +6,14 @@ interface iClockDomainCrossing #(
 	logic req;
 	logic ack;
 
-	modport importer (
-		input data,
-		input req,
-		output ack
+	modport mImport(
+		input	data,
+		input	req,
+		output	ack
 	);
-
-	modport exporter (
-		output data,
-		output req,
-		input ack
+	modport mExport(
+		output	data,
+		output	req,
+		input	ack
 	);
-
 endinterface

@@ -4,7 +4,7 @@ module mMic #(
 	parameter pMicHz = 3000000,
 	parameter pAudioBits = 16
 ) (
-	iWishbone.peripheral wb,
+	iWishbone.mPeri wb,
 	output logic irq,
 	output logic clk,
 	input logic data

@@ -33,22 +33,27 @@
 // TODO: SV: Add timing requirements tests for the interface using it
 
 module mClockDomainExporter #(
-	parameter SIZE = 8
+	parameter pBits = 8
 ) (
-	input wire clk,
-	input wire [SIZE-1:0] data,
-	input wire stb,
-	iClockDomainCrossing.exporter cdc
+	input logic clk,
+	input logic stb,
+	input logic[pBits-1:0] data,
+	iClockDomainCrossing.mExport cdc
 );
-	reg [1:0] ack_ff;
+	logic[1:0] ack_ff;
+	logic[pBits-1:0] cdata;
+	logic req;
+
+	assign cdc.data = cdata;
+	assign cdc.req = req;
 
 	always_ff @(posedge clk) begin
 		// 2FF buffer to prevent metastable state propagation
 		ack_ff <= { cdc.ack, ack_ff[1] };
 
-		if (stb) begin
-			cdc.data <= data;
-			cdc.req <= !cdc.req;
+		if (stb && ack_ff[0]) begin
+			cdata <= data;
+			req <= !cdc.req;
 		end
 	end
 

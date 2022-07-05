@@ -2,20 +2,20 @@
 module mCharlieplex #(
 	parameter nClkHz = 0
 ) (
-	iWishbone.peripheral wb,
-	output wire [6:0] charlieplex_o,
-	output wire [6:0] charlieplex_oe
+	iWishbone.mPeri wb,
+	output logic[6:0] charlieplex_o,
+	output logic[6:0] charlieplex_oe
 );
 	localparam lpMemSize = 1 << $clog2(5);
 	localparam lpDelayHz = 100000;
 
-	logic[2:0] row = 0, col = 0;
+	logic[2:0] row, col;
 	// memory for the screen pixels
-	logic[lpMemSize-1:0] mem [4:0];
+	logic[lpMemSize-1:0] mem[4:0];
 	logic[lpMemSize-1:0] mem_wr_data;
 	logic[$clog2(lpMemSize)-1:0] mem_wr_addr;
 	// clock divider for reducing the refresh rate
-	logic[$clog2(nClkHz / lpDelayHz)-1:0] cnt = 0;
+	logic[$clog2(nClkHz / lpDelayHz)-1:0] cnt;
 	logic dot;
 	logic[2:0] col_pin, row_pin;
 
@@ -27,7 +27,7 @@ module mCharlieplex #(
 	assign col_pin = col;
 	assign row_pin = (row + 1 < col) ? row + 1 : row + 2;
 
-	assign { wb.dat_p  } = 0;
+	assign wb.dat_p = 0;
 
 	assign charlieplex_o = dot ? (1 << row_pin) : 0;
 	assign charlieplex_oe = dot ? (1 << row_pin) | (1 << col_pin) : 0;

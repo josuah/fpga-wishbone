@@ -9,16 +9,20 @@ interface iWishbone (
 	logic[7:0] dat_c;
 	logic[7:0] dat_p;
 
-	modport peripheral (
+	modport mPeri(
+		input	clk,
+		input	rst,
 		input	stb,
-		output	we, 
-		input	ack,
-		output	adr,
+		input	we, 
+		output	ack,
+		input	adr,
 		output	dat_p,
 		input	dat_c
 	);
 
-	modport controller (
+	modport mCtrl(
+		input	clk,
+		input	rst,
 		output	stb,
 		output	we, 
 		input	ack,

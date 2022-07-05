@@ -3,7 +3,7 @@ module mPdm #(
 	parameter pBits = 8,
 	parameter pChannels = 0
 ) (
-	iWishbone wb,
+	iWishbone.mPeri wb,
 	output logic[pChannels-1:0] pdm
 );
 	logic request;

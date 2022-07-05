@@ -2,7 +2,7 @@ CXX = c++ -I${VERILATOR_ROOT}/include
 ICEPACK = icepack
 ICEPROG = iceprog
 MAKE = gmake
-VERILATOR = verilator -Wall -DSIMULATION -Isrc --trace --sv
+VERILATOR = verilator -Wall -DSIMULATION -Irtl --trace --sv
 VERILATOR_ROOT = /usr/local/share/verilator
 VERILATOR_SRC = ${VERILATOR_ROOT}/include/verilated.cpp ${VERILATOR_ROOT}/include/verilated_vcd_c.cpp
 NEXTPNR = nextpnr-ice40 --randomize-seed --up5k --package sg48
@@ -11,24 +11,25 @@ GTKWAVE = gtkwave -CM6
 
 include Makefile.inc
 
-all: board.bit simulation.svcd test
+all: board.bit simulation.vcd test
 
 clean:
-	rm -fr simulation simulation_*/ *.log *.json *.asc *.bit *.hex *.elf *.d *.svcd *.dot *.pdf
+	rm -rf simulation simulation_*/ *.log *.json *.asc *.bit *.hex *.elf *.d *.vcd
+	rm -rf *.dot */*.dot *.pdf */*.pdf
 
 flash: board.bit
 	${ICEPROG} -d i:0x0403:0x6014:0 board.bit
 
-wave: simulation.gtkw simulation.svcd
-	${GTKWAVE} -a simulation.gtkw simulation.svcd >/dev/null 2>&1 &
+wave: simulation.gtkw simulation.vcd
+	${GTKWAVE} -a simulation.gtkw simulation.vcd >/dev/null 2>&1 &
 
 test: simulation_prove/logfile.txt simulation_cover/logfile.txt
 
 lint: Makefile Makefile.inc
 	${VERILATOR} --lint-only board.sv simulation.sv $V
 
-Makefile.inc: src
-	echo V = src/i*.sv src/m*.sv >Makefile.inc
+Makefile.inc: rtl
+	echo V = rtl/i*.sv rtl/m*.sv >Makefile.inc
 
 simulation.sby: $V Makefile.inc simulation.sby.sh Makefile
 	sh simulation.sby.sh simulation.sv $V >$@
@@ -42,14 +43,14 @@ simulation.cpp: simulation.h simulation.spi.h simulation.uart.h simulation.wbm.h
 
 board.json: $V Makefile.inc
 
-.SUFFIXES: .sv .elf .svcd .json .asc .bit .dfu .hex .dot .pdf .py .gtkw
+.SUFFIXES: .sv .elf .vcd .json .asc .bit .dfu .hex .dot .pdf .py .gtkw
 
 .sv.elf:
 	${VERILATOR} -cc --Mdir $*.d --top-module $* $< $V
 	${MAKE} -C $*.d -f V$*.mk
 	${CXX} -I$*.d -o $@ $*.cpp ${VERILATOR_SRC} $*.d/V$*__ALL.a
 
-.elf.svcd:
+.elf.vcd:
 	./$<
 
 .sv.json: $V Makefile.inc

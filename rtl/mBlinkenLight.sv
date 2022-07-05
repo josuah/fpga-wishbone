@@ -1,7 +1,8 @@
+
 module mBlinkenLight #(
 	parameter pLeds = 8
 ) (
-	iWishbone.controller wb,
+	iWishbone.mCtrl wb,
 	output logic[pLeds-1:0] blinkenlights
 );
 	logic[3:0] counter;
@@ -13,7 +14,7 @@ module mBlinkenLight #(
 		if (wb.ack) begin
 			counter <= counter + 1;
 			wb.dat_p <= |wb.dat_p;
-			wwbdat_c <= 0;
+			wb.dat_c <= 0;
 			request <= 0;
 		end
 		if (wb.stb) begin

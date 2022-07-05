@@ -1,11 +1,11 @@
 
 module mRgb (
-	iWishbone.peripheral wb,
+	iWishbone.mPeri wb,
 	output logic[2:0] rgb
 );
 	logic[2:0] enabled;
 
-	assign wb.dat = 0;
+	assign wb.dat_c = 0;
 
 	always_ff @(posedge wb.clk) begin
 		wb.ack <= wb.stb;

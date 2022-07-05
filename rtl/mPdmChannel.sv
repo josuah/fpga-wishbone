@@ -5,7 +5,7 @@ module mPdmChannel #(
 	input logic rst,
 	input logic clk,
 	input logic stb,
-	input logic [pBits-1:0] data,
+	input logic[pBits-1:0] data,
 	output logic pdm
 );
 	logic[pBits-1:0] level;

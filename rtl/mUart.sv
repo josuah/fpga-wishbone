@@ -1,5 +1,5 @@
 
-typedef enum logic [3:0] {
+typedef enum {
 	eUartState_IDLE,
 	eUartState_START,
 	eUartState_BIT_0,
@@ -17,13 +17,13 @@ module mUart #(
 	parameter pClkHz = 0,
 	parameter pOutputHz = 9600
 ) (
-	iWishbone	wb,
-	output	wire	irq,
-	input	wire	rx,
-	output	wire	tx
+	iWishbone.mPeri wb,
+	output logic irq,
+	input logic rx,
+	output logic tx
 );
 	localparam lpTicksPerBaud = pClkHz / pOutputHz;
-	wire unused = &{ wb.dat_c[31:8], wb.dat_p[31:8] };
+	logic unused = &{ wb.dat_c[31:8], wb.dat_p[31:8] };
 
 	assign wb.dat_p[31:8] = 0;
 

@@ -20,8 +20,8 @@ module mPwm #(
 	parameter pOutHz = 0,
 	parameter pChannels = 0
 ) (
-	iWishbone wb,
-	output logic [pChannels-1:0] pwm
+	iWishbone.mPeri wb,
+	output logic[pChannels-1:0] pwm
 );
 	localparam lpTicksPerCycle = pWbHz / pOutHz;
 
@@ -31,7 +31,7 @@ module mPwm #(
 	logic request;
 	logic unused = &{ wb.dat };
 
-	assign { wb.dat_p } = 0;
+	assign wb.dat_p = 0;
 	assign request = wb.stb & wb.we;
 
 	mPwmChannel mchannel[pChannels-1:0] (
@@ -61,8 +61,8 @@ module mPwm #(
 
 `ifdef FORMAL
 
-	reg f_past_valid = 0;
-	reg f_should_pulse = 0;
+	logic f_past_valid = 0;
+	logic f_should_pulse = 0;
 
 	always_ff @(posedge wb.clk) begin
 		f_past_valid <= 1;

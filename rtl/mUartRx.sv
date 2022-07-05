@@ -11,9 +11,9 @@ module mUartRx #(
 	output logic[7:0] data,
 	input logic rx
 );
-	logic[3:0] state = 0;
-	logic[$size(TICKS_PER_BAUD)-1:0] baud_cnt = 0;
-	logic[7:0] shift_logic = 0;
+	logic[3:0] state;
+	logic[$size(TICKS_PER_BAUD)-1:0] baud_cnt;
+	logic[7:0] shift;
 
 	always_ff @(posedge clk) begin
 		case (state)
@@ -28,12 +28,12 @@ module mUartRx #(
 			baud_cnt <= baud_cnt + 1;
 
 			if (baud_cnt == TICKS_PER_BAUD / 2)
-				shift_logic <= { !rx, shift_reg[7:1] };
+				shift_logic <= { !rx, shifter[7:1] };
 
 			if (baud_cnt == TICKS_PER_BAUD - 1) begin
 				if (state == eUartState_Bit_7) begin
 					// continuously update the data buffer
-					data <= shift_reg;
+					data <= shifter;
 					// raise interrupt: dinner is served
 					rx <= 1;
 				end
@@ -50,7 +50,7 @@ module mUartRx #(
 			irq <= 0;
 
 		if (rst) begin
-			{ state, shift_reg, baud_cnt, data } <= 0;
+			{ state, shifter, baud_cnt, data } <= 0;
 		end
 	end
 

@@ -1,30 +1,18 @@
 `default_nettype none
 
 module board (
-	// SPI
-	output logic gpio_20,
-	input logic gpio_10,
-	input logic gpio_12,
-	input logic gpio_21,
-
-	output logic spi_sck,
-	output logic spi_csn,
-	output logic spi_sdi,
-	output logic spi_sdo,
-	output logic[2:0] rgb,
-	output logic[6:0] charlieplex,
-	output logic[7:0] debug
+	output logic gpio_spi_sck,
+	output logic gpio_spi_csn,
+	output logic gpio_spi_sdi,
+	output logic gpio_spi_sdo,
+	output logic[2:0] gpio_rgb,
+	output logic[6:0] gpio_charlieplex,
+	output logic[7:0] gpio_debug
 );
 	logic clk;
 	logic[6:0] charlieplex_oe;
 	logic[6:0] charlieplex_o;
-	logic rgb_pwm;
-	iSpi.peripheral spi;
-
-	assign spi.sck = spi_sck;
-	assign spi.csn = spi_csn;
-	assign spi.sdi = spi_sdi;
-	assign spi.sdo = spi_sdo;
+	logic[2:0] rgb;
 
 	SB_HFOSC hfosc (
 		.CLKHFPU(1'b1),
@@ -40,12 +28,12 @@ module board (
 	) rgba_drv (
 		.CURREN(1'b1),
 		.RGBLEDEN(1'b1),
-		.RGB0PWM(rgb_pwm[0]),
-		.RGB0(rgb[0]),
-		.RGB1PWM(rgb_pwm[1]),
-		.RGB1(rgb[1]),
-		.RGB2PWM(rgb_pwm[2]),
-		.RGB2(rgb[2])
+		.RGB0PWM(rgb[0]),
+		.RGB0(gpio_rgb[0]),
+		.RGB1PWM(rgb[1]),
+		.RGB1(gpio_rgb[1]),
+		.RGB2PWM(rgb[2]),
+		.RGB2(gpio_rgb[2])
 	);
 
 	SB_IO #(
@@ -54,18 +42,21 @@ module board (
 		.NEG_TRIGGER(0),
 		.IO_STANDARD("SB_LVCMOS")
 	) io_charlieplex (
-		.PACKAGE_PIN(charlieplex),
+		.PACKAGE_PIN(gpio_charlieplex),
 		.LATCH_INPUT_VALUE(1'b0),
 		.CLOCK_ENABLE(1'b0),
 		.OUTPUT_ENABLE(charlieplex_oe),
 		.D_OUT_0(charlieplex_o)
 	);
 
-	mTop #(
-		.TICKS_PER_BAUD(48000000/9600)
-	) top (
+	mTop top (
 		.clk,
-		.spi, .rgb, .debug,
+		.spi_sck(gpio_spi_sck),
+		.spi_csn(gpio_spi_csn),
+		.spi_sdi(gpio_spi_sdi),
+		.spi_sdo(gpio_spi_sdo),
+		.rgb(rgb),
+		.debug(gpio_debug),
 		.charlieplex_oe(charlieplex_oe),
 		.charlieplex_o(charlieplex_o)
 	);

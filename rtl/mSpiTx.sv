@@ -9,16 +9,16 @@
 // on a regular basis.
 
 module mSpiTx (
-	iSpi.peripheral spi,
-	iClockDomainCrossing.importer cdc
+	iSpi.mPeri spi,
+	iClockDomainCrossing.mImport cdc
 );
-	reg [7:0] shift_reg = 0;
-	reg [2:0] cnt = 0;
-	wire [7:0] data;
-	wire unused = &{ stb };
-	wire stb;
+	logic[7:0] shifter;
+	logic[2:0] cnt;
+	logic[7:0] data;
+	logic unused = &{ stb };
+	logic stb;
 
-	assign spi.sdo = shift_reg[7];
+	assign spi.sdo = shifter[7];
 
 	// import the value to send over SPI from the wishbone clock domain
 	mClockDomainImporter #(
@@ -34,11 +34,11 @@ module mSpiTx (
 		// if we are selected by the SPI controller
 		if (spi.csn == 0) begin
 			cnt <= cnt + 1;
-			shift_reg <= { shift_reg[6:0], 1'b0 };
+			shifter <= { shifter[6:0], 1'b0 };
 
 			if (cnt == 0) begin
 				// continuously transmit `data`
-				shift_reg <= data;
+				shifter <= data;
 			end
 		end
 	end

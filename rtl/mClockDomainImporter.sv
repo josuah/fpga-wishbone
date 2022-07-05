@@ -31,24 +31,26 @@
 // As `data` becomes valid, `stb` rises for one clock.
 
 module mClockDomainImporter #(
-	parameter SIZE = 8
+	parameter pBits = 8
 ) (
-	input wire clk,
-	output wire [SIZE-1:0] data,
-	output wire stb,
-	iClockDomainCrossing.importer cdc
+	input logic clk,
+	output logic[pBits-1:0] data,
+	output logic stb,
+	iClockDomainCrossing.mImport cdc
 );
-	reg [1:0] req_ff = 0;
+	logic[1:0] req_ff;
+	logic ack;
 
 	assign data = cdc.data;
 	assign stb = (req_ff[0] != cdc.ack);
+	assign cdc.ack = ack;
 
 	always_ff @(posedge clk) begin
 		// 2FF buffer to prevent metastable state propagation
 		req_ff <= { cdc.req, req_ff[1] };
 
 		// have the `ack` signal follow the `req` signal
-		cdc.ack <= req_ff[0];
+		ack <= req_ff[0];
 	end
 
 endmodule

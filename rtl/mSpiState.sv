@@ -1,32 +1,42 @@
+// Wishbone read:
+//
+//	W000SSSS AAAAAAAA :::::::: :::::::: :::::::: :::::::: :::::::: ::::::::
+//	│   ├──┘ ├──────┘
+//	│:::│::: │::::::: 00000000 11111111 DDDDDDDD DDDDDDDD DDDDDDDD DDDDDDDD
+//	│   │    │        ├──────┘ ├──────┘ ├─────────────────────────────────┘
+//	WE  SEL  ADR      STALL    ACK      DAT
+//
+// Wishbone write:
+//
+//	W000SSSS AAAAAAAA DDDDDDDD DDDDDDDD DDDDDDDD DDDDDDDD :::::::: ::::::::
+//	│   ├──┘ ├──────┘ ├─────────────────────────────────┘
+//	│:::│::: │::::::: │::::::: :::::::: :::::::: :::::::: 00000000 11111111
+//	│   │    │        │                                   ├──────┘ ├──────┘
+//	WE  SEL  ADR      DAT                                 STALL    ACK
+//
 
 typedef enum {
 	eSpiState_Idle,
 	eSpiState_GetAddress,
 	eSpiState_ReadStallAck,
-	eSpiState_ReadData0,
-	eSpiState_ReadData1,
-	eSpiState_ReadData2,
-	eSpiState_ReadData3,
-	eSpiState_WriteData0,
-	eSpiState_WriteData1,
-	eSpiState_WriteData2,
-	eSpiState_WriteData3,
+	eSpiState_ReadData,
+	eSpiState_WriteData,
 	eSpiState_WriteStallAck
 } eSpiState;
 
 module mSpiState (
-	iWishbone wb,
-	input wire rx_data,
-	input wire rx_stb,
-	output reg tx_data,
-	output reg tx_stb
+	iWishbone.mCtrl wb,
+	input logic[7:0] rx_data,
+	input logic rx_stb,
+	output logic[7:0] tx_data,
+	output logic tx_stb
 );
-	logic[7:0] tx_data_u8;
+	logic[7:0] tx_data_buf;
 	eSpiState state;
 
 	always_ff @(posedge wb.clk) begin
 		if (wb.ack) begin
-			tx_data_u8 <= wb.dat_p; // only used if wb.we
+			tx_data_buf <= wb.dat_p; // only used if wb.we
 			wb.stb <= 0;
 		end
 
@@ -42,10 +52,10 @@ module mSpiState (
 					state <= eSpiState_GetAddress;
 			end
 			eSpiState_GetAddress: begin	// RX AAAAAAAA
-				wb.adr <= { 8'b00, rx_data };
+				wb.adr <= { rx_data[3:0] }; // TODO: decide on an address length
 				if (wb.we) begin
 					// wait to have data to write
-					state <= eSpiState_WriteData0;
+					state <= eSpiState_WriteData;
 				end else begin
 					// wishbone read with that address
 					wb.stb <= 1;
@@ -55,29 +65,17 @@ module mSpiState (
 			eSpiState_ReadStallAck: begin	// TX 00000000
 				if (!wb.stb) begin	// TX 11111111
 					tx_data <= 8'h55;
-					state <= eSpiState_ReadData0;
+					state <= eSpiState_ReadData;
 				end
 			end
-			eSpiState_ReadData0,		// TX DDDDDDDD
-			eSpiState_ReadData1,		// TX DDDDDDDD
-			eSpiState_ReadData2: begin	// TX DDDDDDDD
-				{ tx_data_u8, tx_data } <= { 8'h00, tx_data_u8 };
-				state <= state + 1;
-			end
-			eSpiState_ReadData3: begin	// TX DDDDDDDD
-				tx_data <= tx_data_u8[7:0];
+			eSpiState_ReadData: begin	// TX DDDDDDDD
+				tx_data <= tx_data_buf;
 				state <= eSpiState_Idle;
 			end
-			eSpiState_WriteDATA,		// RX DDDDDDDD
-			eSpiState_WriteData1,		// RX DDDDDDDD
-			eSpiState_WriteData2: begin	// RX DDDDDDDD
-				wb.dat_c <= { wb.dat_c[23:0], rx_data };
-				state <= state + 1;
-			end
-			eSpiState_WriteData3: begin	// RX DDDDDDDD
-				wb.dat_c <= { wb.dat_c[23:0], rx_data };
-				wb.stb <= 1;
+			eSpiState_WriteData: begin	// RX DDDDDDDD
+				wb.dat_c <= rx_data;
 				state <= eSpiState_WriteStallAck;
+				wb.stb <= 1;
 			end
 			eSpiState_WriteStallAck: begin	// TX 00000000
 				if (!wb.stb) begin	// TX 11111111
@@ -89,13 +87,13 @@ module mSpiState (
 		end
 
 		if (wb.rst) begin
-			{ tx_data, tx_stb, tx_data_u8, state } <= 0;
+			{ tx_data, tx_stb, tx_data_buf, state } <= 0;
 		end
 	end
 
 `ifdef FORMAL
 
-	reg past = 0;
+	logic past = 0;
 
 	initial assume(wb.rst == 1);
 
@@ -120,7 +118,7 @@ module mSpiState (
 			assert($stable(state));
 
 			if (state != eSpiState_ReadStallAck) begin
-				assert($stable(tx_data_u8));
+				assert($stable(tx_data_buf));
 			end
 		end
 
