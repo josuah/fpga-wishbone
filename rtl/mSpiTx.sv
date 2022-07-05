@@ -1,10 +1,7 @@
 
 module mSpiTx (
 	iSpi.mPeri spi,
-	//iClockDomain.mImport cdc
-	input logic[7:0] cdc_data,
-	input logic cdc_req,
-	output logic cdc_ack
+	iClockDomain.mImport cdc
 );
 	logic[7:0] shifter;
 	logic[2:0] cnt;
@@ -15,12 +12,9 @@ module mSpiTx (
 	assign spi.sdo = shifter[7];
 
 	mClockDomainImport mimp (
-		.clk(spi.sck),
+		.cdc(cdc),
 		.data(data),
-		.stb(stb),
-		.cdc_data(cdc_data),
-		.cdc_req(cdc_req),
-		.cdc_ack(cdc_ack)
+		.stb(stb)
 	);
 
 	always_ff @(posedge spi.sck) begin

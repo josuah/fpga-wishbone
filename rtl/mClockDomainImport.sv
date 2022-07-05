@@ -32,22 +32,23 @@
 module mClockDomainImport #(
 	parameter pBits = 8
 ) (
-	input	logic clk,
-	output	logic[pBits-1:0] data,
-	output	logic stb,
-	//iClockDomain.mImport cdc
-	input	logic cdc_req,
-	input	logic[pBits-1:0] cdc_data,
-	output	logic cdc_ack
+	output logic[pBits-1:0] data,
+	output logic stb,
+	iClockDomain.mImport cdc
 );
 	logic[1:0] req_ff;
 
-	assign data = cdc_data;
+	// Tools like Verilator warn us that we are crossing clock domains
+	// which is what we do so here is how we silence it:
+	logic cdc_ack;
+	assign cdc.ack = cdc_ack;
+
+	assign data = cdc.data;
 	assign stb = (req_ff[0] != cdc_ack);
 
-	always_ff @(posedge clk) begin
+	always_ff @(posedge cdc.clk) begin
 		// 2FF buffer to prevent metastable state propagation
-		req_ff <= { cdc_req, req_ff[1] };
+		req_ff <= { cdc.req, req_ff[1] };
 
 		// have the `ack` signal follow the `req` signal
 		cdc_ack <= req_ff[0];

@@ -1,10 +1,7 @@
 
 module mSpiRx (
 	iSpi.mPeri spi,
-	//iClockDomain cdc
-	output logic[7:0] cdc_data,
-	output logic cdc_req,
-	input logic cdc_ack
+	iClockDomain cdc
 );
 	logic[2:0] cnt;
 	logic[6:0] shifter;
@@ -13,13 +10,10 @@ module mSpiRx (
 	logic unused;
 
 	mClockDomainExport mexp(
-		.clk(spi.sck),
 		.data(shifter_next),
 		.stb(spi.csn == 0 && cnt == 0 && started),
 		.ready(unused),
-		.cdc_data(cdc_data),
-		.cdc_req(cdc_req),
-		.cdc_ack(cdc_ack)
+		.cdc(cdc)
 	);
 
 	assign shifter_next = { shifter[6:0], spi.sdi };

@@ -33,22 +33,25 @@
 module mClockDomainExport #(
 	parameter pBits = 8
 ) (
-	input	logic clk,
-	input	logic stb,
-	input	logic[pBits-1:0] data,
-	output	logic ready,
-	//iClockDomain.mExport cdc
-	output	logic cdc_req,
-	output	logic[pBits-1:0] cdc_data,
-	input	logic cdc_ack
+	input logic stb,
+	input logic[pBits-1:0] data,
+	output logic ready,
+	iClockDomain.mExport cdc
 );
 	logic[1:0] ack_ff;
 
+	// Tools like Verilator warn us that we are crossing clock domains
+	// which is what we do so here is how we silence it:
+	logic cdc_req;
+	logic[pBits-1:0] cdc_data;
+	assign cdc.req = cdc_req;
+	assign cdc.data = cdc_data;
+
 	assign ready = (ack_ff[0] == cdc_req);
 
-	always_ff @(posedge clk) begin
+	always_ff @(posedge cdc.clk) begin
 		// 2FF buffer to prevent metastable state propagation
-		ack_ff <= { cdc_ack, ack_ff[1] };
+		ack_ff <= { cdc.ack, ack_ff[1] };
 
 		if (stb && ready) begin
 			cdc_data <= data;
