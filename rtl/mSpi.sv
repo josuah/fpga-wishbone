@@ -10,28 +10,44 @@ module mSpi (
 	logic[7:0] rx_data, tx_data;
 	logic unused;
 
-	iClockDomain cdce(spi.sck);
-	iClockDomain cdci(wb.clk);
+	//iClockDomain cdce(spi.sck);
+	logic[7:0] cdce_data;
+	logic cdce_req;
+	logic cdce_ack;
+	//iClockDomain cdci(wb.clk);
+	logic[7:0] cdci_data;
+	logic cdci_req;
+	logic cdci_ack;
 
-	mClockDomainExport mexp(
-		.data(tx_data), .stb(tx_stb),
-		.ready(unused),
-		.cdc(cdce.mExport)
+	mClockDomainImport mimp(
+		.clk(wb.clk),
+		.data(rx_data), .stb(rx_stb),
+		.cdc_data(cdci_data),
+		.cdc_req(cdci_req),
+		.cdc_ack(cdci_ack)
 	);
 
 	mSpiRx mrx (
 		.spi(spi),
-		.cdc(cdce.mExport)
+		.cdc_data(cdci_data),
+		.cdc_req(cdci_req),
+		.cdc_ack(cdci_ack)
 	);
 
-	mClockDomainImport mimp(
-		.data(rx_data), .stb(rx_stb),
-		.cdc(cdci.mImport)
+	mClockDomainExport mexp(
+		.clk(wb.clk),
+		.data(tx_data), .stb(tx_stb),
+		.ready(unused),
+		.cdc_data(cdce_data),
+		.cdc_req(cdce_req),
+		.cdc_ack(cdce_ack)
 	);
 
 	mSpiTx mtx (
 		.spi(spi),
-		.cdc(cdci.mImport)
+		.cdc_data(cdce_data),
+		.cdc_req(cdce_req),
+		.cdc_ack(cdce_ack)
 	);
 
 	mSpiState mstate (
