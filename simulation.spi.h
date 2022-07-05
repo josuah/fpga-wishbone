@@ -4,11 +4,11 @@ struct spi {
 } spi;
 
 static void
-spi_tick_posedge(uint64_t ns)
+spi_tick_posedge(void)
 {
 	vsim->spi_sck = 1;
 	vsim->spi_sdi = spi.tx >> 7;
-	simulation_eval(ns);
+	simulation_eval();
 
 	spi.rx = (spi.rx << 1) | vsim->spi_sdo;
 	spi.tx = spi.tx << 1;
@@ -18,8 +18,8 @@ spi_tick_posedge(uint64_t ns)
 }
 
 static void
-spi_tick_negedge(uint64_t ns)
+spi_tick_negedge(void)
 {
 	vsim->spi_sck = 0;
-	simulation_eval(ns);
+	simulation_eval();
 }

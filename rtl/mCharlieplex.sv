@@ -1,5 +1,5 @@
 
-module mCharlieplex #(
+module mCharlieplex#(
 	parameter nClkHz = 0
 ) (
 	iWishbone.mPeri wb,

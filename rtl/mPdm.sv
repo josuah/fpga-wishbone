@@ -1,5 +1,5 @@
 
-module mPdm #(
+module mPdm#(
 	parameter pBits = 8,
 	parameter pChannels = 0
 ) (
@@ -11,9 +11,9 @@ module mPdm #(
 	assign wb.dat_p = 0;
 	assign request = wb.stb & wb.we;
 
-	mPdmChannel #(
+	mPdmChannel#(
 		.pBits(pBits)
-	) channel[pChannels-1:0] (
+	) channel[pChannels-1:0](
 		.clk(wb.clk),
 		.rst(wb.rst),
 		.stb({ {pChannels-1{1'b0}}, request } << wb.adr),

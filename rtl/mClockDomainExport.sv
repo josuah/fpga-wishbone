@@ -1,4 +1,3 @@
-
 // Simple handshake protocol for crossing clock domain.
 // 
 // * The source module sending the data to another clock domain writes to
@@ -27,30 +26,37 @@
 // http://www.sunburst-design.com/papers/CummingsSNUG2008Boston_CDC.pdf
 // https://zipcpu.com/blog/2018/07/06/afifo.html
 // 
-// This part imports a buffer of data from the other clock domain.
-// As `data` becomes valid, `stb` rises for one clock.
+// This part exports a buffer of data to the other clock domain.
+// Rising `stb` for one clock queues `data` for transfer. To use
+// only when ready.
 
-module mClockDomainImporter #(
+module mClockDomainExport #(
 	parameter pBits = 8
 ) (
-	input logic clk,
-	output logic[pBits-1:0] data,
-	output logic stb,
-	iClockDomainCrossing.mImport cdc
+	input logic stb,
+	input logic[pBits-1:0] data,
+	output logic ready,
+	iClockDomain.mExport cdc
 );
-	logic[1:0] req_ff;
-	logic ack;
+	logic[1:0] ack_ff;
 
-	assign data = cdc.data;
-	assign stb = (req_ff[0] != cdc.ack);
-	assign cdc.ack = ack;
+	// Tools like Verilator warn us that we are crossing clock domains
+	// which is what we do so here is how we silence it:
+	logic cdc_req;
+	logic[pBits-1:0] cdc_data;
+	assign cdc.req = cdc_req;
+	assign cdc.data = cdc_data;
 
-	always_ff @(posedge clk) begin
+	assign ready = (ack_ff[0] == cdc_req);
+
+	always_ff @(posedge cdc.clk) begin
 		// 2FF buffer to prevent metastable state propagation
-		req_ff <= { cdc.req, req_ff[1] };
+		ack_ff <= { cdc.ack, ack_ff[1] };
 
-		// have the `ack` signal follow the `req` signal
-		ack <= req_ff[0];
+		if (stb && ready) begin
+			cdc_data <= data;
+			cdc_req <= !cdc_req;
+		end
 	end
 
 endmodule

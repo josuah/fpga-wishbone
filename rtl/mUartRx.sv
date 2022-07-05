@@ -1,7 +1,6 @@
-
 // Simple sampling UART receiver with static baud rate
 
-module mUartRx #(
+module mUartRx#(
 	parameter TICKS_PER_BAUD = 0
 ) (
 	input logic clk,

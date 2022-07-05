@@ -15,7 +15,7 @@
 //      One address per channel for setting the current duty cycle value.
 //	Set to 0xFF is a 100% duty cycle.
 
-module mPwm #(
+module mPwm#(
 	parameter pWbHz = 0,
 	parameter pOutHz = 0,
 	parameter pChannels = 0
@@ -55,8 +55,9 @@ module mPwm #(
 			counter1 <= counter1 + 1;
 		end
 
-		if (wb.rst)
+		if (wb.rst) begin
 			{ counter0, counter1 } <= 0;
+		end
 	end
 
 `ifdef FORMAL

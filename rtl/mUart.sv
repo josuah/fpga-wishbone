@@ -13,7 +13,7 @@ typedef enum {
 	eUartState_STOP
 } eUartState;
 
-module mUart #(
+module mUart#(
 	parameter pClkHz = 0,
 	parameter pOutputHz = 9600
 ) (
@@ -27,9 +27,9 @@ module mUart #(
 
 	assign wb.dat_p[31:8] = 0;
 
-	mUartRx #(
+	mUartRx#(
 		.pTicksPerBaud(lpTicksPerBaud)
-	) mrx (
+	) mrx(
 		.clk(wb.clk),
 		.rst(wb.rst),
 		.stb(wb.stb & !wb.we),
@@ -38,9 +38,9 @@ module mUart #(
 		.rx(rx)
 	);
 
-	mUartTx #(
+	mUartTx#(
 		.pTicksPerBaud(lpTicksPerBaud)
-	) mtx (
+	) mtx(
 		.clk(wb.clk),
 		.rst(wb.rst),
 		.stb(wb.stb & wb.we),

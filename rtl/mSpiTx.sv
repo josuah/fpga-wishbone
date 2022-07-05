@@ -1,16 +1,7 @@
-// Dear passenger, we are clossing clock domain. Seat comfortably
-// and fasten your belt to overcome any turbulence there could be.
-//
-// The `data` register is sampled each time a byte is sent, and the
-// parent module has to fill it at regular interval, not too close
-// to the last moment to avoid missing a cycle.
-//
-// The RX signal can be used as a trigger for when to feed the TX data
-// on a regular basis.
 
 module mSpiTx (
 	iSpi.mPeri spi,
-	iClockDomainCrossing.mImport cdc
+	iClockDomain.mImport cdc
 );
 	logic[7:0] shifter;
 	logic[2:0] cnt;
@@ -20,11 +11,7 @@ module mSpiTx (
 
 	assign spi.sdo = shifter[7];
 
-	// import the value to send over SPI from the wishbone clock domain
-	mClockDomainImporter #(
-		.pBits(8)
-	) mcdi (
-		.clk(spi.sck),
+	mClockDomainImport mimp (
 		.cdc(cdc),
 		.data(data),
 		.stb(stb)

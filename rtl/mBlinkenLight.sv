@@ -1,8 +1,8 @@
 
-module mBlinkenLight #(
+module mBlinkenLight#(
 	parameter pLeds = 8
 ) (
-	iWishbone.mCtrl wb,
+	iWishbone wb,
 	output logic[pLeds-1:0] blinkenlights
 );
 	logic[3:0] counter;

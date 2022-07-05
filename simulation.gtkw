@@ -1,61 +1,32 @@
 [dumpfile] "/home/josuah/Code/fpga-sdr/simulation.vcd"
 *-9.580719 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 @800200
--io
+-mspi.spi
 @22
-[color] 1
-TOP.simulation.top.wbm_spi.spi_sck
-[color] 3
-TOP.simulation.top.wbm_spi.spi_csn
-[color] 3
-TOP.simulation.top.wbm_spi.spi_sdi
-[color] 3
-TOP.simulation.top.wbm_spi.spi_sdo
+TOP.simulation.top.mspi.spi.*
 @1000200
--io
+-mspi.spi
 @800200
--tx
+-mspi.mrx.mexp
 @22
-TOP.simulation.top.wbm_spi.tx_handshake_ack
-TOP.simulation.top.wbm_spi.tx_handshake_req
-TOP.simulation.top.wbm_spi.tx_handshake_data[7:0]
-TOP.simulation.top.wbm_spi.rx_data
-TOP.simulation.top.wbm_spi.tx_stb
+TOP.simulation.top.mspi.mrx.mexp.*
 @1000200
--tx
+-mspi.mrx.mexp
 @800200
--rx
+-mspi.mrx.mexp.cdc
 @22
-TOP.simulation.top.wbm_spi.rx_handshake_ack
-TOP.simulation.top.wbm_spi.rx_handshake_req
-TOP.simulation.top.wbm_spi.rx_handshake_data[7:0]
-TOP.simulation.top.wbm_spi.rx_data
-TOP.simulation.top.wbm_spi.rx_stb
-TOP.simulation.top.wbm_spi.tx_ready
+TOP.simulation.top.mspi.mrx.mexp.cdc.*
 @1000200
--rx
+-mspi.mrx.mexp.cdc
 @800200
--state
-@24
-[color] 7
-TOP.simulation.top.wbm_spi.state[3:0]
-@1000200
--state
-@800200
--wb
+-mspi.mimp
 @22
-[color] 1
-TOP.simulation.top.wbm_spi.wb_clk_i
-TOP.simulation.top.wbm_spi.wb_rst_i
-TOP.simulation.top.wbm_spi.wb_cyc_o
-TOP.simulation.top.wbm_spi.wb_stb_o
-TOP.simulation.top.wbm_spi.wb_stall_i
-TOP.simulation.top.wbm_spi.wb_ack_i
-TOP.simulation.top.wbm_spi.wb_we_o
-TOP.simulation.top.wbm_spi.wb_adr_o[15:0]
-TOP.simulation.top.wbm_spi.wb_sel_o[3:0]
-TOP.simulation.top.wbm_spi.wb_dat_i[31:0]
-TOP.simulation.top.wbm_spi.wb_dat_o[31:0]
-TOP.simulation.top.wbm_spi.wb_data[31:0]
+TOP.simulation.top.mspi.mimp.*
 @1000200
--wb
+-mspi.mimp
+@800200
+-mspi.rx
+@22
+TOP.simulation.top.mspi.rx.*
+@1000200
+-mspi.rx

@@ -1,5 +1,5 @@
 
-module mMic #(
+module mMic#(
 	parameter pWbHz = 0,
 	parameter pMicHz = 3000000,
 	parameter pAudioBits = 16

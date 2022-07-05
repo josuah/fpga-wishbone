@@ -1,6 +1,8 @@
 Vsimulation *vsim;
 VerilatedVcdC *vcd;
 
+int simulation_changed = 0;
+
 typedef uint64_t nanosecond_t;
 
 static void
@@ -12,10 +14,10 @@ simulation_put(char const *var, uint64_t u64, uint8_t size)
 }
 
 static void
-simulation_eval(nanosecond_t ns)
+simulation_eval(void)
 {
 	vsim->eval();
-	vcd->dump(ns);
+	simulation_changed = 1;
 }
 
 static void
@@ -30,25 +32,34 @@ simulation_init(int argc, char **argv)
 	vsim->trace(vcd, 99);
 	vcd->open("simulation.vcd");
 
-	simulation_eval(0);
+	vsim->eval();
+	vcd->dump(0);
 }
 
 static void
-simulation_tick_posedge(nanosecond_t ns)
+simulation_tick_posedge(void)
 {
 	vsim->clk = 1;
-	simulation_eval(ns);
+	simulation_eval();
 }
 
 static void
-simulation_tick_negedge(nanosecond_t ns)
+simulation_tick_negedge(void)
 {
 	vsim->clk = 0;
-	simulation_eval(ns);
+	simulation_eval();
 }
 
 static void
 simulation_finish(void)
 {
 	vcd->flush();
+}
+
+static void
+simulation_tick_apply(uint64_t ns)
+{
+	if (simulation_changed)
+		vcd->dump(ns);
+	simulation_changed = 0;
 }

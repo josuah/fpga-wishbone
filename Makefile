@@ -39,7 +39,7 @@ simulation_prove/logfile.txt simulation_cover/logfile.txt: simulation.sby simula
 
 simulation.elf: $V Makefile.inc simulation.cpp simulation.h simulation.uart.h
 
-simulation.cpp: simulation.h simulation.spi.h simulation.uart.h simulation.wbm.h simulation.wb.h
+simulation.cpp: simulation.h simulation.spi.h simulation.uart.h simulation.wbc.h simulation.wb.h
 
 board.json: $V Makefile.inc
 

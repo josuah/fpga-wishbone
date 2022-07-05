@@ -1,5 +1,5 @@
 
-module mRgb (
+module mRgb(
 	iWishbone.mPeri wb,
 	output logic[2:0] rgb
 );

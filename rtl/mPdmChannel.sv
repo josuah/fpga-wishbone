@@ -1,5 +1,5 @@
 
-module mPdmChannel #(
+module mPdmChannel#(
 	parameter pBits = 0
 ) (
 	input logic rst,

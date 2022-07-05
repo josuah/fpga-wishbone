@@ -8,11 +8,14 @@ module mSpi (
 );
 	logic rx_stb, tx_stb;
 	logic[7:0] rx_data, tx_data;
+	logic unused;
 
-	iClockDomainCrossing cdce();
+	iClockDomain cdce(spi.sck);
+	iClockDomain cdci(wb.clk);
 
-	mClockDomainExporter #( .pBits(8) ) exporter (
-		.clk(wb.clk), .data(tx_data), .stb(tx_stb),
+	mClockDomainExport mexp(
+		.data(tx_data), .stb(tx_stb),
+		.ready(unused),
 		.cdc(cdce.mExport)
 	);
 
@@ -21,10 +24,8 @@ module mSpi (
 		.cdc(cdce.mExport)
 	);
 
-	iClockDomainCrossing cdci();
-
-	mClockDomainImporter #( .pBits(8) ) importer (
-		.clk(wb.clk), .data(rx_data), .stb(rx_stb),
+	mClockDomainImport mimp(
+		.data(rx_data), .stb(rx_stb),
 		.cdc(cdci.mImport)
 	);
 

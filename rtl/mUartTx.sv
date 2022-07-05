@@ -1,7 +1,6 @@
-
 // Simple sampling UART transmitter with static baud rate
 
-module mUartTx #(
+module mUartTx#(
 	parameter pTicksPerBaud = 0
 ) (
 	input logic clk, rst, stb,

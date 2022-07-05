@@ -4,32 +4,36 @@ prove
 cover
 
 [files]
-simulation.v
-top.v
-wbs_uart.v
-wbs_uart_tx.v
-wbs_uart_rx.v
-wbs_pwm.v
-wbs_pwm_channel.v
-wbs_pdm.v
-wbs_pdm_channel.v
-wbs_charlie7x5.v
-wbs_debug.v
-wbs_mic.v
-wbs_rgb.v
-wbx_1master.v
-wbm_blinkenlight.v
-wbm_spi.v
-wbm_spi_tx.v
-wbm_spi_rx.v
-clock_domain_export.v
-clock_domain_import.v
+simulation.sv
+rtl/iClockDomain.sv
+rtl/iSpi.sv
+rtl/iWishbone.sv
+rtl/mBlinkenLight.sv
+rtl/mCharlieplex.sv
+rtl/mClockDomainExport.sv
+rtl/mClockDomainImport.sv
+rtl/mDebug.sv
+rtl/mInterconnect.sv
+rtl/mMic.sv
+rtl/mPdm.sv
+rtl/mPdmChannel.sv
+rtl/mPwm.sv
+rtl/mPwmChannel.sv
+rtl/mRgb.sv
+rtl/mSpi.sv
+rtl/mSpiRx.sv
+rtl/mSpiState.sv
+rtl/mSpiTx.sv
+rtl/mTop.sv
+rtl/mUart.sv
+rtl/mUartRx.sv
+rtl/mUartTx.sv
 
 [engines]
 smtbmc
 
 [script]
-read -formal simulation.v top.v wbs_uart.v wbs_uart_tx.v wbs_uart_rx.v wbs_pwm.v wbs_pwm_channel.v wbs_pdm.v wbs_pdm_channel.v wbs_charlie7x5.v wbs_debug.v wbs_mic.v wbs_rgb.v wbx_1master.v wbm_blinkenlight.v wbm_spi.v wbm_spi_tx.v wbm_spi_rx.v clock_domain_export.v clock_domain_import.v
+read -formal simulation.sv rtl/iClockDomain.sv rtl/iSpi.sv rtl/iWishbone.sv rtl/mBlinkenLight.sv rtl/mCharlieplex.sv rtl/mClockDomainExport.sv rtl/mClockDomainImport.sv rtl/mDebug.sv rtl/mInterconnect.sv rtl/mMic.sv rtl/mPdm.sv rtl/mPdmChannel.sv rtl/mPwm.sv rtl/mPwmChannel.sv rtl/mRgb.sv rtl/mSpi.sv rtl/mSpiRx.sv rtl/mSpiState.sv rtl/mSpiTx.sv rtl/mTop.sv rtl/mUart.sv rtl/mUartRx.sv rtl/mUartTx.sv
 prep -top simulation
 
 [options]
