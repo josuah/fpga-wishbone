@@ -12,6 +12,7 @@ module mSpiTx (
 	assign spi.sdo = shifter[7];
 
 	mClockDomainImport mimp (
+		.clk(spi.sck),
 		.cdc(cdc),
 		.data(data),
 		.stb(stb)

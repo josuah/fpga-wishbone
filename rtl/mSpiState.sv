@@ -64,7 +64,7 @@ module mSpiState (
 			end
 			eSpiState_ReadStallAck: begin	// TX 00000000
 				if (!wb.stb) begin	// TX 11111111
-					tx_data <= 8'h55;
+					tx_data <= 8'hFF;
 					state <= eSpiState_ReadData;
 				end
 			end
@@ -79,7 +79,7 @@ module mSpiState (
 			end
 			eSpiState_WriteStallAck: begin	// TX 00000000
 				if (!wb.stb) begin	// TX 11111111
-					tx_data <= 8'h55;
+					tx_data <= 8'hFF;
 					state <= eSpiState_Idle;
 				end
 			end

@@ -6,10 +6,10 @@ def group(pfx):
 
 traces = [
     group('mspi.spi'),
-    group('mspi.mrx.mexp'),
-    group('mspi.mrx.mexp.cdc'),
-    group('mspi.mimp'),
-    group('mspi.rx'),
+    group('mspi.mstate'),
+    group('mspi.mexp'),
+    group('mspi.tx_cdc'),
+    group('mspi.mtx.mimp.cdc'),
 ]
 
 style = {

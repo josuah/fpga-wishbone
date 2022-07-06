@@ -10,28 +10,30 @@ module mSpi (
 	logic[7:0] rx_data, tx_data;
 	logic unused;
 
-	iClockDomain cdce(spi.sck);
-	iClockDomain cdci(wb.clk);
+	iClockDomain tx_cdc();
+	iClockDomain rx_cdc();
 
 	mClockDomainImport mimp(
+		.clk(wb.clk),
 		.data(rx_data), .stb(rx_stb),
-		.cdc(cdci.mImport)
+		.cdc(rx_cdc.mImport)
 	);
 
 	mClockDomainExport mexp(
+		.clk(wb.clk),
 		.data(tx_data), .stb(tx_stb),
 		.ready(unused),
-		.cdc(cdce.mExport)
+		.cdc(tx_cdc.mExport)
 	);
 
 	mSpiRx mrx (
 		.spi(spi),
-		.cdc(cdci.mImport)
+		.cdc(rx_cdc.mImport)
 	);
 
 	mSpiTx mtx (
 		.spi(spi),
-		.cdc(cdce.mExport)
+		.cdc(tx_cdc.mExport)
 	);
 
 	mSpiState mstate (

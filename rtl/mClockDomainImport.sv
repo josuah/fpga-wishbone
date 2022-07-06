@@ -32,6 +32,7 @@
 module mClockDomainImport #(
 	parameter pBits = 8
 ) (
+	input logic clk,
 	output logic[pBits-1:0] data,
 	output logic stb,
 	iClockDomain.mImport cdc
@@ -46,7 +47,7 @@ module mClockDomainImport #(
 	assign data = cdc.data;
 	assign stb = (req_ff[0] != cdc_ack);
 
-	always_ff @(posedge cdc.clk) begin
+	always_ff @(posedge clk) begin
 		// 2FF buffer to prevent metastable state propagation
 		req_ff <= { cdc.req, req_ff[1] };
 

@@ -33,6 +33,7 @@
 module mClockDomainExport #(
 	parameter pBits = 8
 ) (
+	input logic clk,
 	input logic stb,
 	input logic[pBits-1:0] data,
 	output logic ready,
@@ -49,7 +50,7 @@ module mClockDomainExport #(
 
 	assign ready = (ack_ff[0] == cdc_req);
 
-	always_ff @(posedge cdc.clk) begin
+	always_ff @(posedge clk) begin
 		// 2FF buffer to prevent metastable state propagation
 		ack_ff <= { cdc.ack, ack_ff[1] };
 

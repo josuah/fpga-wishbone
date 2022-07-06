@@ -10,6 +10,7 @@ module mSpiRx (
 	logic unused;
 
 	mClockDomainExport mexp(
+		.clk(spi.sck),
 		.data(shifter_next),
 		.stb(spi.csn == 0 && cnt == 0 && started),
 		.ready(unused),
