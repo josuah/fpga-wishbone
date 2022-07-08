@@ -21,7 +21,7 @@ module mPdmChannel#(
 		end
 
 		if (rst) begin
-			{ level, accumulator } <= 0;
+			{level, accumulator} <= 0;
 		end
 	end
 

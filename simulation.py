@@ -19,4 +19,4 @@ style = {
 }
 
 write_gtkw(argv[1]+'.gtkw', argv[1]+'.vcd', traces, style,
-    module='TOP.simulation.top', clk_period=1.0e-10)
+    module='TOP.mTopLevel', clk_period=1.0e-10)

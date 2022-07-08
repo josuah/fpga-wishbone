@@ -1,4 +1,4 @@
-Vsimulation *vsim;
+VmTopLevel *vsim;
 VerilatedVcdC *vcd;
 
 int simulation_changed = 0;
@@ -26,7 +26,7 @@ simulation_init(int argc, char **argv)
 	Verilated::commandArgs(argc, argv);
 	Verilated::traceEverOn(true);
 
-	vsim = new Vsimulation;
+	vsim = new VmTopLevel;
 	vcd = new VerilatedVcdC;
 
 	vsim->trace(vcd, 99);

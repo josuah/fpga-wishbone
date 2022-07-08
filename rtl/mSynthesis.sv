@@ -1,9 +1,9 @@
 `default_nettype none
 
-module board (
-	output logic gpio_spi_sck,
-	output logic gpio_spi_csn,
-	output logic gpio_spi_sdi,
+module mSynthesis (
+	input logic gpio_spi_sck,
+	input logic gpio_spi_csn,
+	input logic gpio_spi_sdi,
 	output logic gpio_spi_sdo,
 	output logic[2:0] gpio_rgb,
 	output logic[6:0] gpio_charlieplex,
@@ -37,7 +37,7 @@ module board (
 	);
 
 	SB_IO #(
-		.PIN_TYPE({ 4'b1010, 2'b01 }),
+		.PIN_TYPE({4'b1010, 2'b01}),
 		.PULLUP(0),
 		.NEG_TRIGGER(0),
 		.IO_STANDARD("SB_LVCMOS")
@@ -49,16 +49,16 @@ module board (
 		.D_OUT_0(charlieplex_o)
 	);
 
-	mTop top (
+	mTopLevel mtop (
 		.clk,
 		.spi_sck(gpio_spi_sck),
 		.spi_csn(gpio_spi_csn),
 		.spi_sdi(gpio_spi_sdi),
 		.spi_sdo(gpio_spi_sdo),
-		.rgb(rgb),
+		.rgb,
 		.debug(gpio_debug),
-		.charlieplex_oe(charlieplex_oe),
-		.charlieplex_o(charlieplex_o)
+		.charlieplex_oe,
+		.charlieplex_o
 	);
 
 endmodule

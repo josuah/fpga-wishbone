@@ -52,7 +52,7 @@ module mSpiState (
 					state <= eSpiState_GetAddress;
 			end
 			eSpiState_GetAddress: begin	// RX AAAAAAAA
-				wb.adr <= { rx_data[3:0] }; // TODO: decide on an address length
+				wb.adr <= {rx_data[3:0]}; // TODO: decide on an address length
 				if (wb.we) begin
 					// wait to have data to write
 					state <= eSpiState_WriteData;
@@ -87,7 +87,7 @@ module mSpiState (
 		end
 
 		if (wb.rst) begin
-			{ tx_data, tx_stb, tx_data_buf, state } <= 0;
+			{tx_data, tx_stb, tx_data_buf, state} <= 0;
 		end
 	end
 

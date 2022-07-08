@@ -23,8 +23,7 @@ set_io -nowarn gpio_debug[6] 4
 set_io -nowarn gpio_debug[7] 44
 
 # mSpi
+set_io -nowarn gpio_spi_sdi 21
 set_io -nowarn gpio_spi_sck 12
 set_io -nowarn gpio_spi_csn 10
-set_io -nowarn gpio_spi_sdi 21
 set_io -nowarn gpio_spi_sdo 20
-

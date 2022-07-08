@@ -7,7 +7,7 @@ module mPwmChannel (
 	input logic[7:0] pwm_counter,
 	output logic pwm
 );
-	logic[7:0] duty_cycle = 0;
+	logic[7:0] duty_cycle;
 
 	assign pwm = duty_cycle > pwm_counter;
 

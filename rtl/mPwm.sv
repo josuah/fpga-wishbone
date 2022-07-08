@@ -29,7 +29,7 @@ module mPwm#(
 	logic[7:0] counter1;
 	logic[$clog2(lpTicksPerCycle)-1:0] counter0;
 	logic request;
-	logic unused = &{ wb.dat };
+	logic unused = &{wb.dat};
 
 	assign wb.dat_p = 0;
 	assign request = wb.stb & wb.we;
@@ -37,7 +37,7 @@ module mPwm#(
 	mPwmChannel mchannel[pChannels-1:0] (
 		.clk(wb.clk),
 		.rst(wb.rst),
-		.stb({ {pChannels-1{1'b0}}, request } << wb.adr),
+		.stb({{pChannels-1{1'b0}}, request} << wb.adr),
 		.data(wb.dat_c[7:0]),
 		.pwm_counter(counter1),
 		.pwm(pwm)
@@ -56,7 +56,7 @@ module mPwm#(
 		end
 
 		if (wb.rst) begin
-			{ counter0, counter1 } <= 0;
+			{counter0, counter1} <= 0;
 		end
 	end
 

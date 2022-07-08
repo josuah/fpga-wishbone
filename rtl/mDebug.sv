@@ -13,7 +13,7 @@ module mDebug (
 		end
 
 		if (wb.rst) begin
-			debug <= 0;
+			debug <= 8'b11011011;
 		end
 	end
 

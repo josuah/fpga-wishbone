@@ -44,7 +44,7 @@ module mMic#(
 		end
 
 		if (wb.rst)
-			{ clk, clk_cnt, sampling_buf, sampling_cnt } <= 0;
+			{clk, clk_cnt, sampling_buf, sampling_cnt} <= 0;
 	end
 
 `ifdef FORMAL

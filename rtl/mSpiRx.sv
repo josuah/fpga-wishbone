@@ -1,5 +1,5 @@
 
-module mSpiRx (
+module mSpiRx(
 	iSpi.mPeri spi,
 	iClockDomain cdc
 );
@@ -14,10 +14,10 @@ module mSpiRx (
 		.data(shifter_next),
 		.stb(spi.csn == 0 && cnt == 0 && started),
 		.ready(unused),
-		.cdc(cdc)
+		.cdc
 	);
 
-	assign shifter_next = { shifter[6:0], spi.sdi };
+	assign shifter_next = {shifter[6:0], spi.sdi};
 
 	always_ff @(posedge spi.sck) begin
 		if (spi.csn == 0) begin

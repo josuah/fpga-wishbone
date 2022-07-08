@@ -16,7 +16,7 @@ module mPdm#(
 	) channel[pChannels-1:0](
 		.clk(wb.clk),
 		.rst(wb.rst),
-		.stb({ {pChannels-1{1'b0}}, request } << wb.adr),
+		.stb({{pChannels-1{1'b0}}, request} << wb.adr),
 		.data(wb.dat_c[pBits-1:0]),
 		.pdm(pdm)
 	);

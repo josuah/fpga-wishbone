@@ -1,16 +1,16 @@
 
 typedef enum {
-	eUartState_IDLE,
-	eUartState_START,
-	eUartState_BIT_0,
-	eUartState_BIT_1,
-	eUartState_BIT_2,
-	eUartState_BIT_3,
-	eUartState_BIT_4,
-	eUartState_BIT_5,
-	eUartState_BIT_6,
-	eUartState_BIT_7,
-	eUartState_STOP
+	eUartState_Idle,
+	eUartState_Start,
+	eUartState_Bit0,
+	eUartState_Bit1,
+	eUartState_Bit2,
+	eUartState_Bit3,
+	eUartState_Bit4,
+	eUartState_Bit5,
+	eUartState_Bit6,
+	eUartState_Bit7,
+	eUartState_Stop
 } eUartState;
 
 module mUart#(
@@ -23,7 +23,6 @@ module mUart#(
 	output logic tx
 );
 	localparam lpTicksPerBaud = pClkHz / pOutputHz;
-	logic unused = &{ wb.dat_c[31:8], wb.dat_p[31:8] };
 
 	assign wb.dat_p[31:8] = 0;
 

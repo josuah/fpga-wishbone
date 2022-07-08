@@ -2,7 +2,6 @@
 *.bin
 *.bit
 *.core
-*.d
 *.dfu
 *.elf
 *.hex
@@ -11,6 +10,7 @@
 *.vcd
 *.pdf
 *.dot
-/testbench
 __pycache__
-simulation_*
+/testbench
+/verification_*
+/verilator

@@ -1,4 +1,4 @@
-module mTop
+module mTopLevel
 //	parameter pCpuHz = 48_000_000
 (
 	input logic clk,
@@ -10,15 +10,15 @@ module mTop
 	output logic[2:0] rgb,
 	output logic[7:0] debug
 );
-	logic rst_n = 0;
-	logic counter = 0;
+	logic rst_n;
+	logic counter;
 	logic rst = !rst_n;
 
-	iWishbone wbc( .clk(clk), .rst(rst) );
+	iWishbone wbc (.clk(clk), .rst(rst));
 
-	iWishbone wbp( .clk(clk), .rst(rst) );
+	iWishbone wbp (.clk(clk), .rst(rst));
 
-	iSpi spi();
+	iSpi spi ();
 	assign spi.sck = spi_sck;
 	assign spi.csn = spi_csn;
 	assign spi.sdi = spi_sdi;
@@ -27,38 +27,39 @@ module mTop
 	assign charlieplex_o = 0;
 	assign charlieplex_oe = 0;
 
-	mInterconnect mint(
+	mInterconnect mint (
 		.peri(wbp.mPeri),
 		.ctrl(wbc.mCtrl)
 	);
 
-	mSpi mspi(
+	mSpi mspi (
 		.wb(wbc.mCtrl),
-		.spi(spi.mPeri)
+		.spi(spi.mPeri),
+		.debug
 	);
 
-//	mBlinkenlight mBlinkenlight(
+//	mBlinkenLight mblink (
 //		.wb(wbc.mCtrl),
-//		.blinkenlight(debug)
+//		.blinkenlights(debug)
 //	);
 
-//	mCharlieplex#( .pCpuHz(pCpuHz) ) wb0(
+//	mCharlieplex #(.pCpuHz(pCpuHz)) wb0 (
 //		.wb(wbp.mPeri),
 //		.charlieplex_o(charlieplex_o),
 //		.charlieplex_oe(charlieplex_oe)
 //	);
 
-	assign rgb = { counter, 2'b00 };
+//	assign rgb = {counter, 2'b00};
 
-//	mRgb wb0(
-//		.wb(wbp.mPeri),
-//		.rgb(rgb)
-//	);
-
-	mDebug wb0(
+	mRgb wb0 (
 		.wb(wbp.mPeri),
-		.debug(debug)
+		.rgb(rgb)
 	);
+
+//	mDebug wb0 (
+//		.wb(wbp.mPeri),
+//		.debug(debug)
+//	);
 
 	always_ff @(posedge clk) begin
 		rst_n <= 1;

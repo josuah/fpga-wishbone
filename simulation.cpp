@@ -1,6 +1,6 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
-#include "Vsimulation.h"
+#include "VmTopLevel.h"
 
 #include "simulation.h"
 #include "simulation.spi.h"

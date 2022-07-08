@@ -2,9 +2,10 @@
 // the MCU on the other end is the SPI controller, and (via this
 // module) the Wishbone controller as well.
 
-module mSpi (
+module mSpi(
 	iWishbone.mPeri wb,
-	iSpi.mPeri spi
+	iSpi.mPeri spi,
+	output logic[7:0] debug
 );
 	logic rx_stb, tx_stb;
 	logic[7:0] rx_data, tx_data;
@@ -12,6 +13,8 @@ module mSpi (
 
 	iClockDomain tx_cdc();
 	iClockDomain rx_cdc();
+
+	assign debug = {8{spi.sdi}};
 
 	mClockDomainImport mimp(
 		.clk(wb.clk),
@@ -26,20 +29,19 @@ module mSpi (
 		.cdc(tx_cdc.mExport)
 	);
 
-	mSpiRx mrx (
+	mSpiRx mrx(
 		.spi(spi),
 		.cdc(rx_cdc.mImport)
 	);
 
-	mSpiTx mtx (
+	mSpiTx mtx(
 		.spi(spi),
 		.cdc(tx_cdc.mExport)
 	);
 
-	mSpiState mstate (
+	mSpiState mstate(
 		.wb,
 		.rx_stb(rx_stb), .rx_data(rx_data),
 		.tx_stb(tx_stb), .tx_data(tx_data)
 	);
-
 endmodule

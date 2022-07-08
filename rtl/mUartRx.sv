@@ -12,7 +12,7 @@ module mUartRx#(
 );
 	logic[3:0] state;
 	logic[$size(TICKS_PER_BAUD)-1:0] baud_cnt;
-	logic[7:0] shift;
+	logic[7:0] shifter;
 
 	always_ff @(posedge clk) begin
 		case (state)
@@ -27,7 +27,7 @@ module mUartRx#(
 			baud_cnt <= baud_cnt + 1;
 
 			if (baud_cnt == TICKS_PER_BAUD / 2)
-				shift_logic <= { !rx, shifter[7:1] };
+				shifter <= {!rx, shifter[7:1]};
 
 			if (baud_cnt == TICKS_PER_BAUD - 1) begin
 				if (state == eUartState_Bit_7) begin
@@ -49,7 +49,7 @@ module mUartRx#(
 			irq <= 0;
 
 		if (rst) begin
-			{ state, shifter, baud_cnt, data } <= 0;
+			{state, shifter, baud_cnt, data} <= 0;
 		end
 	end
 

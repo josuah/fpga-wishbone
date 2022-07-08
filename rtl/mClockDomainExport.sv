@@ -41,22 +41,15 @@ module mClockDomainExport #(
 );
 	logic[1:0] ack_ff;
 
-	// Tools like Verilator warn us that we are crossing clock domains
-	// which is what we do so here is how we silence it:
-	logic cdc_req;
-	logic[pBits-1:0] cdc_data;
-	assign cdc.req = cdc_req;
-	assign cdc.data = cdc_data;
-
-	assign ready = (ack_ff[0] == cdc_req);
+	assign ready = (ack_ff[0] == cdc.req);
 
 	always_ff @(posedge clk) begin
 		// 2FF buffer to prevent metastable state propagation
-		ack_ff <= { cdc.ack, ack_ff[1] };
+		ack_ff <= {cdc.ack, ack_ff[1]};
 
 		if (stb && ready) begin
-			cdc_data <= data;
-			cdc_req <= !cdc_req;
+			cdc.data <= data;
+			cdc.req <= !cdc.req;
 		end
 	end
 

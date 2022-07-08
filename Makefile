@@ -11,53 +11,53 @@ GTKWAVE = gtkwave -CM6
 
 include Makefile.inc
 
-all: board.bit simulation.vcd test
+all: synthesis.bit simulation.vcd #test
 
 clean:
-	rm -rf simulation simulation_*/ *.log *.json *.asc *.bit *.hex *.elf *.d *.vcd
+	rm -rf verilator/ verification*/
+	rm -rf *.log *.json *.asc *.bit *.hex *.elf *.vcd
 	rm -rf *.dot */*.dot *.pdf */*.pdf
 
-flash: board.bit
-	${ICEPROG} -d i:0x0403:0x6014:0 board.bit
+flash: synthesis.bit
+	${ICEPROG} -d i:0x0403:0x6014:0 synthesis.bit
 
 wave: simulation.gtkw simulation.vcd
 	${GTKWAVE} -a simulation.gtkw simulation.vcd >/dev/null 2>&1 &
 
-test: simulation_prove/logfile.txt simulation_cover/logfile.txt
-
-lint: Makefile Makefile.inc
-	${VERILATOR} --lint-only board.sv simulation.sv $V
+lint: Makefile
+	${VERILATOR} --lint-only $V
 
 Makefile.inc: rtl
-	echo V = rtl/i*.sv rtl/m*.sv >Makefile.inc
+	echo V = rtl/*.sv >Makefile.inc
 
-simulation.sby: $V Makefile.inc simulation.sby.sh Makefile
-	sh simulation.sby.sh simulation.sv $V >$@
+test: verification_prove/logfile.txt verification_cover/logfile.txt
 
-simulation_prove/logfile.txt simulation_cover/logfile.txt: simulation.sby simulation.sv $V
-	sby -f simulation.sby
+verification.sby: $V Makefile verification.sh
+	sh verification.sh $V >$@
 
-simulation.elf: $V Makefile.inc simulation.cpp simulation.h simulation.uart.h
+verification_prove/logfile.txt \
+verification_cover/logfile.txt: verification.sby
+	sby -f verification.sby
 
-simulation.cpp: simulation.h simulation.spi.h simulation.uart.h simulation.wbc.h simulation.wb.h
+verilator/VmTopLevel.mk: $V
+	${VERILATOR} -cc --Mdir verilator --top-module mTopLevel $V
 
-board.json: $V Makefile.inc
+verilator/VmTopLevel__ALL.a: verilator/VmTopLevel.mk
+	${MAKE} -C verilator -f VmTopLevel.mk
+
+simulation.elf: verilator/VmTopLevel__ALL.a simulation.cpp simulation.h
+	${CXX} -Iverilator -o $@ simulation.cpp ${VERILATOR_SRC} verilator/VmTopLevel__ALL.a
+
+synthesis.json: $V
+	${YOSYS} -p "read_verilog -sv $V; synth_ice40 -top mSynthesis -json $@" >$*.yosys.log
 
 .SUFFIXES: .sv .elf .vcd .json .asc .bit .dfu .hex .dot .pdf .py .gtkw
-
-.sv.elf:
-	${VERILATOR} -cc --Mdir $*.d --top-module $* $< $V
-	${MAKE} -C $*.d -f V$*.mk
-	${CXX} -I$*.d -o $@ $*.cpp ${VERILATOR_SRC} $*.d/V$*__ALL.a
 
 .elf.vcd:
 	./$<
 
-.sv.json: $V Makefile.inc
-	${YOSYS} -p "read_verilog -sv $< $V; synth_ice40 -top $* -json $@" >$*.yosys.log
-
-.json.asc: board.pcf
-	${NEXTPNR} -q -l $*.nextpnr.log --pcf board.pcf --json $< --asc $@
+.json.asc: ports.pcf
+	${NEXTPNR} -q -l $*.nextpnr.log --pcf ports.pcf --json $< --asc $@
 
 .asc.bit:
 	${ICEPACK} $< $@

@@ -4,7 +4,6 @@ prove
 cover
 
 [files]
-simulation.sv
 rtl/iClockDomain.sv
 rtl/iSpi.sv
 rtl/iWishbone.sv
@@ -24,7 +23,8 @@ rtl/mSpi.sv
 rtl/mSpiRx.sv
 rtl/mSpiState.sv
 rtl/mSpiTx.sv
-rtl/mTop.sv
+rtl/mSynthesis.sv
+rtl/mTopLevel.sv
 rtl/mUart.sv
 rtl/mUartRx.sv
 rtl/mUartTx.sv
@@ -33,7 +33,7 @@ rtl/mUartTx.sv
 smtbmc
 
 [script]
-read -formal simulation.sv rtl/iClockDomain.sv rtl/iSpi.sv rtl/iWishbone.sv rtl/mBlinkenLight.sv rtl/mCharlieplex.sv rtl/mClockDomainExport.sv rtl/mClockDomainImport.sv rtl/mDebug.sv rtl/mInterconnect.sv rtl/mMic.sv rtl/mPdm.sv rtl/mPdmChannel.sv rtl/mPwm.sv rtl/mPwmChannel.sv rtl/mRgb.sv rtl/mSpi.sv rtl/mSpiRx.sv rtl/mSpiState.sv rtl/mSpiTx.sv rtl/mTop.sv rtl/mUart.sv rtl/mUartRx.sv rtl/mUartTx.sv
+read -formal rtl/iClockDomain.sv rtl/iSpi.sv rtl/iWishbone.sv rtl/mBlinkenLight.sv rtl/mCharlieplex.sv rtl/mClockDomainExport.sv rtl/mClockDomainImport.sv rtl/mDebug.sv rtl/mInterconnect.sv rtl/mMic.sv rtl/mPdm.sv rtl/mPdmChannel.sv rtl/mPwm.sv rtl/mPwmChannel.sv rtl/mRgb.sv rtl/mSpi.sv rtl/mSpiRx.sv rtl/mSpiState.sv rtl/mSpiTx.sv rtl/mSynthesis.sv rtl/mTopLevel.sv rtl/mUart.sv rtl/mUartRx.sv rtl/mUartTx.sv
 prep -top simulation
 
 [options]

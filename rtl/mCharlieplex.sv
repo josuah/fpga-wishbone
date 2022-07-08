@@ -64,7 +64,7 @@ module mCharlieplex#(
 		end
 
 		if (wb.rst) begin
-			{ row, col, cnt, mem_wr_data, mem_wr_addr } <= 0;
+			{row, col, cnt, mem_wr_data, mem_wr_addr} <= 0;
 		end
 	end
 
