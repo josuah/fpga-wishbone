@@ -1,11 +1,10 @@
 
-interface iSpi;
-	logic sck, csn, sdi, sdo;
+typedef struct packed {
+	logic sck;
+	logic csn;
+	logic dat;
+} iSpi_Ctrl;
 
-	modport mPeri(
-		input	sck,
-		input	csn,
-		input	sdi,
-		output	sdo
-	);
-endinterface
+typedef struct packed {
+	logic dat;
+} iSpi_Peri;

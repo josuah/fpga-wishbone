@@ -17,42 +17,26 @@ module mUart#(
 	parameter pClkHz = 0,
 	parameter pOutputHz = 9600
 ) (
-	iWishbone.mPeri wb,
-	output logic irq,
-	input logic rx,
-	output logic tx
+	output	iWishbone_Peri wb_p,
+	input	iWishbone_Ctrl wb_c,
+	input	logic rx,
+	output	logic tx
 );
-	localparam lpTicksPerBaud = pClkHz / pOutputHz;
+	localparam pTicksPerBaud = pClkHz / pOutputHz;
 
-	assign wb.dat_p[31:8] = 0;
+	assign wb_p.ack = wb_c.stb;
 
-	mUartRx#(
-		.pTicksPerBaud(lpTicksPerBaud)
-	) mrx(
-		.clk(wb.clk),
-		.rst(wb.rst),
-		.stb(wb.stb & !wb.we),
-		.data(wb.dat_p[7:0]),
-		.irq(irq),
-		.rx(rx)
+	mUartRx#(.pTicksPerBaud(pTicksPerBaud)) murx(
+		.clk, .rst,
+		.stb(wb_c.stb & !wb_c.we),
+		.data(wb_p.dat),
+		.rx
 	);
 
-	mUartTx#(
-		.pTicksPerBaud(lpTicksPerBaud)
-	) mtx(
-		.clk(wb.clk),
-		.rst(wb.rst),
-		.stb(wb.stb & wb.we),
-		.data(wb.dat_c[7:0]),
-		.tx(tx)
+	mUartTx#(.pTicksPerBaud(pTicksPerBaud)) mutx(
+		.clk, .rst,
+		.stb(wb_c.stb & wb_c.we),
+		.data(wb_c.dat),
+		.tx
 	);
-
-	always_ff @(posedge wb.clk) begin
-		wb.ack_o <= wb.cyc && wb.stb;
-
-		if (wb.rst) begin
-			wb.ack_o <= 0;
-		end
-	end
-
 endmodule

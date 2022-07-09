@@ -3,9 +3,11 @@
 module mUartTx#(
 	parameter pTicksPerBaud = 0
 ) (
-	input logic clk, rst, stb,
-	input logic[7:0] data,
-	output logic tx
+	input	logic clk,
+	input	logic rst,
+	input	logic stb,
+	input	logic[7:0] data,
+	output	logic tx
 );
 	eUartState state;
 	logic[9:0] shifter;
@@ -32,44 +34,8 @@ module mUartTx#(
 		end
 		endcase
 
-		if (rst)
+		if (rst) begin
 			{state, shifter, baud_cnt} <= 0;
-	end
-
-`ifdef FORMAL
-	logic f_rst_done = 0;
-
-	always_ff @(*) begin
-		cover(rst);
-		if (rst)
-			f_rst_done <= 1;
-	end
-
-	always_ff @(*) begin
-		if (f_rst_done) begin
-			assert(state <= STATE_STOP);
-			assert(baud_cnt < pTicksPerBaud);
-
-			case (state)
-			STATE_IDLE: begin
-				assert(baud_cnt == 0);
-				assert(shifter == 0);
-			end
-			STATE_START: begin
-				cover(baud_cnt == 0);
-				cover(baud_cnt == 1);
-				cover(baud_cnt == pTicksPerBaud - 1);
-			end
-			default: begin
-				assert(state > STATE_START);
-				assert(state < STATE_STOP);
-			end
-			STATE_STOP: begin
-				assert(shifter == 0);
-			end
-			endcase
 		end
 	end
-`endif
-
 endmodule

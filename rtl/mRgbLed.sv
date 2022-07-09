@@ -1,22 +1,20 @@
 
-module mDebug (
+module mRgbLed(
 	input	logic clk,
 	input	logic rst,
 	output	iWishbone_Peri wb_p,
 	input	iWishbone_Ctrl wb_c,
-	output	logic[7:0] debug
+	output	logic[2:0] rgb
 );
-	assign wb_p.dat = 0;
+	assign wb_p.ack = wb_c.stb;
 
 	always_ff @(posedge clk) begin
-		wb_p.ack <= wb_c.stb;
-
-		if (wb_c.stb && wb_c.we) begin
-			debug <= wb_c.dat;
+		if (wb_c.stb) begin
+			rgb <= 3'b111;
 		end
 
 		if (rst) begin
-			debug <= 8'b11011011;
+			rgb <= 0;
 		end
 	end
 

@@ -9,9 +9,9 @@ NEXTPNR = nextpnr-ice40 --randomize-seed --up5k --package sg48
 YOSYS = yosys
 GTKWAVE = gtkwave -CM6
 
-include Makefile.inc
-
 all: synthesis.bit simulation.vcd #test
+
+include config.mk
 
 clean:
 	rm -rf verilator/ verification*/
@@ -25,22 +25,25 @@ wave: simulation.gtkw simulation.vcd
 	${GTKWAVE} -a simulation.gtkw simulation.vcd >/dev/null 2>&1 &
 
 lint: Makefile
-	${VERILATOR} --lint-only $V
-
-Makefile.inc: rtl
-	echo V = rtl/*.sv >Makefile.inc
+	${VERILATOR} --lint-only ${RTL}
 
 test: verification_prove/logfile.txt verification_cover/logfile.txt
 
-verification.sby: $V Makefile verification.sh
-	sh verification.sh $V >$@
+${RTL}: config.mk
+
+config.mk: rtl
+	echo rtl/*.sv | fold -s -w 80 \
+	| sed 's/^/     /; 1 s/^/RTL =/; s/$$/ \\/; $$ s/ \\$$//' >$@
+
+verification.sby: ${RTL} Makefile verification.sh
+	sh verification.sh ${RTL} >$@
 
 verification_prove/logfile.txt \
 verification_cover/logfile.txt: verification.sby
 	sby -f verification.sby
 
-verilator/VmTopLevel.mk: $V
-	${VERILATOR} -cc --Mdir verilator --top-module mTopLevel $V
+verilator/VmTopLevel.mk: ${RTL}
+	${VERILATOR} -cc --Mdir verilator --top-module mTopLevel ${RTL}
 
 verilator/VmTopLevel__ALL.a: verilator/VmTopLevel.mk
 	${MAKE} -C verilator -f VmTopLevel.mk
@@ -48,8 +51,8 @@ verilator/VmTopLevel__ALL.a: verilator/VmTopLevel.mk
 simulation.elf: verilator/VmTopLevel__ALL.a simulation.cpp simulation.h
 	${CXX} -Iverilator -o $@ simulation.cpp ${VERILATOR_SRC} verilator/VmTopLevel__ALL.a
 
-synthesis.json: $V
-	${YOSYS} -p "read_verilog -sv $V; synth_ice40 -top mSynthesis -json $@" >$*.yosys.log
+synthesis.json: ${RTL}
+	${YOSYS} -p "read_verilog -sv ${RTL}; synth_ice40 -top mSynthesis -json $@" >$*.yosys.log
 
 .SUFFIXES: .sv .elf .vcd .json .asc .bit .dfu .hex .dot .pdf .py .gtkw
 

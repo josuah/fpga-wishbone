@@ -3,12 +3,11 @@
 module mUartRx#(
 	parameter TICKS_PER_BAUD = 0
 ) (
-	input logic clk,
-	input logic rst,
-	input logic stb,
-	output logic irq,
-	output logic[7:0] data,
-	input logic rx
+	input	logic clk,
+	input	logic rst,
+	input	logic stb,
+	output	logic[7:0] data,
+	input	logic rx
 );
 	logic[3:0] state;
 	logic[$size(TICKS_PER_BAUD)-1:0] baud_cnt;
@@ -43,30 +42,8 @@ module mUartRx#(
 		end
 		endcase
 
-		if (stb)
-			// TODO: What if we read the data register just now?
-			// Should the IRQ be set for one clock and disappear?
-			irq <= 0;
-
 		if (rst) begin
 			{state, shifter, baud_cnt, data} <= 0;
 		end
 	end
-
-`ifdef FORMAL
-	logic f_rst = 0;
-
-	assert property (baud_cnt < TICKS_PER_BAUD);
-
-	always_comb begin
-		cover(rst);
-	end
-
-	always_ff @(posedge clk) begin
-		if (rst) begin
-			f_rst <= 1;
-		end
-	end
-`endif
-
 endmodule

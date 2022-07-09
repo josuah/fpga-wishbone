@@ -25,19 +25,22 @@ typedef enum {
 } eSpiState;
 
 module mSpiState (
-	iWishbone.mCtrl wb,
-	input logic[7:0] rx_data,
-	input logic rx_stb,
-	output logic[7:0] tx_data,
-	output logic tx_stb
+	input	logic clk,
+	input	logic rst,
+	output	iWishbone_Ctrl wb_c,
+	output	iWishbone_Peri wb_p,
+	input	logic[7:0] rx_data,
+	input	logic rx_stb,
+	output	logic[7:0] tx_data,
+	output	logic tx_stb
 );
 	logic[7:0] tx_data_buf;
 	eSpiState state;
 
-	always_ff @(posedge wb.clk) begin
-		if (wb.ack) begin
-			tx_data_buf <= wb.dat_p; // only used if wb.we
-			wb.stb <= 0;
+	always_ff @(posedge clk) begin
+		if (wb_p.ack) begin
+			tx_data_buf <= wb_p.dat; // only used if wb_c.we
+			wb_c.stb <= 0;
 		end
 
 		// on each byte read, queue one byte to write
@@ -46,24 +49,24 @@ module mSpiState (
 		if (rx_stb) begin
 			case (state)
 			eSpiState_Idle: begin		// RX W000SSSS
-				wb.we <= rx_data[7];
+				wb_c.we <= rx_data[7];
 				tx_data <= 8'h00;	// TX 00000000
 				if (|rx_data) // skip 0x00
 					state <= eSpiState_GetAddress;
 			end
 			eSpiState_GetAddress: begin	// RX AAAAAAAA
-				wb.adr <= {rx_data[3:0]}; // TODO: decide on an address length
-				if (wb.we) begin
+				wb_p.adr <= {rx_data[3:0]}; // TODO: decide on an address length
+				if (wb_c.we) begin
 					// wait to have data to write
 					state <= eSpiState_WriteData;
 				end else begin
 					// wishbone read with that address
-					wb.stb <= 1;
+					wb_c.stb <= 1;
 					state <= eSpiState_ReadStallAck;
 				end
 			end
 			eSpiState_ReadStallAck: begin	// TX 00000000
-				if (!wb.stb) begin	// TX 11111111
+				if (!wb_c.stb) begin	// TX 11111111
 					tx_data <= 8'hFF;
 					state <= eSpiState_ReadData;
 				end
@@ -73,12 +76,12 @@ module mSpiState (
 				state <= eSpiState_Idle;
 			end
 			eSpiState_WriteData: begin	// RX DDDDDDDD
-				wb.dat_c <= rx_data;
+				wb_c.dat <= rx_data;
 				state <= eSpiState_WriteStallAck;
-				wb.stb <= 1;
+				wb_c.stb <= 1;
 			end
 			eSpiState_WriteStallAck: begin	// TX 00000000
-				if (!wb.stb) begin	// TX 11111111
+				if (!wb_c.stb) begin	// TX 11111111
 					tx_data <= 8'hFF;
 					state <= eSpiState_Idle;
 				end
@@ -86,7 +89,7 @@ module mSpiState (
 			endcase
 		end
 
-		if (wb.rst) begin
+		if (rst) begin
 			{tx_data, tx_stb, tx_data_buf, state} <= 0;
 		end
 	end
@@ -95,23 +98,23 @@ module mSpiState (
 
 	logic past = 0;
 
-	initial assume(wb.rst == 1);
+	initial assume(rst == 1);
 
-	always_ff @(posedge wb.clk) begin
+	always_ff @(posedge clk) begin
 		past <= 1;
 
-		if (wb.rst) begin
+		if (rst) begin
 			assume(rx_stb == 0);
 		end
 
-		if (past && $past(wb.rst) == 1)
-			assume(wb.rst == 0);
-		if (past && $past(wb.rst) == 0)
-			assume(wb.rst == 0);
+		if (past && $past(rst) == 1)
+			assume(rst == 0);
+		if (past && $past(rst) == 0)
+			assume(rst == 0);
 
 		// we are not expecting to see a slave answer before
 		// we actually wait for an answer from a slave
-		assume(state == eSpiState_ReadStallAck || wb.ack == 0);
+		assume(state == eSpiState_ReadStallAck || wb_p.ack == 0);
 
 		if (past && $stable(rx_stb)) begin
 			assert($stable(tx_data));
