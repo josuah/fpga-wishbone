@@ -2,14 +2,19 @@ from gtkw import write_gtkw
 from sys import argv
 
 def group(pfx):
-    return (pfx, [(pfx + '.*')])
+    return (pfx, [(pfx)])
 
 traces = [
-    group('mspi.spi'),
-    group('mspi.mstate'),
-    group('mspi.mexp'),
-    group('mspi.tx_cdc'),
-    group('mspi.mtx.mimp.cdc'),
+    group('rst'),
+    group('spi_*'),
+    group('ms.mss.*'),
+    group('ms.mst.*'),
+    group('ms.msr.cd_*'),
+    group('ms.msr.mcde.*'),
+    group('ms.msr.shifter*'),
+    group('ms.msr.spi_*'),
+    group('ms.mcdi.*'),
+    group('ms.mcde.*'),
 ]
 
 style = {

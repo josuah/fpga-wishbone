@@ -1,3 +1,5 @@
+`default_nettype none
+
 // Simple sampling UART transmitter with static baud rate
 
 module mUartTx#(
@@ -20,14 +22,14 @@ module mUartTx#(
 		eUartState_Idle: begin
 			if (stb) begin
 				shifter <= {1'b0, data[7:0], 1'b1};
-				state <= STATE_START;
+				state <= eUartState_Start;
 			end
 		end
 		default: begin
 			baud_cnt <= baud_cnt + 1;
 
 			if (baud_cnt == pTicksPerBaud - 1) begin
-				state <= (state == STATE_STOP) ? 0 : state + 1;
+				state <= (state == eUartState_Stop) ? 0 : state + 1;
 				shifter <= {1'b0, shifter[9:1]};
 				baud_cnt <= 0;
 			end

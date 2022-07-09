@@ -1,3 +1,5 @@
+`default_nettype none
+
 // Designed for a single master such as a MCU, and multiple
 // peri. This is the place where addressing of slaves is
 // configured.
@@ -7,7 +9,8 @@
 // so we receive master's output and send to slave's input
 
 module mWishboneInterconnect#(
-	parameter pPeri = 0
+	parameter pPeri = 1,
+	parameter pAddrSize = 8
 )(
 	input	logic clk,
 	input	logic rst,
@@ -16,10 +19,10 @@ module mWishboneInterconnect#(
 	input	iWishbone_Peri[pPeri-1:0] wbp_p,
 	output	iWishbone_Ctrl[pPeri-1:0] wbp_c
 );
-	logic[3:0] addr_buf;
-	logic[3:0] addr;
 
-/*
+	logic[pAddrSize-1:0] addr_buf;
+	logic[pAddrSize-1:0] addr;
+
 	task tWishboneConnectPeri(input int id);
 		wbp_c[id].stb = wbc_c.stb;
 		wbc_p.dat = wbp_p[id].dat;
@@ -37,11 +40,11 @@ module mWishboneInterconnect#(
 
 	always_comb begin
 		case (addr)
-//		8'b00000000: begin
-//			wbp_c[0].stb = wbc_c.stb;
-//			wbc_p.dat = wbp_p[0].dat;
-//			wbc_p.ack = wbp_p[0].ack;
-//		end
+		pAddrSize'(0): begin
+			wbp_c[0].stb = wbc_c.stb;
+			wbc_p.dat = wbp_p[0].dat;
+			wbc_p.ack = wbp_p[0].ack;
+		end
 		default: begin
 			wbc_p.dat = 0;
 			wbc_p.ack = 0;
@@ -59,5 +62,4 @@ module mWishboneInterconnect#(
 			addr_buf <= 0;
 		end
 	end
-*/
 endmodule

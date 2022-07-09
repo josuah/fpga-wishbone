@@ -19,7 +19,7 @@ main(int argc, char **argv)
 
 	wbc_queue_write(0x00, 0xF, 0x55);
 
-	for (nanosecond_t ns = 100; ns < 1000000; ns++) {
+	for (nanosecond_t ns = 100; ns < 10000; ns++) {
 
 		// main clock domain
 		if (ns % CLK_MAIN_PERIOD == CLK_MAIN_PHASE)

@@ -1,3 +1,4 @@
+`default_nettype none
 
 typedef enum {
 	eUartState_Idle,
@@ -17,6 +18,8 @@ module mUart#(
 	parameter pClkHz = 0,
 	parameter pOutputHz = 9600
 ) (
+	input	logic clk,
+	input	logic rst,
 	output	iWishbone_Peri wb_p,
 	input	iWishbone_Ctrl wb_c,
 	input	logic rx,

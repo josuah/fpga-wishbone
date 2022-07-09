@@ -1,3 +1,5 @@
+`default_nettype none
+
 // Simple handshake protocol for crossing clock domain.
 // 
 // * The source module sending the data to another clock domain writes to
@@ -28,7 +30,7 @@
 
 typedef struct packed {
 	logic[7:0] data;
-	logic stb;
+	logic req;
 } iClockDomain_Exp;
 
 typedef struct packed {

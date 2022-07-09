@@ -1,37 +1,37 @@
+`default_nettype none
 
 module mSpiRx(
 	input	iSpi_Ctrl spi_c,
-	output	iSpi_Peri spi_p,
 	input	iClockDomain_Imp cd_i,
-	output	iClockDomain_Exp cd_e
+	output	iClockDomain_Exp cd_e,
+	output	logic[7:0] debug
 );
 	logic[2:0] cnt;
-	logic[6:0] shifter;
-	logic started;
-	logic[7:0] shifter_next;
+	logic[7:0] shifter;
 	logic unused;
+	logic stb;
+
+	assign debug = shifter;
 
 	mClockDomainExporter mcde(
+		.rst(0),
 		.clk(spi_c.sck),
-		.cd_e,
-		.cd_i,
-		.data(shifter_next),
-		.stb(spi.csn == 0 && cnt == 0 && started),
-		.ready(unused),
+		.cd_e, .cd_i,
+		.data(shifter),
+		.stb,
+		.ready(unused)
 	);
 
-	assign shifter_next = {shifter[6:0], spi.sdi};
-
-	always_ff @(posedge spi.sck) begin
-		if (spi.csn == 0) begin
-			// prevent reception of empty data on first clock
-			started <= 1;
-
-			if (spi.csn == 0) begin
+	always_ff @(posedge spi_c.sck) begin
+		stb <= 0;
+		if (spi_c.csn == 0) begin
+			if (spi_c.csn == 0) begin
 				cnt <= cnt + 1;
-				shifter <= shifter_next[6:0];
+				shifter <= {shifter[6:0], spi_c.dat};
+			end
+			if (cnt == 3'b111) begin
+				stb <= 1;
 			end
 		end
 	end
-
 endmodule

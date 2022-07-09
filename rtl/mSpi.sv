@@ -1,3 +1,5 @@
+`default_nettype none
+
 // Wishbone B4 controller, itself controlled through an SPI peripheral
 // the MCU on the other end is the SPI controller, and (via this
 // module) the Wishbone controller as well.
@@ -11,8 +13,10 @@ module mSpi(
 	input	iSpi_Ctrl spi_c,
 	output	logic[7:0] debug
 );
-	logic rx_stb, tx_stb;
-	logic[7:0] rx_data, tx_data;
+	logic rx_stb;
+	logic tx_stb;
+	logic[7:0] rx_data;
+	logic[7:0] tx_data;
 	logic unused;
 
 	iClockDomain_Imp tx_cd_i;
@@ -21,43 +25,36 @@ module mSpi(
 	iClockDomain_Imp rx_cd_i;
 	iClockDomain_Exp rx_cd_e;
 
-	assign debug = {8{spi.sdi}};
-
 	mClockDomainImporter mcdi(
 		.clk, .rst,
+		.cd_i(rx_cd_i), .cd_e(rx_cd_e),
 		.data(rx_data),
-		.stb(rx_stb),
-		.cd_i(rx_cd_i),
-		.cd_e(rx_cd_e)
+		.stb(rx_stb)
 	);
 
 	mClockDomainExporter mcde(
 		.clk, .rst,
+		.cd_e(tx_cd_e), .cd_i(tx_cd_i),
 		.data(tx_data),
 		.stb(tx_stb),
-		.ready(unused),
-		.cd_e(tx_cd_e),
-		.cd_i(tx_cd_i)
+		.ready(unused)
 	);
 
 	mSpiRx msr(
-		.spi_c, .spi_p,
-		.cd_i(rx_cd_i),
-		.cd_e(rx_cd_e)
+		.spi_c,
+		.cd_i(rx_cd_i), .cd_e(rx_cd_e),
+		.debug
 	);
 
 	mSpiTx mst(
 		.spi_c, .spi_p,
-		.cd_i(tx_cd_i),
-		.cd_e(tx_cd_e)
+		.cd_i(tx_cd_i), .cd_e(tx_cd_e)
 	);
 
 	mSpiState mss(
 		.clk, .rst,
-		.wb_p, .wb_c,
-		.rx_stb(rx_stb),
-		.rx_data(rx_data),
-		.tx_stb(tx_stb),
-		.tx_data(tx_data)
+		.wb_c, .wb_p,
+		.rx_stb, .rx_data,
+		.tx_stb, .tx_data
 	);
 endmodule

@@ -1,3 +1,4 @@
+`default_nettype none
 
 module mDebug (
 	input	logic clk,

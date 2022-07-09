@@ -1,3 +1,4 @@
+`default_nettype none
 
 module mMicrophone#(
 	parameter pWbHz = 0,
@@ -28,9 +29,9 @@ module mMicrophone#(
 			clk <= !clk;
 		end
 
-		irq_mic_data_ready = 0;
-		if (clk_cnt == 0 && clk == 1) begin
-			sampling_buf <= sampling_buf + mic_dat ? 1 : 0;
+		irq = 0;
+		if (mic_clk_cnt == 0 && clk == 1) begin
+			sampling_buf <= sampling_buf + mic_data ? 1 : 0;
 			sampling_cnt <= sampling_cnt + 1;
 
 			// if next sampling would overflow
@@ -38,12 +39,12 @@ module mMicrophone#(
 
 				// continuously sampling wb_p.dat
 				wb_p.dat <= sampling_buf;
-				irq_mic_data_ready = 1;
+				irq = 1;
 
 				// not starting at zero because we add
 				// the first value right away
 				sampling_cnt <= 1;
-				sampling_buf <= mic_dat ? 1 : 0;
+				sampling_buf <= mic_data ? 1 : 0;
 			end
 		end
 

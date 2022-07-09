@@ -1,3 +1,4 @@
+`default_nettype none
 
 module mPdmChannel#(
 	parameter pBits = 0
@@ -12,7 +13,7 @@ module mPdmChannel#(
 	logic[pBits:0] accumulator;
 
 	assign pdm = accumulator[pBits];
-	assign wb_p.ack = wb_p.stb;
+	assign wb_p.ack = wb_c.stb;
 
 	always_ff @(posedge clk) begin
 		accumulator <= accumulator[pBits-1:0] + level;

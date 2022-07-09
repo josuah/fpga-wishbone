@@ -1,3 +1,5 @@
+`default_nettype none
+
 // This part exports a buffer of data to the other clock domain.
 // Rising `stb` for one clock queues `data` for transfer. To use
 // only when ready.
@@ -25,6 +27,9 @@ module mClockDomainExporter#(
 			cd_e.data <= data;
 			cd_e.req <= !cd_e.req;
 		end
-	end
 
+		if (rst) begin
+			{ack_ff, cd_e.data, cd_e.req} <= 0;
+		end
+	end
 endmodule

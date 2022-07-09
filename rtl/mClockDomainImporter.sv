@@ -1,3 +1,5 @@
+`default_nettype none
+
 // This part imports a buffer of data from the other clock domain.
 // As `data` becomes valid, `stb` rises for one clock.
 
@@ -20,7 +22,11 @@ module mClockDomainImporter #(
 		// 2FF buffer to prevent metastable state propagation
 		req_ff <= {cd_e.req, req_ff[1]};
 
-		// have the `ack` signal follow the `req` signal
+		// the `ack` signal follows the `req` signal
 		cd_i.ack <= req_ff[0];
+
+		if (rst) begin
+			{req_ff, cd_i.ack} <= 0;
+		end
 	end
 endmodule

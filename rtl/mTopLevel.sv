@@ -1,6 +1,8 @@
-module mTopLevel#(
-	parameter pCpuHz = 48_000_000
-)(
+`default_nettype none
+
+module mTopLevel(
+//	parameter pCpuHz = 48_000_000
+//)(
 	input	logic clk,
 	input	logic spi_sck,
 	input	logic spi_csn,
@@ -12,10 +14,9 @@ module mTopLevel#(
 );
 	logic rst_n = 0;
 	logic rst = !rst_n;
-	logic counter;
 
-	iSpi_Ctrl spi_c = {spi_sck, spi_csn, spi_sdi};
-	iSpi_Peri spi_p = {spi_sdo};
+	iSpi_Ctrl spi_c;
+	iSpi_Peri spi_p;
 
 	iWishbone_Ctrl wbc_c;
 	iWishbone_Peri wbc_p;
@@ -26,12 +27,15 @@ module mTopLevel#(
 	assign charlieplex_o = 0;
 	assign charlieplex_oe = 0;
 
+	assign spi_sdo = spi_p.dat;
+	assign spi_c.dat = spi_sdi;
+	assign spi_c.sck = spi_sck;
+	assign spi_c.csn = spi_csn;
+
 //	assign rgb = {3'b100};
 
 	mSpi ms(
-		.clk, .rst,
-		.wb_p(wbc_p),
-		.wb_p(wbc_c),
+		.clk, .rst, .wb_p(wbc_p), .wb_c(wbc_c),
 		.spi_p, .spi_c, .debug
 	);
 
@@ -41,7 +45,7 @@ module mTopLevel#(
 //	);
 
 	mRgbLed mp0(
-		.clk, .rst, .wb_p(wb0_p), .wb_p(wb0_c),
+		.clk, .rst, .wb_p(wb0_p), .wb_c(wb0_c),
 		.rgb(rgb)
 	);
 
@@ -55,11 +59,15 @@ module mTopLevel#(
 //		.charlieplex_o, .charlieplex_oe
 //	);
 
-	mWishboneInterconnect mwi(
+	mWishboneInterconnect#(.pPeri(1)) mwi(
 		.clk, .rst,
 		.wbc_p,
 		.wbc_c,
 		.wbp_p({wb0_p}),
 		.wbp_c({wb0_c})
 	);
+
+	always_ff @(posedge clk) begin
+		rst_n <= 1;
+	end
 endmodule

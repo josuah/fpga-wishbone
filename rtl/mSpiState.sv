@@ -1,3 +1,5 @@
+`default_nettype none
+
 // Wishbone read:
 //
 //	W000SSSS AAAAAAAA :::::::: :::::::: :::::::: :::::::: :::::::: ::::::::
@@ -18,7 +20,7 @@
 typedef enum {
 	eSpiState_Idle,
 	eSpiState_GetAddress,
-	eSpiState_ReadStallAck,
+	eSpiState_WaitAck,
 	eSpiState_ReadData,
 	eSpiState_WriteData,
 	eSpiState_WriteStallAck
@@ -28,7 +30,7 @@ module mSpiState (
 	input	logic clk,
 	input	logic rst,
 	output	iWishbone_Ctrl wb_c,
-	output	iWishbone_Peri wb_p,
+	input	iWishbone_Peri wb_p,
 	input	logic[7:0] rx_data,
 	input	logic rx_stb,
 	output	logic[7:0] tx_data,
@@ -55,17 +57,17 @@ module mSpiState (
 					state <= eSpiState_GetAddress;
 			end
 			eSpiState_GetAddress: begin	// RX AAAAAAAA
-				wb_p.adr <= {rx_data[3:0]}; // TODO: decide on an address length
+				wb_c.adr <= {rx_data[3:0]};
 				if (wb_c.we) begin
 					// wait to have data to write
 					state <= eSpiState_WriteData;
 				end else begin
 					// wishbone read with that address
 					wb_c.stb <= 1;
-					state <= eSpiState_ReadStallAck;
+					state <= eSpiState_WaitAck;
 				end
 			end
-			eSpiState_ReadStallAck: begin	// TX 00000000
+			eSpiState_WaitAck: begin	// TX 00000000
 				if (!wb_c.stb) begin	// TX 11111111
 					tx_data <= 8'hFF;
 					state <= eSpiState_ReadData;
@@ -114,13 +116,13 @@ module mSpiState (
 
 		// we are not expecting to see a slave answer before
 		// we actually wait for an answer from a slave
-		assume(state == eSpiState_ReadStallAck || wb_p.ack == 0);
+		assume(state == eSpiState_WaitAck || wb_p.ack == 0);
 
 		if (past && $stable(rx_stb)) begin
 			assert($stable(tx_data));
 			assert($stable(state));
 
-			if (state != eSpiState_ReadStallAck) begin
+			if (state != eSpiState_WaitAck) begin
 				assert($stable(tx_data_buf));
 			end
 		end

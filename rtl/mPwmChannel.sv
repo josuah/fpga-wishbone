@@ -1,3 +1,4 @@
+`default_nettype none
 
 module mPwmChannel#(
 	parameter pClkHz = 0,
@@ -13,11 +14,12 @@ module mPwmChannel#(
 	localparam pTicksPerCycle = pClkHz / pOutHz;
 
 	// one less bit, to permit reaching 100% duty cycle
-	logic[7:0] cnt1;
 	logic[$clog2(pTicksPerCycle)-1:0] cnt0;
+	logic[7:0] cnt1;
+	logic[7:0] duty_cycle;
 
-	assign pwm = duty_cycle > pwm_counter;
-	assign wb_p.ack = wb_c.req;
+	assign pwm = duty_cycle > cnt1;
+	assign wb_p.ack = wb_c.stb;
 
 	always_ff @(posedge clk) begin
 

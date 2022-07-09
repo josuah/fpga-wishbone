@@ -1,3 +1,5 @@
+`default_nettype none
+
 // Simple sampling UART receiver with static baud rate
 
 module mUartRx#(
@@ -29,14 +31,14 @@ module mUartRx#(
 				shifter <= {!rx, shifter[7:1]};
 
 			if (baud_cnt == TICKS_PER_BAUD - 1) begin
-				if (state == eUartState_Bit_7) begin
+				if (state == eUartState_Bit7) begin
 					// continuously update the data buffer
 					data <= shifter;
 					// raise interrupt: dinner is served
 					rx <= 1;
 				end
 
-				state <= (state == eUartState_Bit_7) ? 0 : state + 1;
+				state <= (state == eUartState_Bit7) ? 0 : state + 1;
 				baud_cnt <= 0;
 			end
 		end
