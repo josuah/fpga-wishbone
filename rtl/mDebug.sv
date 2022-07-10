@@ -7,11 +7,11 @@ module mDebug (
 	input	iWishbone_Ctrl wb_c,
 	output	logic[7:0] debug
 );
+	logic unused = |{ wb_c.adr };
 	assign wb_p.dat = 0;
+	assign wb_p.ack = wb_c.stb;
 
 	always_ff @(posedge clk) begin
-		wb_p.ack <= wb_c.stb;
-
 		if (wb_c.stb && wb_c.we) begin
 			debug <= wb_c.dat;
 		end
@@ -20,5 +20,4 @@ module mDebug (
 			debug <= 8'b11011011;
 		end
 	end
-
 endmodule

@@ -33,7 +33,7 @@ ${RTL}: config.mk
 
 config.mk: rtl
 	echo rtl/*.sv | fold -s -w 80 \
-	| sed 's/^/     /; 1 s/^/RTL =/; s/$$/ \\/; $$ s/ \\$$//' >$@
+	| sed 's/^/	/; 1 s/^/RTL = /; s/$$/\\/; $$ s/\\$$//' >$@
 
 verification.sby: ${RTL} Makefile verification.sh
 	sh verification.sh ${RTL} >$@

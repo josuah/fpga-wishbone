@@ -10,8 +10,7 @@ module mSpi(
 	output	iWishbone_Ctrl wb_c,
 	input	iWishbone_Peri wb_p,
 	output	iSpi_Peri spi_p,
-	input	iSpi_Ctrl spi_c,
-	output	logic[7:0] debug
+	input	iSpi_Ctrl spi_c
 );
 	logic rx_stb;
 	logic tx_stb;
@@ -42,8 +41,7 @@ module mSpi(
 
 	mSpiRx msr(
 		.spi_c,
-		.cd_i(rx_cd_i), .cd_e(rx_cd_e),
-		.debug
+		.cd_i(rx_cd_i), .cd_e(rx_cd_e)
 	);
 
 	mSpiTx mst(

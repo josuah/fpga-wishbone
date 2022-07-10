@@ -32,6 +32,7 @@ module mCharlieplex#(
 	assign row_pin = (row + 1 < col) ? row + 1 : row + 2;
 
 	assign wb_p.dat = 0;
+	assign wb_p.ack = wb_c.stb;
 
 	assign charlieplex_o = dot ? (1 << row_pin) : 0;
 	assign charlieplex_oe = dot ? (1 << row_pin) | (1 << col_pin) : 0;
@@ -41,8 +42,6 @@ module mCharlieplex#(
 	end
 
 	always_ff @(posedge clk) begin
-		wb_p.ack <= wb_c.stb;
-
 		// scale the clock down
 		cnt <= cnt + 1;
 		if (cnt == 0) begin

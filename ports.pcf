@@ -1,7 +1,7 @@
 # mRgb
 set_io -nowarn gpio_rgb[0] 39 # red
-set_io -nowarn gpio_rgb[1] 41 # green
-set_io -nowarn gpio_rgb[2] 40 # blue
+set_io -nowarn gpio_rgb[1] 40 # green
+set_io -nowarn gpio_rgb[2] 41 # blue
 
 # mCharlieplex
 set_io -nowarn gpio_charlieplex[0] 38

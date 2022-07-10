@@ -3,15 +3,12 @@
 module mSpiRx(
 	input	iSpi_Ctrl spi_c,
 	input	iClockDomain_Imp cd_i,
-	output	iClockDomain_Exp cd_e,
-	output	logic[7:0] debug
+	output	iClockDomain_Exp cd_e
 );
 	logic[2:0] cnt;
 	logic[7:0] shifter;
 	logic unused;
 	logic stb;
-
-	assign debug = shifter;
 
 	mClockDomainExporter mcde(
 		.rst(0),

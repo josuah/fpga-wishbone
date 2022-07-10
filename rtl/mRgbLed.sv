@@ -14,11 +14,11 @@ module mRgbLed(
 
 	always_ff @(posedge clk) begin
 		if (wb_c.stb) begin
-			rgb <= 3'b111;
+			rgb <= {{2{|wb_c.dat}}, 1'b1};
 		end
 
 		if (rst) begin
-			rgb <= 0;
+			rgb <= 3'b100;;
 		end
 	end
 
