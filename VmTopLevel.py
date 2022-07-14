@@ -7,14 +7,14 @@ def group(pfx):
 traces = [
     group('rst'),
     group('spi_*'),
-    group('ms.mss.*'),
-    group('ms.mst.*'),
-    group('ms.msr.cd_*'),
-    group('ms.msr.mcde.*'),
-    group('ms.msr.shifter*'),
-    group('ms.msr.spi_*'),
-    group('ms.mcdi.*'),
-    group('ms.mcde.*'),
+    group('mwcs.mss.*'),
+    group('mwcs.mst.*'),
+    group('mwcs.msr.cd_*'),
+    group('mwcs.msr.mcde.*'),
+    group('mwcs.msr.shifter*'),
+    group('mwcs.msr.spi_*'),
+    group('mwcs.mcdi.*'),
+    group('mwcs.mcde.*'),
 ]
 
 style = {

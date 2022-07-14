@@ -1,7 +1,5 @@
-#include "verilated.h"
-#include "verilated_vcd_c.h"
+#include <stdio.h>
 #include "VmTopLevel.h"
-
 #include "simulation.h"
 #include "simulation.spi.h"
 #include "simulation.wbc.h"

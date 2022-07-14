@@ -13,7 +13,7 @@ module mUartRx#(
 	output	logic[7:0] data,
 	input	logic rx
 );
-	logic[3:0] state;
+	eUartState state;
 	logic[$size(pTicksPerBaud)-1:0] baud_cnt;
 	logic[7:0] shifter;
 

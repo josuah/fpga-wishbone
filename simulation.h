@@ -1,9 +1,22 @@
-VmTopLevel *vsim;
+#include "verilated_vcd_c.h"
+
+VM *vsim;
 VerilatedVcdC *vcd;
 
 int simulation_changed = 0;
 
 typedef uint64_t nanosecond_t;
+
+static void
+simulation_fatal(char const *fmt, ...)
+{
+	va_list va;
+
+	va_start(va, fmt);
+	fputs("fatal: ", stderr);
+	vfprintf(stderr, fmt, va);
+	fputs("\n", stderr);
+}
 
 static void
 simulation_put(char const *var, uint64_t u64, uint8_t size)
@@ -26,11 +39,11 @@ simulation_init(int argc, char **argv)
 	Verilated::commandArgs(argc, argv);
 	Verilated::traceEverOn(true);
 
-	vsim = new VmTopLevel;
+	vsim = new VM;
 	vcd = new VerilatedVcdC;
 
 	vsim->trace(vcd, 99);
-	vcd->open("simulation.vcd");
+	vcd->open("/dev/stdout");
 
 	vsim->eval();
 	vcd->dump(0);
@@ -62,4 +75,13 @@ simulation_tick_apply(uint64_t ns)
 	if (simulation_changed)
 		vcd->dump(ns);
 	simulation_changed = 0;
+}
+
+static void
+simulation_tick_ns(nanosecond_t *ns, nanosecond_t delay)
+{
+	*ns += delay;
+	simulation_tick_posedge();
+	simulation_tick_negedge();
+	simulation_tick_apply(*ns);
 }

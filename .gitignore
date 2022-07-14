@@ -3,14 +3,11 @@
 *.bit
 *.core
 *.dfu
-*.elf
 *.hex
 *.json
 *.log
-*.vcd
 *.pdf
 *.dot
 __pycache__
-/testbench
 /verification_*
 /verilator
