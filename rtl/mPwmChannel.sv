@@ -2,39 +2,34 @@
 
 module mPwmChannel#(
 	parameter pClkHz = 0,
-	parameter pOutHz = 0,
-	parameter pChannels = 0
+	parameter pPwmHz = 0
 ) (
 	input	logic clk,
 	input	logic rst,
 	output	iWishbone_Peri wb_p,
 	input	iWishbone_Ctrl wb_c,
-	output	logic[pChannels-1:0] pwm
+	output	logic pwm
 );
-	localparam pTicksPerCycle = pClkHz / pOutHz;
+	localparam pTicksPerCycle = pClkHz / pPwmHz;
 
-	// one less bit, to permit reaching 100% duty cycle
-	logic[$clog2(pTicksPerCycle)-1:0] cnt0;
-	logic[7:0] cnt1;
+	logic[8:0] cnt;
 	logic[7:0] duty_cycle;
 
-	assign pwm = duty_cycle > cnt1;
+	assign pwm = duty_cycle > cnt;
 	assign wb_p.ack = wb_c.stb;
 
 	always_ff @(posedge clk) begin
-
 		if (wb_c.stb) begin
 			duty_cycle <= wb_c.dat;
 		end
 
-		cnt0 <= cnt0 + 1;
-		if (cnt0 == pTicksPerCycle[8 +: $size(cnt0)]) begin
-			cnt0 <= 0;
-			cnt1 <= cnt1 + 1;
+		cnt <= cnt + 1;
+		if (cnt[8]) begin
+			cnt <= 0;
 		end
 
 		if (rst) begin
-			{cnt0, cnt1, duty_cycle} <= 0;
+			{cnt, duty_cycle} <= 0;
 		end
 	end
 

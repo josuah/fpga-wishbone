@@ -26,5 +26,4 @@ module mPdmChannel#(
 			{level, accumulator} <= 0;
 		end
 	end
-
 endmodule

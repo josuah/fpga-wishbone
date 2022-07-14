@@ -3,41 +3,43 @@
 // Simple sampling UART receiver with static baud rate
 
 module mUartRx#(
-	parameter TICKS_PER_BAUD = 0
-) (
+	parameter pBaudRate = 0,
+	parameter pClkHz = 0,
+	localparam pTicksPerBaud = pClkHz / pBaudRate
+)(
 	input	logic clk,
 	input	logic rst,
-	input	logic stb,
+	output	logic stb,
 	output	logic[7:0] data,
 	input	logic rx
 );
 	logic[3:0] state;
-	logic[$size(TICKS_PER_BAUD)-1:0] baud_cnt;
+	logic[$size(pTicksPerBaud)-1:0] baud_cnt;
 	logic[7:0] shifter;
 
 	always_ff @(posedge clk) begin
+		stb <= 0;
+
 		case (state)
 		eUartState_Idle: begin
 			if (rx == 0) begin
 				state <= eUartState_Start;
-				// 1 to compensate register delay
-				baud_cnt <= (TICKS_PER_BAUD > 1) ? 1 : 0;
+				// start at 1 to compensate register delay
+				baud_cnt <= (pTicksPerBaud > 1) ? 1 : 0;
 			end
 		end
 		default: begin
 			baud_cnt <= baud_cnt + 1;
 
-			if (baud_cnt == TICKS_PER_BAUD / 2)
+			if (baud_cnt == pTicksPerBaud / 2) begin
 				shifter <= {!rx, shifter[7:1]};
+			end
 
-			if (baud_cnt == TICKS_PER_BAUD - 1) begin
+			if (baud_cnt == pTicksPerBaud - 1) begin
 				if (state == eUartState_Bit7) begin
-					// continuously update the data buffer
 					data <= shifter;
-					// raise interrupt: dinner is served
-					rx <= 1;
+					stb <= 1;
 				end
-
 				state <= (state == eUartState_Bit7) ? 0 : state + 1;
 				baud_cnt <= 0;
 			end

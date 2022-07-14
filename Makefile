@@ -9,7 +9,7 @@ NEXTPNR = nextpnr-ice40 --randomize-seed --up5k --package sg48
 YOSYS = yosys
 GTKWAVE = gtkwave -CM6
 
-all: synthesis.bit simulation.vcd #test
+all: synthesis.bit simulation.vcd
 
 include config.mk
 
@@ -27,19 +27,20 @@ wave: simulation.gtkw simulation.vcd
 lint: Makefile
 	${VERILATOR} --lint-only ${RTL}
 
-test: verification_prove/logfile.txt verification_cover/logfile.txt
-
 ${RTL}: config.mk
 
 config.mk: rtl
 	echo rtl/*.sv | fold -s -w 80 \
 	| sed 's/^/	/; 1 s/^/RTL = /; s/$$/\\/; $$ s/\\$$//' >$@
 
+test: verification_prove/logfile.txt verification_cover/logfile.txt
+
 verification.sby: ${RTL} Makefile verification.sh
 	sh verification.sh ${RTL} >$@
 
 verification_prove/logfile.txt \
-verification_cover/logfile.txt: verification.sby
+verification_cover/logfile.txt \
+: verification.sby
 	sby -f verification.sby
 
 verilator/VmTopLevel.mk: ${RTL}

@@ -4,13 +4,14 @@
 // the MCU on the other end is the SPI controller, and (via this
 // module) the Wishbone controller as well.
 
-module mSpi(
+module mWishboneCtrlSpi(
 	input	logic clk,
 	input	logic rst,
 	output	iWishbone_Ctrl wb_c,
 	input	iWishbone_Peri wb_p,
 	output	iSpi_Peri spi_p,
-	input	iSpi_Ctrl spi_c
+	input	iSpi_Ctrl spi_c,
+	output	logic[7:0] debug
 );
 	logic rx_stb;
 	logic tx_stb;
@@ -43,13 +44,14 @@ module mSpi(
 		.spi_c,
 		.cd_i(rx_cd_i), .cd_e(rx_cd_e)
 	);
+	assign debug = rx_data;
 
 	mSpiTx mst(
 		.spi_c, .spi_p,
 		.cd_i(tx_cd_i), .cd_e(tx_cd_e)
 	);
 
-	mSpiState mss(
+	mWishboneCtrlSync mwcs(
 		.clk, .rst,
 		.wb_c, .wb_p,
 		.rx_stb, .rx_data,

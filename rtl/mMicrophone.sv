@@ -52,9 +52,4 @@ module mMicrophone#(
 			{mic_clk, mic_clk_cnt, sampling_buf, sampling_cnt} <= 0;
 		end
 	end
-
-`ifdef FORMAL
-	assert property	(pTicksPerHz > 0);
-`endif
-
 endmodule

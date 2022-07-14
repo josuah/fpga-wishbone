@@ -1,10 +1,10 @@
 `default_nettype none
 
-// Simple sampling UART transmitter with static baud rate
+// Simple UART transmitter with config-time static baud rate
 
 module mUartTx#(
 	parameter pTicksPerBaud = 0
-) (
+)(
 	input	logic clk,
 	input	logic rst,
 	input	logic stb,
