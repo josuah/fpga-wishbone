@@ -1,4 +1,5 @@
 `default_nettype none
+`include "rtl/iWishbone.svh"
 
 // Controller for a Wishbone bus, receiving data from an asynchronous serial interface
 

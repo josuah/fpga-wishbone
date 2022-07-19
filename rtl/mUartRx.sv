@@ -1,4 +1,5 @@
 `default_nettype none
+`include "rtl/eUartState.svh"
 
 // Simple sampling UART receiver with static baud rate
 

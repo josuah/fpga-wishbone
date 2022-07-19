@@ -8,6 +8,6 @@
 *.log
 *.pdf
 *.dot
+*.xml
 __pycache__
-/verification_*
-/verilator
+/sim_build

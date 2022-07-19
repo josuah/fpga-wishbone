@@ -1,4 +1,5 @@
 `default_nettype none
+`include "rtl/iWishbone.svh"
 
 module mMicrophone#(
 	parameter pWbHz = 0,

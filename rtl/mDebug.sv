@@ -1,4 +1,5 @@
 `default_nettype none
+`include "rtl/iWishbone.svh"
 
 module mDebug (
 	input	logic clk,

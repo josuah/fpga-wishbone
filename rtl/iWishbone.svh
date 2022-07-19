@@ -1,4 +1,6 @@
 `default_nettype none
+`ifndef iWishbone
+`define iWishbone
 
 typedef struct packed {
 	logic ack;
@@ -11,3 +13,5 @@ typedef struct packed {
 	logic[3:0] adr;
 	logic[7:0] dat;
 } iWishbone_Ctrl;
+
+`endif

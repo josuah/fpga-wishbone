@@ -1,4 +1,5 @@
 `default_nettype none
+`include "rtl/iWishbone.svh"
 
 // Wishbone B4 controller, itself controlled through an SPI peripheral
 // the MCU on the other end is the SPI controller, and (via this

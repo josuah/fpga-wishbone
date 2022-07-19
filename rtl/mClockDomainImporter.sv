@@ -1,4 +1,5 @@
 `default_nettype none
+`include "rtl/iClockDomain.svh"
 
 // This part imports a buffer of data from the other clock domain.
 // As `data` becomes valid, `stb` rises for one clock.

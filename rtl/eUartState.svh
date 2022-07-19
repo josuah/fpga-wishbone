@@ -1,3 +1,6 @@
+`default_nettype none
+`ifndef eUartState
+`define eUartState
 
 typedef enum {
 	eUartState_Idle,
@@ -12,3 +15,5 @@ typedef enum {
 	eUartState_Bit7,
 	eUartState_Stop
 } eUartState;
+
+`endif

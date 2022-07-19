@@ -1,6 +1,8 @@
 `default_nettype none
+`include "rtl/iWishbone.svh"
+`include "rtl/iSpi.svh"
 
-module mTopLevel#(
+module top#(
 //	parameter pCpuHz = 48_000_000,
 	parameter pAddrLen = 4
 )(

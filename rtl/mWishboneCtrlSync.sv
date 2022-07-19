@@ -1,4 +1,5 @@
 `default_nettype none
+`include "rtl/iWishbone.svh"
 
 // Wishbone read:
 //

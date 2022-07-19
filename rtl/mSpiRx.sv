@@ -1,4 +1,6 @@
 `default_nettype none
+`include "rtl/iClockDomain.svh"
+`include "rtl/iSpi.svh"
 
 module mSpiRx(
 	input	iSpi_Ctrl spi_c,

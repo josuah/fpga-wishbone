@@ -49,7 +49,7 @@ module mSynthesis (
 		.D_OUT_0(charlieplex_o)
 	);
 
-	mTopLevel mtop(
+	top mtop(
 		.clk,
 		.spi_sck(gpio_spi_sck),
 		.spi_csn(gpio_spi_csn),

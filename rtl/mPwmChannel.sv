@@ -1,4 +1,5 @@
 `default_nettype none
+`include "rtl/iWishbone.svh"
 
 module mPwmChannel#(
 	parameter pClkHz = 0,
@@ -15,7 +16,7 @@ module mPwmChannel#(
 	logic[8:0] cnt;
 	logic[7:0] duty_cycle;
 
-	assign pwm = duty_cycle > cnt;
+	assign pwm = { 1'b1, duty_cycle } > cnt;
 	assign wb_p.ack = wb_c.stb;
 
 	always_ff @(posedge clk) begin

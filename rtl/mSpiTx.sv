@@ -1,4 +1,6 @@
 `default_nettype none
+`include "rtl/iClockDomain.svh"
+`include "rtl/iSpi.svh"
 
 module mSpiTx (
 	output	iSpi_Peri spi_p,

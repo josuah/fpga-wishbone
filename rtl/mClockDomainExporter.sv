@@ -1,4 +1,5 @@
 `default_nettype none
+`include "rtl/iClockDomain.svh"
 
 // This part exports a buffer of data to the other clock domain.
 // Rising `stb` for one clock queues `data` for transfer. To use

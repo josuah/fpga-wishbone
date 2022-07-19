@@ -1,4 +1,6 @@
 `default_nettype none
+`ifndef iClockDomain
+`define iClockDomain
 
 // Simple handshake protocol for crossing clock domain.
 // 
@@ -36,3 +38,5 @@ typedef struct packed {
 typedef struct packed {
 	logic ack;
 } iClockDomain_Imp;
+
+`endif

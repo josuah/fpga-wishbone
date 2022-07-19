@@ -1,4 +1,5 @@
 `default_nettype none
+`include "rtl/eUartState.svh"
 
 // Simple UART transmitter with config-time static baud rate
 
