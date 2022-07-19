@@ -2,29 +2,29 @@
 `include "rtl/iWishbone.svh"
 
 module mPdmChannel#(
-	parameter pBits = 0
+  parameter pBits = 0
 )(
-	input	logic rst,
-	input	logic clk,
-	input	iWishbone_Peri wb_p,
-	input	iWishbone_Ctrl wb_c,
-	output	logic pdm
+  input logic rst,
+  input logic clk,
+  input iWishbone_Peri wb_p,
+  input iWishbone_Ctrl wb_c,
+  output  logic pdm
 );
-	logic[pBits-1:0] level;
-	logic[pBits:0] accumulator;
+  logic[pBits-1:0] level;
+  logic[pBits:0] accumulator;
 
-	assign pdm = accumulator[pBits];
-	assign wb_p.ack = wb_c.stb;
+  assign pdm = accumulator[pBits];
+  assign wb_p.ack = wb_c.stb;
 
-	always_ff @(posedge clk) begin
-		accumulator <= accumulator[pBits-1:0] + level;
+  always_ff @(posedge clk) begin
+    accumulator <= accumulator[pBits-1:0] + level;
 
-		if (wb_c.stb) begin
-			level <= wb_c.dat;
-		end
+    if (wb_c.stb) begin
+      level <= wb_c.dat;
+    end
 
-		if (rst) begin
-			{level, accumulator} <= 0;
-		end
-	end
+    if (rst) begin
+      {level, accumulator} <= 0;
+    end
+  end
 endmodule

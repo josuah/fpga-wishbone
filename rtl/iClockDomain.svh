@@ -9,15 +9,15 @@
 // * The destination module receiving data from another clock domain writes to
 //   `req` (and reads `ack`).
 // 
-//		  :   :   :   :   :   :   :   :   :   :   :   :  
-//		__:_______________:_______________:______________
-//	data	__X_______________X_______________X______________
-//		  :    _______________:   :   :   :    __________
-//	req	______/   :   :   :   \_______________/   :   :  
-//		  :   :   :   :_______________:   :   :   :   :__
-//	ack	______________/   :   :   :   \_______________/  
-//		  :   :   :   :   :   :   :   :   :   :   :   :  
-//		 (1) (2) (3) (4) (1) (2) (3) (4) (1) (2) (3) (4) 
+//      :   :   :   :   :   :   :   :   :   :   :   :  
+//    __:_______________:_______________:______________
+//  data  __X_______________X_______________X______________
+//      :    _______________:   :   :   :    __________
+//  req ______/   :   :   :   \_______________/   :   :  
+//      :   :   :   :_______________:   :   :   :   :__
+//  ack ______________/   :   :   :   \_______________/  
+//      :   :   :   :   :   :   :   :   :   :   :   :  
+//     (1) (2) (3) (4) (1) (2) (3) (4) (1) (2) (3) (4) 
 // 
 // * When the source has data to transfer,
 //   it first asserts `data` to the data to transfer (1) then invert `req` (2).
@@ -31,12 +31,12 @@
 // https://zipcpu.com/blog/2018/07/06/afifo.html
 
 typedef struct packed {
-	logic[7:0] data;
-	logic req;
+  logic[7:0] data;
+  logic req;
 } iClockDomain_Exp;
 
 typedef struct packed {
-	logic ack;
+  logic ack;
 } iClockDomain_Imp;
 
 `endif
