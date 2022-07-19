@@ -3,18 +3,18 @@
 
 // Simple UART transmitter with config-time static baud rate
 
-module mUartTx#(
+module mUartTx #(
   parameter pTicksPerBaud = 0
 )(
   input logic clk,
   input logic rst,
   input logic stb,
-  input logic[7:0] data,
-  output  logic tx
+  input logic [7:0] data,
+  output logic tx
 );
   eUartState state;
-  logic[9:0] shifter;
-  logic[$size(pTicksPerBaud)-1:0] baud_cnt;
+  logic [9:0] shifter;
+  logic [$size (pTicksPerBaud)-1:0] baud_cnt;
 
   assign tx = !shifter[0];
 

@@ -2,23 +2,23 @@
 `include "rtl/iClockDomain.svh"
 `include "rtl/iSpi.svh"
 
-module mSpiRx(
+module mSpiRx (
   input iSpi_Ctrl spi_c,
   input iClockDomain_Imp cd_i,
-  output  iClockDomain_Exp cd_e
+  output iClockDomain_Exp cd_e
 );
-  logic[2:0] cnt;
-  logic[7:0] shifter;
+  logic [2:0] cnt;
+  logic [7:0] shifter;
   logic unused;
   logic stb;
 
-  mClockDomainExporter mcde(
-    .rst(0),
-    .clk(spi_c.sck),
+  mClockDomainExporter mcde (
+    .rst (0),
+    .clk (spi_c.sck),
     .cd_e, .cd_i,
-    .data(shifter),
+    .data (shifter),
     .stb,
-    .ready(unused)
+    .ready (unused)
   );
 
   always_ff @(posedge spi_c.sck) begin

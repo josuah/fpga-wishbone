@@ -5,34 +5,34 @@
 // the MCU on the other end is the SPI controller, and (via this
 // module) the Wishbone controller as well.
 
-module mWishboneCtrlUart(
+module mWishboneCtrlUart (
   input logic clk,
   input logic rst,
-  output  iWishbone_Ctrl wb_c,
+  output iWishbone_Ctrl wb_c,
   input iWishbone_Peri wb_p,
-  output  logic tx,
+  output logic tx,
   input logic rx
 );
   logic rx_stb;
   logic tx_stb;
-  logic[7:0] rx_data;
-  logic[7:0] tx_data;
+  logic [7:0] rx_data;
+  logic [7:0] tx_data;
 
-  mUartRx mur(
+  mUartRx mur (
     .clk, .rst,
-    .stb(rx_stb),
-    .data(rx_data),
+    .stb (rx_stb),
+    .data (rx_data),
     .rx
   );
 
-  mUartTx mut(
+  mUartTx mut (
     .clk, .rst,
-    .stb(tx_stb),
-    .data(tx_data),
+    .stb (tx_stb),
+    .data (tx_data),
     .tx
   );
 
-  mWishboneCtrlSync mwcs(
+  mWishboneCtrlSync mwcs (
     .clk, .rst,
     .wb_c, .wb_p,
     .rx_stb, .rx_data,

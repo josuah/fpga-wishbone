@@ -1,16 +1,16 @@
 `default_nettype none
 `include "rtl/iWishbone.svh"
 
-module mBlinkenLight#(
+module mBlinkenLight #(
   parameter pLeds = 8
-)(
+) (
   input logic clk,
   input logic rst,
   input iWishbone_Ctrl wb_c,
   input iWishbone_Peri wb_p,
-  output  logic[pLeds-1:0] blinkenlights
+  output logic [pLeds-1:0] blinkenlights
 );
-  logic[3:0] counter;
+  logic [3:0] counter;
   logic request, we, dat_p, dat_c;
 
   assign blinkenlights = {counter, request, we, dat_c, dat_p};

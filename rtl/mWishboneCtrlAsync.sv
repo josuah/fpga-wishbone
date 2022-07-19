@@ -34,15 +34,15 @@ typedef enum {
   eWishboneCtrlAsync_WrWaitAck
 } eWishboneCtrlAsyncState;
 
-module mWishboneCtrlAsync(
+module mWishboneCtrlAsync (
   input logic clk,
   input logic rst,
   input iWishbone_Peri wb_p,
-  output  iWishbone_Ctrl wb_c,
+  output iWishbone_Ctrl wb_c,
   input logic rx_stb,
   input logic rx_data,
-  output  logic tx_stb,
-  output  logic tx_data
+  output logic tx_stb,
+  output logic tx_data
   
 );
   eWishboneCtrlAsyncState state;

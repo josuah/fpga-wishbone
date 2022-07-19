@@ -27,17 +27,17 @@ typedef enum {
   eWishboneCtrlSyncState_WriteStallAck
 } eWishboneCtrlSyncState;
 
-module mWishboneCtrlSync(
+module mWishboneCtrlSync (
   input logic clk,
   input logic rst,
-  output  iWishbone_Ctrl wb_c,
+  output iWishbone_Ctrl wb_c,
   input iWishbone_Peri wb_p,
-  input logic[7:0] rx_data,
+  input logic [7:0] rx_data,
   input logic rx_stb,
-  output  logic[7:0] tx_data,
-  output  logic tx_stb
+  output logic [7:0] tx_data,
+  output logic tx_stb
 );
-  logic[7:0] tx_data_buf;
+  logic [7:0] tx_data_buf;
   eWishboneCtrlSyncState state;
 
   always_ff @(posedge clk) begin

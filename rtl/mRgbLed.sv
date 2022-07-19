@@ -1,18 +1,18 @@
 `default_nettype none
 `include "rtl/iWishbone.svh"
 
-module mRgbLed(
+module mRgbLed (
   input logic clk,
   input logic rst,
-  output  iWishbone_Peri wb_p,
+  output iWishbone_Peri wb_p,
   input iWishbone_Ctrl wb_c,
-  output  logic[2:0] rgb
+  output logic [2:0] rgb
 );
   logic unused = |{wb_c};
-  logic[2:0] cnt;
-  logic[1:0] pwm_r;
-  logic[1:0] pwm_g;
-  logic[1:0] pwm_b;
+  logic [2:0] cnt;
+  logic [1:0] pwm_r;
+  logic [1:0] pwm_g;
+  logic [1:0] pwm_b;
 
   assign wb_p.ack = wb_c.stb;
   assign wb_p.dat = 0;

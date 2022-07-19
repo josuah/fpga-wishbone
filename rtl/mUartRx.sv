@@ -3,20 +3,20 @@
 
 // Simple sampling UART receiver with static baud rate
 
-module mUartRx#(
+module mUartRx #(
   parameter pBaudRate = 0,
   parameter pClkHz = 0,
   localparam pTicksPerBaud = pClkHz / pBaudRate
 )(
   input logic clk,
   input logic rst,
-  output  logic stb,
-  output  logic[7:0] data,
+  output logic stb,
+  output logic [7:0] data,
   input logic rx
 );
   eUartState state;
-  logic[$size(pTicksPerBaud)-1:0] baud_cnt;
-  logic[7:0] shifter;
+  logic [$size (pTicksPerBaud)-1:0] baud_cnt;
+  logic [7:0] shifter;
 
   always_ff @(posedge clk) begin
     stb <= 0;

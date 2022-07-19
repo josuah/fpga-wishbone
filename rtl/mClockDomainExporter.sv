@@ -5,18 +5,18 @@
 // Rising `stb` for one clock queues `data` for transfer. To use
 // only when ready.
 
-module mClockDomainExporter#(
+module mClockDomainExporter #(
   parameter pBits = 8
 )(
   input logic clk,
   input logic rst,
   input iClockDomain_Imp cd_i,
-  output  iClockDomain_Exp cd_e,
+  output iClockDomain_Exp cd_e,
   input logic stb,
-  input logic[pBits-1:0] data,
-  output  logic ready
+  input logic [pBits-1:0] data,
+  output logic ready
 );
-  logic[1:0] ack_ff;
+  logic [1:0] ack_ff;
 
   assign ready = (ack_ff[0] == cd_e.req);
 

@@ -1,23 +1,23 @@
 `default_nettype none
 `include "rtl/iWishbone.svh"
 
-module mMicrophone#(
+module mMicrophone #(
   parameter pWbHz = 0,
   parameter pMicHz = 3000000,
   parameter pAudioBits = 16
 ) (
   input logic clk,
-  output  logic rst,
-  output  iWishbone_Peri wb_p,
+  output logic rst,
+  output iWishbone_Peri wb_p,
   input iWishbone_Ctrl wb_c,
-  output  logic mic_clk,
+  output logic mic_clk,
   input logic mic_data,
-  output  logic irq
+  output logic irq
 );
   localparam pTicksPerHz = pWbHz / pMicHz / 2;
 
-  logic[$clog2(pTicksPerHz)-1:0] mic_clk_cnt;
-  logic[pAudioBits-1:0] sampling_buf, sampling_cnt;
+  logic [$clog2(pTicksPerHz)-1:0] mic_clk_cnt;
+  logic [pAudioBits-1:0] sampling_buf, sampling_cnt;
 
   assign wb_p.ack = wb_c.stb;
 

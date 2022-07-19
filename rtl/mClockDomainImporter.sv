@@ -9,12 +9,12 @@ module mClockDomainImporter #(
 )(
   input logic clk,
   input logic rst,
-  output  iClockDomain_Imp cd_i,
+  output iClockDomain_Imp cd_i,
   input iClockDomain_Exp cd_e,
-  output  logic stb,
-  output  logic[pBits-1:0] data
+  output logic stb,
+  output logic [pBits-1:0] data
 );
-  logic[1:0] req_ff;
+  logic [1:0] req_ff;
 
   assign data = cd_e.data;
   assign stb = (req_ff[0] != cd_i.ack);

@@ -4,9 +4,9 @@
 module mDebug (
   input logic clk,
   input logic rst,
-  output  iWishbone_Peri wb_p,
+  output iWishbone_Peri wb_p,
   input iWishbone_Ctrl wb_c,
-  output  logic[7:0] debug
+  output logic [7:0] debug
 );
   logic unused = |{ wb_c.adr };
   assign wb_p.dat = 0;
