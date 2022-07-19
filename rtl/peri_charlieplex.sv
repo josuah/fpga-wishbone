@@ -1,26 +1,25 @@
 `default_nettype none
-`include "rtl/iWishbone.svh"
 
 module mCharlieplex #(
-  parameter pClkHz = 0
-)(
-  input logic clk,
-  input logic rst,
+  parameter ClkHz = 0
+) (
+  input logic clk_i,
+  input logic rst_ni,
   input iWishbone_Peri wb_p,
   input iWishbone_Ctrl wb_c,
   output logic [6:0] charlieplex_o,
   output logic [6:0] charlieplex_oe
 );
-  localparam pMemSize = 1 << $clog2(5);
-  localparam pDelayHz = 100000;
+  localparam MemSize = 1 << $clog2(5);
+  localparam DelayHz = 100000;
 
   logic [2:0] row, col;
   // memory for the screen pixels
-  logic [pMemSize-1:0] mem[4:0];
-  logic [pMemSize-1:0] mem_wr_data;
-  logic [$clog2(pMemSize)-1:0] mem_wr_addr;
+  logic [MemSize-1:0] mem[4:0];
+  logic [MemSize-1:0] mem_wr_data;
+  logic [$clog2(MemSize)-1:0] mem_wr_addr;
   // clock divider for reducing the refresh rate
-  logic [$clog2(pClkHz / pDelayHz)-1:0] cnt;
+  logic [$clog2(ClkHz / DelayHz)-1:0] cnt;
   logic dot;
   logic [2:0] col_pin, row_pin;
 
@@ -32,17 +31,17 @@ module mCharlieplex #(
   assign col_pin = col;
   assign row_pin = (row + 1 < col) ? row + 1 : row + 2;
 
-  assign wb_p.dat = 0;
-  assign wb_p.ack = wb_c.stb;
+  assign wb_dat = 0;
+  assign wb_ack = wb_stb;
 
   assign charlieplex_o = dot ? (1 << row_pin) : 0;
   assign charlieplex_oe = dot ? (1 << row_pin) | (1 << col_pin) : 0;
 
-  always_ff @(posedge clk) begin
+  always_ff @(posedge clk_i) begin
     mem[mem_wr_addr] <= mem_wr_data;
   end
 
-  always_ff @(posedge clk) begin
+  always_ff @(posedge clk_i) begin
     // scale the clock down
     cnt <= cnt + 1;
     if (cnt == 0) begin
@@ -62,12 +61,12 @@ module mCharlieplex #(
       end
     end
 
-    if (wb_c.stb && wb_c.we) begin
-      mem_wr_data <= wb_c.dat[7:0];
-      mem_wr_addr <= wb_c.adr[$clog2(pMemSize)-1:0];
+    if (wb_stb && wb_we) begin
+      mem_wr_data <= wb_dat[7:0];
+      mem_wr_addr <= wb_adr[$clog2(MemSize)-1:0];
     end
 
-    if (rst) begin
+    if (!rst_ni) begin
       {row, col, cnt, mem_wr_data, mem_wr_addr} <= 0;
     end
   end

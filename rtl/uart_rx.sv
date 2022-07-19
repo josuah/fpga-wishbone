@@ -1,24 +1,30 @@
 `default_nettype none
-`include "rtl/eUartState.svh"
 
 // Simple sampling UART receiver with static baud rate
 
+typedef enum {
+  StIdle,
+  StStart,
+  StBit0, StBit1, StBit2, StBit3, StBit4, StBit5, StBit6, StBit7,
+  StStop
+} state_e;
+
 module mUartRx #(
-  parameter pBaudRate = 0,
-  parameter pClkHz = 0,
-  localparam pTicksPerBaud = pClkHz / pBaudRate
-)(
-  input logic clk,
-  input logic rst,
+  parameter BaudRate = 0,
+  parameter ClkHz = 0,
+  localparam TicksPerBaud = ClkHz / BaudRate
+) (
+  input logic clk_i,
+  input logic rst_ni,
   output logic stb,
   output logic [7:0] data,
   input logic rx
 );
-  eUartState state;
-  logic [$size (pTicksPerBaud)-1:0] baud_cnt;
+  state_e state;
+  logic [$size(TicksPerBaud)-1:0] baud_cnt;
   logic [7:0] shifter;
 
-  always_ff @(posedge clk) begin
+  always_ff @(posedge clk_i) begin
     stb <= 0;
 
     case (state)
@@ -26,17 +32,17 @@ module mUartRx #(
       if (rx == 0) begin
         state <= eUartState_Start;
         // start at 1 to compensate register delay
-        baud_cnt <= (pTicksPerBaud > 1) ? 1 : 0;
+        baud_cnt <= (TicksPerBaud > 1) ? 1 : 0;
       end
     end
     default: begin
       baud_cnt <= baud_cnt + 1;
 
-      if (baud_cnt == pTicksPerBaud / 2) begin
+      if (baud_cnt == TicksPerBaud / 2) begin
         shifter <= {!rx, shifter[7:1]};
       end
 
-      if (baud_cnt == pTicksPerBaud - 1) begin
+      if (baud_cnt == TicksPerBaud - 1) begin
         if (state == eUartState_Bit7) begin
           data <= shifter;
           stb <= 1;
@@ -47,7 +53,7 @@ module mUartRx #(
     end
     endcase
 
-    if (rst) begin
+    if (!rst_ni) begin
       {state, shifter, baud_cnt, data} <= 0;
     end
   end

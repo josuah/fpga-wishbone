@@ -1,11 +1,15 @@
 `default_nettype none
-`include "rtl/iClockDomain.svh"
-`include "rtl/iSpi.svh"
 
 module mSpiRx (
-  input iSpi_Ctrl spi_c,
-  input iClockDomain_Imp cd_i,
-  output iClockDomain_Exp cd_e
+  // spi receiver
+  input spi_sck,
+  input spi_csn,
+  input spi_sdi,
+
+  // clock domain crossing
+  output cdc_stb_o,
+  output cdc_data_o,
+  input cdc_ack_i
 );
   logic [2:0] cnt;
   logic [7:0] shifter;
@@ -13,20 +17,20 @@ module mSpiRx (
   logic stb;
 
   mClockDomainExporter mcde (
-    .rst (0),
-    .clk (spi_c.sck),
+    .rst_ni (0),
+    .clk_i (spi_sck),
     .cd_e, .cd_i,
     .data (shifter),
     .stb,
     .ready (unused)
   );
 
-  always_ff @(posedge spi_c.sck) begin
+  always_ff @(posedge spi_sck) begin
     stb <= 0;
-    if (spi_c.csn == 0) begin
-      if (spi_c.csn == 0) begin
+    if (spi_csn == 0) begin
+      if (spi_csn == 0) begin
         cnt <= cnt + 1;
-        shifter <= {shifter[6:0], spi_c.dat};
+        shifter <= {shifter[6:0], spi_dat};
       end
       if (cnt == 3'b111) begin
         stb <= 1;

@@ -9,7 +9,7 @@ module mSynthesis (
   output logic [6:0] gpio_charlieplex,
   output logic [7:0] gpio_debug
 );
-  logic clk;
+  logic clk_i;
   logic [6:0] charlieplex_oe;
   logic [6:0] charlieplex_o;
   logic [2:0] rgb;
@@ -17,7 +17,7 @@ module mSynthesis (
   SB_HFOSC hfosc (
     .CLKHFPU (1'b1),
     .CLKHFEN (1'b1),
-    .CLKHF (clk)
+    .CLKHF (clk_i)
   );
 
   SB_RGBA_DRV #(
@@ -50,7 +50,7 @@ module mSynthesis (
   );
 
   top mtop (
-    .clk,
+    .clk_i,
     .spi_sck (gpio_spi_sck),
     .spi_csn (gpio_spi_csn),
     .spi_sdi (gpio_spi_sdi),

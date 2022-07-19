@@ -1,24 +1,30 @@
 `default_nettype none
-`include "rtl/eUartState.svh"
 
 // Simple UART transmitter with config-time static baud rate
 
+typedef enum {
+  StIdle,
+  StStart,
+  StBit0, StBit1, StBit2, StBit3, StBit4, StBit5, StBit6, StBit7,
+  StStop
+} state_e;
+
 module mUartTx #(
-  parameter pTicksPerBaud = 0
-)(
-  input logic clk,
-  input logic rst,
+  parameter TicksPerBaud = 0
+) (
+  input logic clk_i,
+  input logic rst_ni,
   input logic stb,
   input logic [7:0] data,
   output logic tx
 );
   eUartState state;
   logic [9:0] shifter;
-  logic [$size (pTicksPerBaud)-1:0] baud_cnt;
+  logic [$size (TicksPerBaud)-1:0] baud_cnt;
 
   assign tx = !shifter[0];
 
-  always_ff @(posedge clk) begin
+  always_ff @(posedge clk_i) begin
     case (state)
     eUartState_Idle: begin
       if (stb) begin
@@ -29,7 +35,7 @@ module mUartTx #(
     default: begin
       baud_cnt <= baud_cnt + 1;
 
-      if (baud_cnt == pTicksPerBaud - 1) begin
+      if (baud_cnt == TicksPerBaud - 1) begin
         state <= (state == eUartState_Stop) ? 0 : state + 1;
         shifter <= {1'b0, shifter[9:1]};
         baud_cnt <= 0;
@@ -37,7 +43,7 @@ module mUartTx #(
     end
     endcase
 
-    if (rst) begin
+    if (!rst_ni) begin
       {state, shifter, baud_cnt} <= 0;
     end
   end

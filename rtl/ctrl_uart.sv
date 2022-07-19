@@ -1,13 +1,12 @@
 `default_nettype none
-`include "rtl/iWishbone.svh"
 
 // Wishbone B4 controller, itself controlled through an SPI peripheral
 // the MCU on the other end is the SPI controller, and (via this
 // module) the Wishbone controller as well.
 
-module mWishboneCtrlUart (
-  input logic clk,
-  input logic rst,
+module ctrl_uart (
+  input logic clk_i,
+  input logic rst_ni,
   output iWishbone_Ctrl wb_c,
   input iWishbone_Peri wb_p,
   output logic tx,
@@ -18,22 +17,22 @@ module mWishboneCtrlUart (
   logic [7:0] rx_data;
   logic [7:0] tx_data;
 
-  mUartRx mur (
-    .clk, .rst,
+  uart_rx mur (
+    .clk_i, .rst_ni,
     .stb (rx_stb),
     .data (rx_data),
     .rx
   );
 
-  mUartTx mut (
-    .clk, .rst,
+  uart_tx mut (
+    .clk_i, .rst_ni,
     .stb (tx_stb),
     .data (tx_data),
     .tx
   );
 
-  mWishboneCtrlSync mwcs (
-    .clk, .rst,
+  ctrl_sync mcs (
+    .clk_i, .rst_ni,
     .wb_c, .wb_p,
     .rx_stb, .rx_data,
     .tx_stb, .tx_data
