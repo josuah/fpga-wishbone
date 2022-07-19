@@ -12,7 +12,7 @@ COCOTB = ${MAKE} -f "$$(cocotb-config --makefiles)/Makefile.sim" \
   MAKE="${MAKE}" SIM="verilator" TOPLEVEL_LANG="verilog" VERILOG_SOURCES="${RTL}" \
   EXTRA_ARGS="--trace --trace-structs" 
 
-all: synthesis.bit verilator/VmTopLevel.vcd
+all: synthesis.bit
 
 include config.mk
 
@@ -22,9 +22,6 @@ clean:
 flash: synthesis.bit
 	${ICEPROG} -d i:0x0403:0x6014:0 synthesis.bit
 
-wave: VmTopLevel.gtkw verilator/VmTopLevel.vcd
-	${GTKWAVE} -a VmTopLevel.gtkw verilator/VmTopLevel.vcd
-
 cocotb: ${RTL} ${TB:.py=.xml}
 
 ${RTL}: config.mk
@@ -33,25 +30,10 @@ config.mk: rtl tb
 	echo RTL = rtl/*.sv >$@ 
 	echo TB = tb/*.py >>$@
 
-verilator/VmTopLevel.mk: ${RTL}
-	${VERILATOR} -cc --top-module mTopLevel ${RTL}
-
-verilator/VmUartRx.mk: ${RTL}
-	${VERILATOR} -cc --top-module mUartRx ${RTL}
-
-verilator/VmWishboneCtrlUart.mk: ${RTL}
-	${VERILATOR} -cc --top-module mWishboneCtrlUart ${RTL}
-
 synthesis.json: ${RTL}
 	${YOSYS} -p "read_verilog -sv ${RTL}; synth_ice40 -top mSynthesis -json $@" >$*.yosys.log
 
-.SUFFIXES: .sv .elf .vcd .json .asc .bit .dfu .hex .dot .pdf .1.pdf .2.pdf .py .gtkw .mk __ALL.a .xml
-
-.mk__ALL.a:
-	${MAKE} -C ${<D} -f ${<F}
-
-__ALL.a.elf:
-	${CXX} -DVM=${*F} -I./verilator/ -I./src/ -o $@ src/${*F}.cpp ${VERILATOR_SRC} $<
+.SUFFIXES: .sv .elf .vcd .json .asc .bit .dfu .hex .dot .pdf .py .gtkw .xml
 
 .elf.vcd:
 	./$< >$@
