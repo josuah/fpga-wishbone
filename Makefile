@@ -9,8 +9,8 @@ NEXTPNR = nextpnr-ice40 --randomize-seed --up5k --package sg48
 YOSYS = yosys
 GTKWAVE = gtkwave -CM6
 COCOTB = ${MAKE} -f "$$(cocotb-config --makefiles)/Makefile.sim" \
-  MAKE="${MAKE}" SIM="verilator" SIM_ARGS="--trace --trace-structs" \
-  TOPLEVEL_LANG="verilog" VERILOG_SOURCES="${RTL}"
+  MAKE="${MAKE}" SIM="verilator" TOPLEVEL_LANG="verilog" VERILOG_SOURCES="${RTL}" \
+  EXTRA_ARGS="--trace --trace-structs" 
 
 all: synthesis.bit verilator/VmTopLevel.vcd
 
@@ -76,5 +76,7 @@ __ALL.a.elf:
 	dot -Tpdf $< >$@
 
 .py.xml: ${RTL}
-	${COCOTB} TOPLEVEL="${*F}" MODULE="tb.${*F}" \
-		COCOTB_RESULTS_FILE="$*.xml"
+	${COCOTB} TOPLEVEL="${*F}" MODULE="tb.${*F}" SIM_BUILD="$*" \
+	  COCOTB_RESULTS_FILE="$*.xml"
+	mv dump.vcd $*
+

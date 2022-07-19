@@ -11,6 +11,9 @@ async def drive_reset(dut):
 
 @cocotb.test()
 async def test(dut):
-    clock = cocotb.start(Clock(dut.clk, 10, units='ns'))
-    assert dut.pwm.value == 0
-    await Timer(100, 'ns')
+    clock = Clock(dut.clk, 10, units='ns').start()
+    assert dut.pwm.value == 0b0
+    dut.wb_c.dat.value = 0b00001111
+    dut.wb_c.we.value = 0b1
+    dut.wb_c.stb.value = 0b1
+    await Timer(200, 'ns')

@@ -10,4 +10,4 @@
 *.dot
 *.xml
 __pycache__
-/sim_build
+/tb/*/
