@@ -2,92 +2,132 @@
 
 // Wishbone read:
 //
-//  Ctrl: W000SSSS AAAAAAAA :::::::: :::::::: :::::::: :::::::: :::::::: ::::::::
-//  Peri: :::::::: :::::::: 00000000 11111111 DDDDDDDD DDDDDDDD DDDDDDDD DDDDDDDD
+//  Ctrl: W000AAAA [ :::::::: ]* :::::::: ::::::::
+//  Peri: :::::::: [ 00000000 ]* 00000001 DDDDDDDD
 //
 // Wishbone write:
 //
-//  Ctrl: W000SSSS AAAAAAAA DDDDDDDD DDDDDDDD DDDDDDDD DDDDDDDD :::::::: ::::::::
-//  Peri: :::::::: :::::::: :::::::: :::::::: :::::::: :::::::: 00000000 11111111
+//  Ctrl: W000AAAA DDDDDDDD [ :::::::: ]* ::::::::
+//  Peri: :::::::: :::::::: [ 00000000 ]* 00000001
 //
 
-typedef enum {
-  StIdle,
-  StGetAddress,
-  StWaitAck,
-  StReadData,
-  StWriteData,
-  StWriteStallAck
-} state_e;
-
 module ctrl_sync (
-  input logic clk_i,
-  input logic rst_ni,
+  input clk_i,
+  input rst_ni,
 
-  output iWishbone_Ctrl wb_c,
-  input iWishbone_Peri wb_p,
-  input logic [7:0] rx_data,
-  input logic rx_stb,
-  output logic [7:0] tx_data,
-  output logic tx_stb
+  // wishbone b4 controller
+  output wb_we_o,
+  output wb_adr_o,
+  output wb_dat_o,
+  output wb_stb_o,
+  input wb_dat_i,
+  input wb_ack_i,
+
+  // data i/o
+  input [7:0] rx_data_i,
+  input rx_valid_i,
+  output [7:0] tx_data_o,
+  output tx_valid_o
 );
-  logic [7:0] tx_data_buf;
-  state_e state;
+  typedef enum logic [2:0] {
+    StIdle,
+    StReadPutData,
+    StReadWaitAck,
+    StWriteGetData,
+    StWriteWaitAck,
+    StInvalid
+  } state_e;
 
-  always_ff @(posedge clk_i) begin
-    if (wb_ack) begin
-      tx_data_buf <= wb_dat; // only used if wb_we
-      wb_stb <= 0;
-    end
+  logic wb_we_d, wb_we_q;
+  logic wb_adr_d, wb_adr_q;
+  logic wb_ack_d, wb_ack_q;
+  logic wb_dat_d, wb_dat_q;
+  logic wb_stb_d, wb_stb_q;
+  logic [7:0] tx_data_d, tx_data_q;
+  state_e state_d, state_q;
 
-    // on each byte read, queue one byte to write
-    tx_stb <= rx_stb;
+  assign wb_we_o = wb_we_d;
+  assign wb_adr_o = wb_adr_d;
 
-    if (rx_stb) begin
-      case (state)
-      StIdle: begin  // Rx:W000SSSS
-        wb_we <= rx_data[7];
-        tx_data <= 8'h00;  // Tx:00000000
-        if (|rx_data) // skip 0x00
-          state <= StGetAddress;
-      end
-      StGetAddress: begin  // Rx:AAAAAAAA
-        wb_adr <= {rx_data[3:0]};
-        if (wb_we) begin
-          // wait to have data to write
-          state <= StWriteData;
-        end else begin
-          // wishbone read with that address
-          wb_stb <= 1;
-          state <= StWaitAck;
+  // on each byte read, queue one byte to write
+  assign tx_valid_o = rx_valid_i;
+
+  always_comb begin
+    state_d = state_q;
+    wb_we_d = wb_we_q;
+    wb_adr_d = wb_adr_q;
+    wb_stb_d = wb_stb_q;
+    wb_ack_d = wb_ack_q;
+    wb_dat_d = wb_dat_q;
+
+    // send zeroes by default
+    tx_data_d = 8'h00;
+
+    if (rx_valid_i) begin
+      unique case (state_q)
+
+        StIdle: begin
+          wb_ack_d = wb_ack_i; // =0 would drop ACK coming on this clock
+          wb_adr_d = rx_data_i[3:0];
+          if (rx_data_i[7]) begin
+            wb_we_d = 1;
+            state_d = StWriteGetData;
+          end else begin
+            wb_we_d = 0;
+            wb_stb_o = 1;
+            state_d = StReadWaitAck;
+          end
         end
-      end
-      StWaitAck: begin  // Tx:00000000
-        if (!wb_stb) begin  // Tx:11111111
-          tx_data <= 8'hFF;
-          state <= StReadData;
+
+        StWriteGetData: begin
+          wb_dat_o = rx_data_i;
+          wb_stb_o = 1;
+          state_d = StWriteWaitAck;
         end
-      end
-      StReadData: begin  // Tx:DDDDDDDD
-        tx_data <= tx_data_buf;
-        state <= StIdle;
-      end
-      StWriteData: begin  // Rx:DDDDDDDD
-        wb_dat <= rx_data;
-        state <= StWriteStallAck;
-        wb_stb <= 1;
-      end
-      StWriteStallAck: begin  // Tx:00000000
-        if (!wb_stb) begin  // Tx:11111111
-          tx_data <= 8'hFF;
-          state <= StIdle;
+
+        StReadWaitAck: begin
+          if (wb_ack_d) begin
+            tx_data_o <= 8'h01;
+            state = StReadPutData;
+          end
         end
-      end
+
+        StReadPutData: begin
+          tx_data_o = wb_dat_d;
+          state_d = StIdle;
+        end
+
+        StWriteWaitAck: begin
+          if (wb_ack_d) begin
+            tx_data_d = 8'h01;
+            state_d = StIdle;
+          end
+        end
+
+        default: begin
+          state_d = StInvalid;
+        end
+
       endcase
     end
 
+    if (wb_ack_i) begin
+      wb_ack_d = wb_ack_i;
+      wb_dat_d = wb_dat_i;
+    end
+  end
+
+  always_ff @(posedge clk_i) begin
     if (!rst_ni) begin
-      {tx_data, tx_stb, tx_data_buf, state} <= 0;
+      tx_data_q <= 0;
+      tx_valid_q <= 0;
+      tx_data_q <= 0;
+      state_q <= 0;
+    end else begin
+      tx_data_q <= tx_data_d;
+      tx_valid_q <= tx_valid_d;
+      tx_data_q <= 0;
+      state_q <= 0;
     end
   end
 endmodule

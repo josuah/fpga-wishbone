@@ -1,14 +1,22 @@
 `default_nettype none
 
-module mCharlieplex #(
+module peri_charlieplex #(
   parameter ClkHz = 0
 ) (
-  input logic clk_i,
-  input logic rst_ni,
-  input iWishbone_Peri wb_p,
-  input iWishbone_Ctrl wb_c,
-  output logic [6:0] charlieplex_o,
-  output logic [6:0] charlieplex_oe
+  input clk_i,
+  input rst_ni,
+
+  // wishbone b4 peripheral
+  input wb_we_i,
+  input wb_adr_i,
+  input wb_dat_i,
+  input wb_stb_i,
+  output wb_dat_o,
+  output wb_ack_o,
+
+  // charlieplexed screen
+  output [6:0] charlieplex_o,
+  output [6:0] charlieplex_oe
 );
   localparam MemSize = 1 << $clog2(5);
   localparam DelayHz = 100000;

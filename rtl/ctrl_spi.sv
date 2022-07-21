@@ -5,63 +5,51 @@
 // module) the Wishbone controller as well.
 
 module ctrl_spi (
-  input logic clk_i,
-  input logic rst_ni,
+  input clk_i,
+  input rst_ni,
 
-  output iWishbone_Ctrl wb_c,
-  input iWishbone_Peri wb_p,
+  // wishbone b4 controller
+  input wb_dat_i,
+  input wb_ack_i,
+  output wb_we_o,
+  output wb_adr_o,
+  output wb_dat_o,
+  output wb_stb_o,
 
-  output iSpi_Peri spi_p,
-  input iSpi_Ctrl spi_c,
-  output logic [7:0] debug
+  // spi peripheral
+  input spi_sck,
+  input spi_csn,
+  input spi_sdi,
+  output spi_sdo
 );
-  logic rx_stb;
-  logic tx_stb;
-  logic [7:0] rx_data;
-  logic [7:0] tx_data;
   logic unused;
 
-  clock_domain_importer cdc_rx (
-    .clk_i,
-    .rst_ni,
-    .cd_i(rx_cd_i),
-    .cd_e(rx_cd_e),
-    .data(rx_data),
-    .stb(rx_stb)
-  );
-
-  clock_domain_exporter cdc_tx (
-    .clk_i,
-    .rst_ni,
-    .cd_e(tx_cd_e),
-    .cd_i(tx_cd_i),
-    .data(tx_data),
-    .stb(tx_stb),
-    .ready(unused)
-  );
+  logic [7:0] rx_data;
+  logic rx_valid;
 
   spi_rx rx (
-    .spi_c,
-    .cd_i(rx_cd_i),
-    .cd_e(rx_cd_e)
+    .spi_sck, .spi_csn, .spi_sdi, .spi_sdo,
+    .valid_o(rx_valid),
+    .data_o(rx_data)
   );
-  assign debug = rx_data;
+
+  logic [7:0] tx_data;
+  logic tx_valid;
 
   spi_tx tx (
-    .spi_c,
-    .spi_p,
-    .cd_i(tx_cd_i),
-    .cd_e(tx_cd_e)
+    .spi_sck, .spi_csn, .spi_sdi, .spi_sdo,
+    .ready_o(unused),
+    .valid_i(tx_valid),
+    .data_i(tx_data)
   );
 
   ctrl_sync ctrl (
-    .clk_i,
-    .rst_ni,
-    .wb_c,
-    .wb_p,
-    .rx_stb,
-    .rx_data,
-    .tx_stb,
-    .tx_data
+    .clk_i, .rst_ni,
+    .wb_dat_i, .wb_ack_i, .wb_we_o, .wb_adr_o, .wb_dat_o, .wb_stb_o,
+    .valid_i(rx_valid),
+    .data_i(rx_data),
+    .valid_o(tx_valid),
+    .data_o(tx_data)
   );
+
 endmodule

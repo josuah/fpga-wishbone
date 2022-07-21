@@ -1,2 +1,2 @@
-RTL = rtl/mBlinkenLight.sv rtl/mCharlieplex.sv rtl/mClockDomainExporter.sv rtl/mClockDomainImporter.sv rtl/mDebug.sv rtl/mMicrophone.sv rtl/mPdmChannel.sv rtl/mPwmChannel.sv rtl/mRgbLed.sv rtl/mSpiRx.sv rtl/mSpiTx.sv rtl/mSynthesis.sv rtl/mUartRx.sv rtl/mUartTx.sv rtl/mWishboneCtrlAsync.sv rtl/mWishboneCtrlSpi.sv rtl/mWishboneCtrlSync.sv rtl/mWishboneCtrlUart.sv rtl/my_design.sv rtl/top.sv
+RTL = rtl/ctrl_async.sv rtl/ctrl_spi.sv rtl/ctrl_sync.sv rtl/ctrl_uart.sv rtl/peri_blinkenlight.sv rtl/peri_charlieplex.sv rtl/peri_debug.sv rtl/peri_microphone.sv rtl/peri_pdm_channel.sv rtl/peri_pwm_channel.sv rtl/peri_rgb_led.sv rtl/spi_rx.sv rtl/spi_tx.sv rtl/synthesis.sv rtl/top.sv rtl/uart_rx.sv rtl/uart_tx.sv
 TB = tb/mPwmChannel.py tb/top.py

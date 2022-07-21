@@ -1,39 +1,46 @@
 `default_nettype none
 
-module mSpiRx (
-  // spi receiver
-  input spi_sck,
-  input spi_csn,
-  input spi_sdi,
+module spi_rx (
+  input clk_i,
+  input rst_ni,
 
-  // clock domain crossing
-  output cdc_stb_o,
-  output cdc_data_o,
-  input cdc_ack_i
+  // spi peripheral, receiver
+  input spi_sck_i,
+  input spi_csn_i,
+  input spi_data_i,
+
+  // data reception
+  input data_o,
+  output valid_o,
 );
   logic [2:0] cnt;
-  logic [7:0] shifter;
+  logic [7:0] shift_q;
   logic unused;
-  logic stb;
 
-  mClockDomainExporter mcde (
-    .rst_ni (0),
-    .clk_i (spi_sck),
-    .cd_e, .cd_i,
-    .data (shifter),
-    .stb,
-    .ready (unused)
+  always_ff @(posedge clk_i) begin
+    if (!rst_-ni) begin
+      _q <= 0;
+    end else begin
+      _q <= _d;
+    end
+  end
+
+  clock_domain_crossing cdc (
+    ,
   );
 
   always_ff @(posedge spi_sck) begin
-    stb <= 0;
-    if (spi_csn == 0) begin
-      if (spi_csn == 0) begin
-        cnt <= cnt + 1;
-        shifter <= {shifter[6:0], spi_dat};
-      end
-      if (cnt == 3'b111) begin
-        stb <= 1;
+    if (spi_csn_i == 0) begin
+      shift_q <= shift_d;
+      counter <= counter + 1;
+    end
+  end
+
+  always_comb
+      shift_d = {shift_q[6:0], spi_sdi};
+      if (counter == 3'b111) begin
+        handshake_o <= !handshake_o;
+        data_o <= shift_q;
       end
     end
   end

@@ -6,8 +6,12 @@ module mPwmChannel #(
 ) (
   input logic clk_i,
   input logic rst_ni,
-  output iWishbone_Peri wb_p,
-  input iWishbone_Ctrl wb_c,
+  output wb_dat_o,
+  output wb_ack_o,
+  input wb_we_i,
+  input wb_adr_i,
+  input wb_dat_i,
+  input wb_stb_i,
   output logic pwm
 );
   localparam TicksPerCycle = ClkHz / PwmHz;

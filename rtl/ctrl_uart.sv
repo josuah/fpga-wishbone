@@ -1,41 +1,47 @@
 `default_nettype none
 
-// Wishbone B4 controller, itself controlled through an SPI peripheral
-// the MCU on the other end is the SPI controller, and (via this
-// module) the Wishbone controller as well.
+// Wishbone B4 controller, itself controlled through an UART interface
+// with an MCU on the other end.
 
 module ctrl_uart (
-  input logic clk_i,
-  input logic rst_ni,
-  output iWishbone_Ctrl wb_c,
-  input iWishbone_Peri wb_p,
-  output logic tx,
-  input logic rx
+  input clk_i,
+  input rst_ni,
+
+  // wishbone b4 controller
+  output wb_we_o,
+  output wb_adr_o,
+  output wb_dat_o,
+  output wb_stb_o,
+  input wb_dat_i,
+  input wb_ack_i,
+
+  // uart i/o
+  output uart_o,
+  input uart_i
 );
-  logic rx_stb;
-  logic tx_stb;
+  logic rx_valid;
   logic [7:0] rx_data;
+
+  uart_rx rx (
+    .clk_i, .rst_ni,
+    .valid_o(rx_valid), .data_o(rx_data),
+    .uart_i
+  );
+
+  logic tx_valid;
   logic [7:0] tx_data;
 
-  uart_rx mur (
+  uart_tx tx (
     .clk_i, .rst_ni,
-    .stb (rx_stb),
-    .data (rx_data),
-    .rx
+    .valid_i(tx_valid), .data_i(tx_data),
+    .uart_o
   );
 
-  uart_tx mut (
+  ctrl_sync ctrl (
     .clk_i, .rst_ni,
-    .stb (tx_stb),
-    .data (tx_data),
-    .tx
-  );
-
-  ctrl_sync mcs (
-    .clk_i, .rst_ni,
-    .wb_c, .wb_p,
-    .rx_stb, .rx_data,
-    .tx_stb, .tx_data
+    .wb_we_o, .wb_adr_o, .wb_dat_o, .wb_stb_o, .wb_dat_i, .wb_ack_i,
+    .valid_i(rx_valid), .data_i(rx_data),
+    .valid_o(tx_valid), .data_o(tx_data)
   );
 
 endmodule
