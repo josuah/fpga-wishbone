@@ -1,50 +1,68 @@
 `default_nettype none
-
+//
 // Simple UART transmitter with config-time static baud rate
-
-typedef enum {
-  StIdle,
-  StStart,
-  StBit0, StBit1, StBit2, StBit3, StBit4, StBit5, StBit6, StBit7,
-  StStop
-} state_e;
-
-module mUartTx #(
+//
+module uart_tx #(
   parameter TicksPerBaud = 0
 ) (
-  input logic clk_i,
-  input logic rst_ni,
-  input logic stb,
-  input logic [7:0] data,
-  output logic tx
-);
-  eUartState state;
-  logic [9:0] shifter;
-  logic [$size (TicksPerBaud)-1:0] baud_cnt;
+  input clk_i,
+  input rst_ni,
 
-  assign tx = !shifter[0];
+  // data input
+  input [7:0] tx_data_i,
+  input tx_valid_i,
+
+  // uart output
+  output uart_tx_no
+);
+  typedef enum {
+    StIdle,
+    StBit0, StBit1, StBit2, StBit3, StBit4, StBit5, StBit6, StBit7,
+    StStop
+  } state_e;
+
+  state_e state_d, state_q;
+  logic [9:0] shift_d, shift_q;
+  logic [$size(TicksPerBaud)-1:0] cnt_q, cnt_d;
+
+  assign uart_tx_no = !shift_d[0];
 
   always_ff @(posedge clk_i) begin
-    case (state)
-    eUartState_Idle: begin
-      if (stb) begin
-        shifter <= {1'b0, data[7:0], 1'b1};
-        state <= eUartState_Start;
-      end
-    end
-    default: begin
-      baud_cnt <= baud_cnt + 1;
-
-      if (baud_cnt == TicksPerBaud - 1) begin
-        state <= (state == eUartState_Stop) ? 0 : state + 1;
-        shifter <= {1'b0, shifter[9:1]};
-        baud_cnt <= 0;
-      end
-    end
-    endcase
-
     if (!rst_ni) begin
-      {state, shifter, baud_cnt} <= 0;
+      state_q <= 0;
+      shift_q <= 0;
+      cnt_q <= 0;
+    end else begin
+      state_q <= state_d;
+      shift_q <= shift_d;
+      cnt_q <= cnt_d;
     end
   end
+
+  always_comb begin
+    case (state_q)
+
+      StIdle: begin
+        if (tx_valid_i) begin
+          shift_d = {1'b0, tx_data_i[7:0], 1'b1};
+          state_d <= StBit0;
+        end
+      end
+
+      default: begin
+        cnt_d = cnt_q + 1;
+
+        if (cnt_d == TicksPerBaud) begin
+          cnt_d = 0;
+          state_d = state_q + 1;
+          shift_d <= {1'b0, shift_q[9:1]};
+          if (state_q == StStop) begin
+            state_d = 0;
+          end
+        end
+      end
+
+    endcase
+  end
+
 endmodule

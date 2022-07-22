@@ -8,10 +8,10 @@ module peri_charlieplex #(
 
   // wishbone b4 peripheral
   input wb_we_i,
-  input wb_adr_i,
-  input wb_dat_i,
+  input [3:0] wb_adr_i,
+  input [7:0] wb_dat_i,
   input wb_stb_i,
-  output wb_dat_o,
+  output [7:0] wb_dat_o,
   output wb_ack_o,
 
   // charlieplexed screen
@@ -39,8 +39,8 @@ module peri_charlieplex #(
   assign col_pin = col;
   assign row_pin = (row + 1 < col) ? row + 1 : row + 2;
 
-  assign wb_dat = 0;
-  assign wb_ack = wb_stb;
+  assign wb_ack_o = wb_stb_i;
+  assign wb_dat_o = 0;
 
   assign charlieplex_o = dot ? (1 << row_pin) : 0;
   assign charlieplex_oe = dot ? (1 << row_pin) | (1 << col_pin) : 0;
@@ -69,9 +69,9 @@ module peri_charlieplex #(
       end
     end
 
-    if (wb_stb && wb_we) begin
-      mem_wr_data <= wb_dat[7:0];
-      mem_wr_addr <= wb_adr[$clog2(MemSize)-1:0];
+    if (wb_stb_i && wb_we_i) begin
+      mem_wr_data <= wb_dat_i[7:0];
+      mem_wr_addr <= wb_adr_i[$clog2(MemSize)-1:0];
     end
 
     if (!rst_ni) begin

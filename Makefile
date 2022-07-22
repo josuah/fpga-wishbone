@@ -2,7 +2,7 @@ CXX = c++ -I${VERILATOR_ROOT}/include
 ICEPACK = icepack
 ICEPROG = iceprog
 MAKE = gmake
-VERILATOR = verilator -Wall -DSIMULATION -Irtl --trace --sv --trace-structs --Mdir verilator
+VERILATOR = verilator -Wall -DSIMULATION --sv
 VERILATOR_ROOT = /usr/local/share/verilator
 VERILATOR_SRC = ${VERILATOR_ROOT}/include/verilated.cpp ${VERILATOR_ROOT}/include/verilated_vcd_c.cpp
 NEXTPNR = nextpnr-ice40 --randomize-seed --up5k --package sg48
@@ -19,6 +19,9 @@ include config.mk
 clean:
 	rm -rf */*.dot */*.pdf *.log *.json *.asc *.bit *.hex
 
+lint:
+	${VERILATOR} --lint-only ${RTL} --top top 2>&1 | sed 's,^%[^:]*: ,,'
+
 flash: synthesis.bit
 	${ICEPROG} -d i:0x0403:0x6014:0 synthesis.bit
 
@@ -31,7 +34,7 @@ config.mk: rtl tb
 	echo TB = tb/*.py >>$@
 
 synthesis.json: ${RTL}
-	${YOSYS} -p "read_verilog -sv ${RTL}; synth_ice40 -top mSynthesis -json $@" >$*.yosys.log
+	${YOSYS} -p "read_verilog -sv ${RTL}; synth_ice40 -top synthesis -json $@" >$*.yosys.log
 
 .SUFFIXES: .sv .elf .vcd .json .asc .bit .dfu .hex .dot .pdf .py .gtkw .xml
 

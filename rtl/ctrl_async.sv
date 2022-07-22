@@ -19,10 +19,10 @@ module ctrl_async (
 
   // wishbone b4 peripheral
   output wb_we_o,
-  output wb_adr_o,
-  output wb_dat_o,
+  output [3:0] wb_adr_o,
+  output [7:0] wb_dat_o,
   output wb_stb_o,
-  input wb_dat_i,
+  input [7:0] wb_dat_i,
   input wb_ack_i,
 
   // serial data i/o
@@ -34,8 +34,9 @@ module ctrl_async (
   typedef enum logic [1:0] {
     StIdle,
     StReadWaitAck,
-    StReadGetData,
-    StWaitAck,
+    StReadPutData,
+    StWriteWaitAck,
+    StWriteGetData
   } state_e;
 
   state_e state_q, state_d;
@@ -57,7 +58,6 @@ module ctrl_async (
       wb_adr_q <= 0;
       wb_stb_q <= 0;
       wb_dat_q <= 0;
-      wb_ack_i <= 0;
     end else begin
       state_q <= state_d;
       wb_we_q <= wb_we_d;
@@ -86,7 +86,7 @@ module ctrl_async (
             state_d = StWriteGetData;
           end else begin
             wb_we_d = 0;
-            state_d = StReadGetData;
+            state_d = StReadPutData;
           end
         end
 

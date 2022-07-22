@@ -6,32 +6,30 @@ module peri_debug (
 
   // wishbone b4 peripheral
   input wb_we_i,
-  input wb_adr_i,
-  input wb_dat_i,
+  input [3:0] wb_adr_i,
+  input [7:0] wb_dat_i,
   input wb_stb_i,
-  output wb_dat_o,
+  output [7:0] wb_dat_o,
   output wb_ack_o,
 
   // led i/o
   output [7:0] debug_o
 );
-  logic unused = wb_adr_i;
+  logic unused = |{wb_adr_i};
+  logic debug_d, debug_q;
 
   assign wb_dat_o = 0;
   assign wb_ack_o = wb_stb_i;
+  assign debug_o = debug_d;
 
   always_ff @(posedge clk_i) begin
     if (!rst_ni) begin
-      debug_o <= 8'b11011011;
+      debug_q <= 8'b11011011;
     end else begin
-
-      if (wb_stb_i && wb_we_i) begin
-        debug_o <= wb_dat_i;
-      end
+      debug_q <= debug_d;
     end
   end
 
-  always_comb begin
+  assign debug_d = (wb_stb_i && wb_we_i) ? wb_dat_i : debug_q;
 
-  end
 endmodule

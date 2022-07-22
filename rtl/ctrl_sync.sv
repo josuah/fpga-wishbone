@@ -1,5 +1,5 @@
 `default_nettype none
-
+//
 // Wishbone read:
 //
 //  Ctrl: W000AAAA [ :::::::: ]* :::::::: ::::::::
@@ -10,17 +10,16 @@
 //  Ctrl: W000AAAA DDDDDDDD [ :::::::: ]* ::::::::
 //  Peri: :::::::: :::::::: [ 00000000 ]* 00000001
 //
-
 module ctrl_sync (
   input clk_i,
   input rst_ni,
 
   // wishbone b4 controller
   output wb_we_o,
-  output wb_adr_o,
-  output wb_dat_o,
-  output wb_stb_o,
-  input wb_dat_i,
+  output [3:0] wb_adr_o,
+  output reg [7:0] wb_dat_o,
+  output reg wb_stb_o,
+  input [7:0] wb_dat_i,
   input wb_ack_i,
 
   // data i/o
@@ -39,18 +38,38 @@ module ctrl_sync (
   } state_e;
 
   logic wb_we_d, wb_we_q;
-  logic wb_adr_d, wb_adr_q;
+  logic [3:0] wb_adr_d, wb_adr_q;
   logic wb_ack_d, wb_ack_q;
-  logic wb_dat_d, wb_dat_q;
+  logic [7:0] wb_dat_d, wb_dat_q;
   logic wb_stb_d, wb_stb_q;
-  logic [7:0] tx_data_d, tx_data_q;
+  logic [7:0] tx_data_d;
   state_e state_d, state_q;
 
   assign wb_we_o = wb_we_d;
   assign wb_adr_o = wb_adr_d;
+  assign tx_data_o = tx_data_d;
 
   // on each byte read, queue one byte to write
   assign tx_valid_o = rx_valid_i;
+
+  always_ff @(posedge clk_i) begin
+    if (!rst_ni) begin
+      wb_we_q <= 0;
+      wb_adr_q <= 0;
+      wb_ack_q <= 0;
+      wb_dat_q <= 0;
+      wb_dat_q <= 0;
+      wb_stb_q <= 0;
+      state_q <= 0;
+    end else begin
+      wb_we_q <= wb_we_d;
+      wb_adr_q <= wb_adr_d;
+      wb_ack_q <= wb_ack_d;
+      wb_dat_q <= wb_dat_d;
+      wb_stb_q <= wb_stb_d;
+      state_q <= state_d;
+    end
+  end
 
   always_comb begin
     state_d = state_q;
@@ -59,8 +78,9 @@ module ctrl_sync (
     wb_stb_d = wb_stb_q;
     wb_ack_d = wb_ack_q;
     wb_dat_d = wb_dat_q;
-
-    // send zeroes by default
+    wb_dat_d = 0;
+    wb_stb_o = 0;
+    wb_dat_o = 0;
     tx_data_d = 8'h00;
 
     if (rx_valid_i) begin
@@ -87,13 +107,13 @@ module ctrl_sync (
 
         StReadWaitAck: begin
           if (wb_ack_d) begin
-            tx_data_o <= 8'h01;
-            state = StReadPutData;
+            tx_data_d = 8'h01;
+            state_d = StReadPutData;
           end
         end
 
         StReadPutData: begin
-          tx_data_o = wb_dat_d;
+          tx_data_d = wb_dat_d;
           state_d = StIdle;
         end
 
@@ -111,23 +131,11 @@ module ctrl_sync (
       endcase
     end
 
+    // persist the acknoledge so that St{Read,Write}WaitAck could read it
     if (wb_ack_i) begin
       wb_ack_d = wb_ack_i;
       wb_dat_d = wb_dat_i;
     end
   end
 
-  always_ff @(posedge clk_i) begin
-    if (!rst_ni) begin
-      tx_data_q <= 0;
-      tx_valid_q <= 0;
-      tx_data_q <= 0;
-      state_q <= 0;
-    end else begin
-      tx_data_q <= tx_data_d;
-      tx_valid_q <= tx_valid_d;
-      tx_data_q <= 0;
-      state_q <= 0;
-    end
-  end
 endmodule

@@ -1,60 +1,87 @@
 `default_nettype none
-
+//
 // Simple sampling UART receiver with static baud rate
-
-typedef enum {
-  StIdle,
-  StStart,
-  StBit0, StBit1, StBit2, StBit3, StBit4, StBit5, StBit6, StBit7,
-  StStop
-} state_e;
-
-module mUartRx #(
+//
+module uart_rx #(
   parameter BaudRate = 0,
   parameter ClkHz = 0,
   localparam TicksPerBaud = ClkHz / BaudRate
 ) (
-  input logic clk_i,
-  input logic rst_ni,
-  output logic stb,
-  output logic [7:0] data,
-  input logic rx
+  input clk_i,
+  input rst_ni,
+
+  input uart_rx_ni,
+
+  // data reception
+  output [7:0] rx_data_o,
+  output rx_valid_o
 );
-  state_e state;
-  logic [$size(TicksPerBaud)-1:0] baud_cnt;
-  logic [7:0] shifter;
+  typedef enum {
+    StIdle,
+    StBit0, StBit1, StBit2, StBit3, StBit4, StBit5, StBit6, StBit7,
+    StStop,
+    StInvalid
+  } state_e;
+
+  state_e state_d, state_q;
+  logic [$size(TicksPerBaud)-1:0] cnt_d, cnt_q;
+  logic [7:0] shift_d, shift_q;
 
   always_ff @(posedge clk_i) begin
-    stb <= 0;
-
-    case (state)
-    eUartState_Idle: begin
-      if (rx == 0) begin
-        state <= eUartState_Start;
-        // start at 1 to compensate register delay
-        baud_cnt <= (TicksPerBaud > 1) ? 1 : 0;
-      end
-    end
-    default: begin
-      baud_cnt <= baud_cnt + 1;
-
-      if (baud_cnt == TicksPerBaud / 2) begin
-        shifter <= {!rx, shifter[7:1]};
-      end
-
-      if (baud_cnt == TicksPerBaud - 1) begin
-        if (state == eUartState_Bit7) begin
-          data <= shifter;
-          stb <= 1;
-        end
-        state <= (state == eUartState_Bit7) ? 0 : state + 1;
-        baud_cnt <= 0;
-      end
-    end
-    endcase
-
     if (!rst_ni) begin
-      {state, shifter, baud_cnt, data} <= 0;
+      state_q <= 0;
+      shift_q <= 0;
+      cnt_q <= 0;
+    end else begin
+      state_q <= state_d;
+      shift_q <= shift_d;
+      cnt_q <= cnt_d;
     end
   end
+
+  always_comb begin
+    cnt_d = cnt_q + 1;
+    shift_d = shift_q;
+    rx_data_o = 0;
+    rx_valid_o = 0;
+
+    case (state_q)
+
+      StIdle: begin
+        if (!uart_rx_ni) begin
+          // start at 1 to compensate register delay
+          cnt_d = (TicksPerBaud > 1) ? 1 : 0;
+          state_d = StBit0;
+        end
+      end
+
+      StBit0, StBit1, StBit2, StBit3, StBit4, StBit5, StBit6, StBit7: begin
+        state_d = state_q + 1;
+
+        case (cnt_q)
+
+          TicksPerBaud: begin
+            cnt_d = 0;
+          end
+
+          TicksPerBaud / 2: begin
+            shift_d = {!uart_rx_ni, shift_q[7:1]};
+          end
+
+        endcase
+      end
+
+      StStop: begin
+        rx_data_o = shift_d;
+        rx_valid_o = 1;
+        state_d = StIdle;
+      end
+
+      default: begin
+        state_d = StInvalid;;
+      end
+
+    endcase
+  end
+
 endmodule
