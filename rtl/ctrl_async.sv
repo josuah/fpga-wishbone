@@ -1,5 +1,5 @@
 `default_nettype none
-//
+
 // Controller for a Wishbone bus, receiving data from an asynchronous serial
 // interface
 //
@@ -12,7 +12,7 @@
 //
 //  Ctrl: :1000AAAA:DDDDDDDD:///:::::::::
 //  Peri: :::::::::::::::::::///:00000001
-//
+
 module ctrl_async (
   input clk_i,
   input rst_ni,
@@ -27,11 +27,11 @@ module ctrl_async (
 
   // serial data i/o
   input rx_req_i,
-  input rx_data_i,
+  input [7:0] rx_data_i,
   output tx_req_o,
-  output tx_data_o
+  output [7:0] tx_data_o
 );
-  typedef enum logic [1:0] {
+  typedef enum logic [2:0] {
     StIdle,
     StReadWaitAck,
     StReadPutData,
@@ -67,16 +67,21 @@ module ctrl_async (
     end
   end
 
+  logic [7:0] tx_data_w;
+  logic tx_req_w;
+  assign tx_data_o = tx_data_w;
+  assign tx_req_o = tx_req_w;
+
   always_comb begin
     state_d = state_q;
     wb_we_d = wb_we_q;
     wb_stb_d = wb_stb_d;
     wb_dat_d = wb_dat_q;
-    tx_req_o = 0;
+    tx_req_w = 0;
 
     // wait for the async request from serial
     if (rx_req_i) begin
-      unique case (state_q)
+      case (state_q)
 
         StIdle: begin
           wb_stb_d = 0;
@@ -103,8 +108,8 @@ module ctrl_async (
 
     // wait for the ack from the wishbone bus
     if (wb_ack_i) begin
-      tx_data_o = wb_we_d ? wb_dat_i : 8'b00000001;
-      tx_req_o = 1;
+      tx_data_w = wb_we_d ? wb_dat_i : 8'b00000001;
+      tx_req_w = 1;
       state_d = StIdle;
     end
 

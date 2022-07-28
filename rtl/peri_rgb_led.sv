@@ -49,7 +49,7 @@ module peri_rgb_led (
     pwm_b_d = pwm_b_q;
 
     if (wb_stb_i && wb_we_i) begin
-      case (wb_adr_i)
+     case (wb_adr_i)
         4'h0: pwm_r_d = wb_dat_i;
         4'h1: pwm_g_d = wb_dat_i;
         4'h2: pwm_b_d = wb_dat_i;

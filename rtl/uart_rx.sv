@@ -1,7 +1,7 @@
 `default_nettype none
-//
+
 // Simple sampling UART receiver with static baud rate
-//
+
 module uart_rx #(
   parameter BaudRate = 0,
   parameter ClkHz = 0,
@@ -16,7 +16,7 @@ module uart_rx #(
   output [7:0] rx_data_o,
   output rx_valid_o
 );
-  typedef enum {
+  typedef enum logic [3:0] {
     StIdle,
     StBit0, StBit1, StBit2, StBit3, StBit4, StBit5, StBit6, StBit7,
     StStop,
@@ -39,11 +39,16 @@ module uart_rx #(
     end
   end
 
+  logic rx_data_w;
+  logic rx_valid_w;
+  assign rx_data_o = rx_data_w;
+  assign rx_valid_o = rx_valid_w;
+
   always_comb begin
     cnt_d = cnt_q + 1;
     shift_d = shift_q;
-    rx_data_o = 0;
-    rx_valid_o = 0;
+    rx_data_w = 0;
+    rx_valid_w = 0;
 
     case (state_q)
 
@@ -56,8 +61,16 @@ module uart_rx #(
       end
 
       StBit0, StBit1, StBit2, StBit3, StBit4, StBit5, StBit6, StBit7: begin
-        state_d = state_q + 1;
-
+        case (cnt_q)
+          StBit0: state_d = StBit1;
+          StBit1: state_d = StBit2;
+          StBit2: state_d = StBit3;
+          StBit3: state_d = StBit4;
+          StBit4: state_d = StBit5;
+          StBit5: state_d = StBit6;
+          StBit6: state_d = StBit7;
+          StBit7: state_d = StStop;
+        endcase;
         case (cnt_q)
 
           TicksPerBaud: begin
@@ -72,8 +85,8 @@ module uart_rx #(
       end
 
       StStop: begin
-        rx_data_o = shift_d;
-        rx_valid_o = 1;
+        rx_data_w = shift_d;
+        rx_valid_w = 1;
         state_d = StIdle;
       end
 

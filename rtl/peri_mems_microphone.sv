@@ -1,7 +1,5 @@
 `default_nettype none
-//
-//
-//
+
 module peri_mems_microphone #(
   parameter ClkHz = 0,
   parameter MicHz = 3000000,
@@ -32,9 +30,11 @@ module peri_mems_microphone #(
   logic [$clog2(AudioBits)-1:0] sample_cnt_d, sample_cnt_q;
   logic [7:0] wb_dat_d, wb_dat_q;
   logic mic_clk_d, mic_clk_q;
+  logic irq_w;
   assign wb_dat_o = wb_dat_d;
   assign wb_ack_o = wb_stb_i;
   assign mic_clk_o = mic_clk_d;
+  assign irq_o = irq_w;
 
   always_ff @(posedge clk_i) begin
     if (!rst_ni) begin
@@ -69,7 +69,7 @@ module peri_mems_microphone #(
     sample_buf_d = sample_buf_q;
     sample_cnt_d = sample_cnt_q;
     wb_dat_d = wb_dat_q;
-    irq_o = 0;
+    irq_w = 0;
 
     // apply the clock divider
     if (mic_en) begin
@@ -78,7 +78,7 @@ module peri_mems_microphone #(
       // reset the sample buffer on counter overflow
       if (sample_cnt_q == 0) begin
         wb_dat_d = sample_buf_d;
-        irq_o = 1;
+        irq_w = 1;
 
         // add the first value right away
         sample_buf_d = mic_data_i ? 1 : 0;

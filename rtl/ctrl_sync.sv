@@ -84,7 +84,7 @@ module ctrl_sync (
     tx_data_d = 8'h00;
 
     if (rx_valid_i) begin
-      unique case (state_q)
+      case (state_q)
 
         StIdle: begin
           wb_ack_d = wb_ack_i; // =0 would drop ACK coming on this clock
