@@ -1,23 +1,20 @@
 import random
 import cocotb
-from cocotb.triggers import Timer
 from cocotb.triggers import RisingEdge
-from cocotb.triggers import FallingEdge
-from cocotb.utils import get_sim_time
 from cocotb.clock import Clock
 from tb.driver.wishbone import WishboneDriver
 
 @cocotb.test(timeout_time=1000, timeout_unit="us")
-async def test_peri_pwm_channel(dut):
+async def test_peri_pdm_channel(dut):
     """
     Batch test with randomized parameters
     """
     for i in range(10):
-        await run_peri_pwm_channel(dut)
+        await run_peri_pdm_channel(dut)
 
-async def run_peri_pwm_channel(dut, cycles=1000):
+async def run_peri_pdm_channel(dut, cycles=1000):
     """
-    Issue a Wishbone request and check that it generates PDM output.
+    Issue a Wishbone request and check that it generates PWM output.
     """
 
     # driver
@@ -30,26 +27,31 @@ async def run_peri_pwm_channel(dut, cycles=1000):
     await wb.write(0, val)
 
     # monitor
+    dut._log.info("test that the PDM signal switches up and down often enough")
     tickup = 0
     switch = 0
-    last_pwm = dut.pwm_o.value
-    dut._log.info("test that the PWM signal stays switch only twice per cycle")
+    last_pdm = dut.pdm_o.value
     for i in range(cycles):
-        switch += (dut.pwm_o.value != last_pwm)
-        if i % 256 == 0:
+        switch += (dut.pdm_o.value != last_pdm)
+        if i % 256 == 255:
+            if val < 128:
+                assert switch * 2 > val
+            else:
+                assert switch * 2 > 256 - val
             switch = 0
-        assert switch <= 2
-        tickup += dut.pwm_o.value
-        last_pwm = dut.pwm_o.value
+
+        tickup += dut.pdm_o.value
+        last_pdm = dut.pdm_o.value
+
         await RisingEdge(dut.clk_i)
 
     # scoreboard
     dut._log.info("test that the ratio is matching the input value with a small error margin")
     dut._log.debug(f"tickup={tickup}")
     dut._log.debug(f"cycles={cycles}")
-    expected_ratio = val / 255 * 100
-    dut._log.debug(f"expected_ratio={expected_ratio}%")
-    measured_ratio = tickup / cycles * 100
-    dut._log.debug(f"measured_ratio={measured_ratio}%")
-    assert measured_ratio + 2 >= expected_ratio
-    assert measured_ratio - 2 <= expected_ratio
+    expected_duty_cycle = val / 255 * 100
+    dut._log.debug(f"expected_duty_cycle={expected_duty_cycle}%")
+    measured_duty_cycle = tickup / cycles * 100
+    dut._log.debug(f"measured_duty_cycle={measured_duty_cycle}%")
+    assert measured_duty_cycle + 50 >= expected_duty_cycle
+    assert measured_duty_cycle - 50 <= expected_duty_cycle

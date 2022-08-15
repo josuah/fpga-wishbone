@@ -1,9 +1,8 @@
 `default_nettype none
 
 module peri_mems_microphone #(
-  parameter ClkHz = 0,
-  parameter MicHz = 3000000,
-  parameter AudioBits = 16
+  parameter ClkHz = 48_000_000,
+  parameter MicHz = 3_000_000
 ) (
   input clk_i,
   output rst_ni,
@@ -23,11 +22,11 @@ module peri_mems_microphone #(
   // interrupt
   output irq_o
 );
-  localparam TicksPerHz = ClkHz / MicHz / 2;
+  localparam TicksPerHz = 8'(ClkHz / MicHz / 2);
 
-  logic [$clog2(TicksPerHz)-1:0] mic_cnt_d, mic_cnt_q;
-  logic [AudioBits-1:0] sample_buf_d, sample_buf_q;
-  logic [$clog2(AudioBits)-1:0] sample_cnt_d, sample_cnt_q;
+  logic [$size(TicksPerHz)-1:0] mic_cnt_d, mic_cnt_q;
+  logic [7:0] sample_buf_d, sample_buf_q;
+  logic [$clog2(8)-1:0] sample_cnt_d, sample_cnt_q;
   logic [7:0] wb_dat_d, wb_dat_q;
   logic mic_clk_d, mic_clk_q;
   logic irq_w;
@@ -38,13 +37,13 @@ module peri_mems_microphone #(
 
   always_ff @(posedge clk_i) begin
     if (!rst_ni) begin
-      mic_cnt_q <= 0;
+      mic_cnt_q <= TicksPerHz;
       mic_clk_q <= 0;
       sample_buf_q <= 0;
       sample_cnt_q <= 0;
       wb_dat_q <= 0;
     end else begin
-      mic_cnt_q <= mic_cnt_d;
+      mic_cnt_q <= mic_cnt_q - 1;
       mic_clk_q <= mic_clk_d;
       sample_buf_q <= sample_buf_d;
       sample_cnt_q <= sample_cnt_q + 1;
@@ -54,10 +53,10 @@ module peri_mems_microphone #(
 
   // divide the input clock
   always_comb begin
-    mic_cnt_d = mic_cnt_q + 1;
     mic_clk_d = mic_clk_q;
-    if (mic_cnt_q == TicksPerHz) begin
-      mic_cnt_d = 0;
+    mic_cnt_d = mic_cnt_q;
+    if (mic_cnt_q == 0) begin
+      mic_cnt_d = TicksPerHz;
       mic_clk_d = !mic_clk_q;
     end
   end

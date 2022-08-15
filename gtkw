@@ -19,6 +19,6 @@ style = {
 }
 
 mod = argv[1]
-dump = f"tb/{mod}/dump"
+dump = f"tb/{mod}.d/dump"
 write_gtkw(f"{dump}.gtkw", f"{dump}.vcd", traces, style, module=f"TOP.{mod}", clk_period=1.0e-9)
 os.execlp("gtkwave", "gtkwave", "-CM6", f"{dump}.gtkw")

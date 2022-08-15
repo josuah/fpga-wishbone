@@ -13,7 +13,7 @@ all: synthesis.bit
 include config.mk
 
 clean:
-	rm -rf tb/*/ */*.dot */*.pdf */*.xml *.log *.json *.asc *.bit *.hex
+	rm -rf tb/*.d */*.dot */*.pdf */*.xml *.log *.json *.asc *.bit *.hex
 
 lint:
 	${VERILATOR} --lint-only ${RTL} --top top 2>&1 | sed 's,^%[^:]*: ,,'
@@ -56,6 +56,6 @@ synthesis.json: ${RTL}
 	dot -Tpdf $< >$@
 
 .py.xml:
-	${COCOTB} TOPLEVEL="${*F}" MODULE="tb.${*F}" SIM_BUILD="$*" \
+	${COCOTB} TOPLEVEL="${*F}" MODULE="tb.${*F}" SIM_BUILD="$*.d" \
 	  COCOTB_RESULTS_FILE="$*.xml"
-	mv dump.vcd $*/dump.vcd
+	mv dump.vcd $*.d/dump.vcd

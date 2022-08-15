@@ -1,8 +1,6 @@
 `default_nettype none
 
-module peri_pdm_channel #(
-  parameter Bits = 0
-) (
+module peri_pdm_channel (
   input rst_ni,
   input clk_i,
 
@@ -17,13 +15,13 @@ module peri_pdm_channel #(
   // pdm channel
   output pdm_o
 );
-  logic [Bits-1:0] level_q, level_d;
-  logic [Bits:0] accumulator_d, accumulator_q;
+  logic [7:0] level_q, level_d;
+  logic [8:0] accumulator_d, accumulator_q;
   logic unused = &{wb_adr_i};
 
   assign wb_ack_o = wb_stb_i;
   assign wb_dat_o = 0;
-  assign pdm_o = accumulator_q[Bits];
+  assign pdm_o = accumulator_q[8];
 
   always_ff @(posedge clk_i) begin
     if (!rst_ni) begin
