@@ -1,8 +1,8 @@
 `default_nettype none
 
 module peri_rgb_led (
-  input logic clk_i,
-  input logic rst_ni,
+  input clk_i,
+  input rst_ni,
 
   // wishbone b4 peripheral
   input wb_we_i,
@@ -13,9 +13,9 @@ module peri_rgb_led (
   output wb_ack_o,
 
   // pwm output
-  output logic led_r_o,
-  output logic led_g_o,
-  output logic led_b_o
+  output led_r_o,
+  output led_g_o,
+  output led_b_o
 );
   logic [8:0] cnt_d, cnt_q;
   logic [7:0] pwm_r_d, pwm_r_q;

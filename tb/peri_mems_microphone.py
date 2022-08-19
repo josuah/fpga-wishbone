@@ -4,7 +4,7 @@ from cocotb.triggers import RisingEdge
 from cocotb.clock import Clock
 from tb.driver.wishbone import WishboneDriver
 
-@cocotb.test(timeout_time=1000, timeout_unit="ns")
+@cocotb.test(timeout_time=100000, timeout_unit="ns")
 async def test_peri_mems_microphone(dut):
     """
     Send data synchronised to the clock coming out of the device.
@@ -12,20 +12,26 @@ async def test_peri_mems_microphone(dut):
     for i in range(10):
         await run_peri_mems_microphone(dut)
 
-async def drive_mic(mic_clk, mic_data):
+async def drive_mic(log, mic_clk, mic_data):
     """
     Set mic_data to a random value at every mic_clk tick, and yield them as byte.
     """
+    log.info("entered drive_mic func")
     byte = 0
+    i = 0
     while True:
         await RisingEdge(mic_clk)
         mic_data.value = random.getrandbits(1)
         byte += mic_data.value
-        if i == 8:
+        i += 1
+        if i == 256:
+            log.info(f"yielding {byte}")
             yield byte
             byte = 0
+            i = 0
 
 async def run_peri_mems_microphone(dut):
+    log = dut._log
 
     # driver
     wb = WishboneDriver(dut._log, dut.clk_i, dut.rst_ni, dut.wb_we_i, dut.wb_adr_i,
@@ -39,10 +45,13 @@ async def run_peri_mems_microphone(dut):
 
     # monitor
     i = 0
-    async for mic_byte in drive_mic(dut.mic_clk_o, dut.mic_data_i):
+    dut._log.info("entering async for")
+    async for mic_byte in drive_mic(log, dut.mic_clk_o, dut.mic_data_i):
+        dut._log.info("waiting dut.irq_o")
+        await RisingEdge(dut.irq_o)
         wb_byte = wb.read(0)
-        assert wb_byte == wb_read
+        dut._log.info(f"{wb_byte} =?= {mic_byte}")
+        assert mic_byte == wb_byte
         if i == 10:
             break
         i += 1
-        print(f"{i}\n")

@@ -1,7 +1,7 @@
 `default_nettype none
 
 module peri_charlieplex #(
-  parameter ClkHz = 0
+  parameter TicksPerHz = 1
 ) (
   input clk_i,
   input rst_ni,
@@ -19,7 +19,6 @@ module peri_charlieplex #(
   output [6:0] charlieplex_oe
 );
   localparam MemSize = 1 << $clog2(5);
-  localparam DelayHz = 100000;
 
   logic [2:0] row, col;
   // memory for the screen pixels
@@ -27,7 +26,7 @@ module peri_charlieplex #(
   logic [MemSize-1:0] mem_wr_data;
   logic [$clog2(MemSize)-1:0] mem_wr_addr;
   // clock divider for reducing the refresh rate
-  logic [$clog2(ClkHz / DelayHz)-1:0] cnt;
+  logic [$clog2(TicksPerHz)-1:0] cnt;
   logic dot;
   logic [2:0] col_pin, row_pin;
 

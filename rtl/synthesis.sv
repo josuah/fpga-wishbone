@@ -1,15 +1,15 @@
 `default_nettype none
 
 module synthesis (
-  input logic gpio_spi_sck,
-  input logic gpio_spi_csn,
-  input logic gpio_spi_sdi,
-  output logic gpio_spi_sdo,
-  output logic gpio_led_r,
-  output logic gpio_led_g,
-  output logic gpio_led_b,
-  output logic [6:0] gpio_charlieplex,
-  output logic [7:0] gpio_debug
+  input gpio_spi_sck,
+  input gpio_spi_csn,
+  input gpio_spi_sdi,
+  output gpio_spi_sdo,
+  output gpio_led_r,
+  output gpio_led_g,
+  output gpio_led_b,
+  output [6:0] gpio_charlieplex,
+  output [7:0] gpio_debug
 );
   logic clk_i;
   logic [6:0] charlieplex_en_o;

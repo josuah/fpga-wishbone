@@ -3,9 +3,7 @@
 // Simple sampling UART receiver with static baud rate
 
 module uart_rx #(
-  parameter BaudRate = 0,
-  parameter ClkHz = 0,
-  localparam TicksPerBaud = ClkHz / BaudRate
+  parameter TicksPerBaud = 3
 ) (
   input clk_i,
   input rst_ni,

@@ -1,7 +1,6 @@
 `default_nettype none
 
 module top #(
-//  parameter int CpuHz = 48_000_000,
   parameter int AddrW = 4,
   parameter int DataW = 8
 ) (
@@ -86,7 +85,7 @@ module top #(
 //  logic peri2_wb_we, peri2_wb_stb, peri2_wb_ack;
 //  logic [AddrW-1:0] peri2_wb_adr;
 //  logic [DataW-1:0] peri2_wb_dat_i, peri2_wb_dat_o;
-//  peri_charlieplex#(.ClkHz(CpuHz)) peri2 (
+//  peri_charlieplex peri2 (
 //    .clk_i, .rst_ni, .wb_p(wb2_p), .wb_p(wb2_c),
 //    .charlieplex_o, .charlieplex_en_o
 //  );

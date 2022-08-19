@@ -1,8 +1,8 @@
 `default_nettype none
 
 module peri_pwm_channel (
-  input logic clk_i,
-  input logic rst_ni,
+  input clk_i,
+  input rst_ni,
 
   // wishbone b4 peripheral
   input wb_we_i,

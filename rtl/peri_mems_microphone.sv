@@ -1,11 +1,10 @@
 `default_nettype none
 
 module peri_mems_microphone #(
-  parameter ClkHz = 48_000_000,
-  parameter MicHz = 3_000_000
+  parameter TicksPerHz = 2
 ) (
   input clk_i,
-  output rst_ni,
+  input rst_ni,
 
   // wishbone b4 peripheral
   input wb_we_i,
@@ -22,22 +21,20 @@ module peri_mems_microphone #(
   // interrupt
   output irq_o
 );
-  localparam TicksPerHz = 8'(ClkHz / MicHz / 2);
-
-  logic [$size(TicksPerHz)-1:0] mic_cnt_d, mic_cnt_q;
+  logic [$clog2(TicksPerHz):0] mic_cnt_d, mic_cnt_q;
   logic [7:0] sample_buf_d, sample_buf_q;
   logic [$clog2(8)-1:0] sample_cnt_d, sample_cnt_q;
   logic [7:0] wb_dat_d, wb_dat_q;
   logic mic_clk_d, mic_clk_q;
-  logic irq_w;
+  logic irq_d;
   assign wb_dat_o = wb_dat_d;
   assign wb_ack_o = wb_stb_i;
   assign mic_clk_o = mic_clk_d;
-  assign irq_o = irq_w;
+  assign irq_o = irq_d;
 
   always_ff @(posedge clk_i) begin
     if (!rst_ni) begin
-      mic_cnt_q <= TicksPerHz;
+      mic_cnt_q <= 0;
       mic_clk_q <= 0;
       sample_buf_q <= 0;
       sample_cnt_q <= 0;
@@ -68,7 +65,7 @@ module peri_mems_microphone #(
     sample_buf_d = sample_buf_q;
     sample_cnt_d = sample_cnt_q;
     wb_dat_d = wb_dat_q;
-    irq_w = 0;
+    irq_d = 0;
 
     // apply the clock divider
     if (mic_en) begin
@@ -77,7 +74,7 @@ module peri_mems_microphone #(
       // reset the sample buffer on counter overflow
       if (sample_cnt_q == 0) begin
         wb_dat_d = sample_buf_d;
-        irq_w = 1;
+        irq_d = 1;
 
         // add the first value right away
         sample_buf_d = mic_data_i ? 1 : 0;
