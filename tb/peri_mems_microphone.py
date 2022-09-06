@@ -1,6 +1,7 @@
 import random
 import cocotb
 from cocotb.triggers import RisingEdge
+from cocotb.triggers import FallingEdge
 from cocotb.clock import Clock
 from tb.driver.wishbone import WishboneDriver
 
@@ -39,18 +40,21 @@ async def run_peri_mems_microphone(dut):
     irq = dut.irq_o
     mic_clk = dut.mic_clk_o
     mic_data = dut.mic_data_i
+    log.debug("run_peri_mems_microphone: waiting random amount of clock edges")
     for i in range(random.randint(0, 50)):
-        await RisingEdge(dut.clk_i)
+        log.debug(f"run_peri_mems_microphone: waiting edge {i}")
+        await FallingEdge(dut.clk_i)
+    log.debug(f"run_peri_mems_microphone: issuing a reset")
     await wb.reset()
 
     # monitor
     i = 0
-    dut._log.info("entering async for")
+    log.info("entering async for")
     async for mic_byte in drive_mic(log, dut.mic_clk_o, dut.mic_data_i):
-        dut._log.info("waiting dut.irq_o")
+        log.info("waiting dut.irq_o")
         await RisingEdge(dut.irq_o)
         wb_byte = wb.read(0)
-        dut._log.info(f"{wb_byte} =?= {mic_byte}")
+        log.info(f"{wb_byte} =?= {mic_byte}")
         assert mic_byte == wb_byte
         if i == 10:
             break

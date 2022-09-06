@@ -9,5 +9,5 @@
 *.pdf
 *.dot
 *.xml
+*.d
 __pycache__
-/tb/*/
