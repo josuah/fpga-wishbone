@@ -53,7 +53,7 @@ async def run_peri_mems_microphone(dut):
     async for mic_byte in drive_mic(log, dut.mic_clk_o, dut.mic_data_i):
         log.info("waiting dut.irq_o")
         await RisingEdge(dut.irq_o)
-        wb_byte = wb.read(0)
+        wb_byte = await wb.read(0)
         log.info(f"{wb_byte} =?= {mic_byte}")
         assert mic_byte == wb_byte
         if i == 10:

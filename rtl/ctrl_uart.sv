@@ -37,7 +37,7 @@ module ctrl_uart (
     .uart_tx_no
   );
 
-  ctrl_sync ctrl (
+  ctrl_async ctrl (
     .clk_i, .rst_ni,
     .wb_we_o, .wb_adr_o, .wb_dat_o, .wb_stb_o, .wb_dat_i, .wb_ack_i,
     .rx_valid_i(rx_valid), .rx_data_i(rx_data),

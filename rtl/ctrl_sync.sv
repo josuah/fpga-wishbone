@@ -1,4 +1,7 @@
 `default_nettype none
+
+// Controller for a Wishbone bus, receiving data from an synchronous serial
+// interface
 //
 // Wishbone read:
 //
@@ -9,7 +12,7 @@
 //
 //  Ctrl: W000AAAA DDDDDDDD [ :::::::: ]* ::::::::
 //  Peri: :::::::: :::::::: [ 00000000 ]* 00000001
-//
+
 module ctrl_sync (
   input clk_i,
   input rst_ni,
@@ -17,12 +20,12 @@ module ctrl_sync (
   // wishbone b4 controller
   output wb_we_o,
   output [3:0] wb_adr_o,
-  output reg [7:0] wb_dat_o,
-  output reg wb_stb_o,
+  output [7:0] wb_dat_o,
+  output wb_stb_o,
   input [7:0] wb_dat_i,
   input wb_ack_i,
 
-  // data i/o
+  // serial data i/o
   input [7:0] rx_data_i,
   input rx_valid_i,
   output [7:0] tx_data_o,
