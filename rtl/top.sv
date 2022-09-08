@@ -111,6 +111,7 @@ module top #(
         ctrl_wb_ack = peri2_wb_ack;
         peri2_wb_stb = ctrl_wb_stb;
       end
+      default:;
     endcase
   end
 

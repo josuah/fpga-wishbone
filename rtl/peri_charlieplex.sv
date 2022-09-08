@@ -8,11 +8,11 @@ module peri_charlieplex #(
 
   // wishbone b4 peripheral
   input wb_we_i,
+  input wb_stb_i,
+  output wb_ack_o,
   input [3:0] wb_adr_i,
   input [7:0] wb_dat_i,
-  input wb_stb_i,
   output [7:0] wb_dat_o,
-  output wb_ack_o,
 
   // charlieplexed screen
   output [6:0] charlieplex_o,
@@ -20,13 +20,14 @@ module peri_charlieplex #(
 );
   localparam MemSize = 1 << $clog2(5);
 
+  logic unused = |{ wb_adr_i };
   logic [2:0] row, col;
   // memory for the screen pixels
   logic [MemSize-1:0] mem[4:0];
   logic [MemSize-1:0] mem_wr_data;
   logic [$clog2(MemSize)-1:0] mem_wr_addr;
   // clock divider for reducing the refresh rate
-  logic [$clog2(TicksPerHz)-1:0] cnt;
+  logic [$clog2(TicksPerHz):0] cnt;
   logic dot;
   logic [2:0] col_pin, row_pin;
 

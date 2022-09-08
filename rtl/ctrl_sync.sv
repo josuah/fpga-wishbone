@@ -49,6 +49,7 @@ module ctrl_sync (
   logic [7:0] tx_data_d;
   state_e state_d, state_q;
 
+  assign wb_stb_o = wb_stb_d;
   assign wb_we_o = wb_we_d;
   assign wb_adr_o = wb_adr_d;
   assign wb_dat_o = wb_dat_od;

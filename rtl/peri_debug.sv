@@ -15,7 +15,8 @@ module peri_debug (
   // led i/o
   output [7:0] debug_o
 );
-  logic debug_d, debug_q;
+  logic unused = |{ wb_adr_i };
+  logic [7:0] debug_d, debug_q;
 
   assign wb_dat_o = 0;
   assign wb_ack_o = wb_stb_i;
