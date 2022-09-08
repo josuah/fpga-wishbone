@@ -1,6 +1,6 @@
 `default_nettype none
 
-module synthesis (
+module ice40 (
   input gpio_spi_sck,
   input gpio_spi_csn,
   input gpio_spi_sdi,
@@ -12,14 +12,18 @@ module synthesis (
   output [7:0] gpio_debug
 );
   logic clk_i;
-  logic [6:0] charlieplex_en_o;
-  logic [6:0] charlieplex_o;
 
   SB_HFOSC hfosc (
     .CLKHFPU(1'b1),
     .CLKHFEN(1'b1),
     .CLKHF(clk_i)
   );
+
+  logic rst_ni;
+
+  always_ff @(posedge clk_i) begin
+    rst_ni <= 1;
+  end
 
   logic led_r, led_g, led_b;
 
@@ -39,6 +43,9 @@ module synthesis (
     .RGB2(gpio_led_r)
   );
 
+  logic [6:0] charlieplex_out_en_o;
+  logic [6:0] charlieplex_o;
+
   SB_IO #(
     .PIN_TYPE({4'b1010, 2'b01}),
     .PULLUP(0),
@@ -48,19 +55,19 @@ module synthesis (
     .PACKAGE_PIN(gpio_charlieplex),
     .LATCH_INPUT_VALUE(1'b0),
     .CLOCK_ENABLE(1'b0),
-    .OUTPUT_ENABLE(charlieplex_en_o),
+    .OUTPUT_ENABLE(charlieplex_out_en_o),
     .D_OUT_0(charlieplex_o)
   );
 
   top top (
-    .clk_i,
+    .clk_i, .rst_ni,
     .spi_sck_i(gpio_spi_sck),
     .spi_csn_i(gpio_spi_csn),
     .spi_sd_i(gpio_spi_sdi),
     .spi_sd_o(gpio_spi_sdo),
     .led_r_o(led_r), .led_g_o(led_g), .led_b_o(led_b),
-    .debug_o(gpio_debug),
-    .charlieplex_en_o, .charlieplex_o
+    .led_debug_o(gpio_debug),
+    .charlieplex_out_en_o, .charlieplex_o
   );
 
 endmodule

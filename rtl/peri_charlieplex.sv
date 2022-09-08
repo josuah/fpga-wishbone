@@ -16,7 +16,7 @@ module peri_charlieplex #(
 
   // charlieplexed screen
   output [6:0] charlieplex_o,
-  output [6:0] charlieplex_oe
+  output [6:0] charlieplex_out_en_o
 );
   localparam MemSize = 1 << $clog2(5);
 
@@ -42,7 +42,7 @@ module peri_charlieplex #(
   assign wb_dat_o = 0;
 
   assign charlieplex_o = dot ? (1 << row_pin) : 0;
-  assign charlieplex_oe = dot ? (1 << row_pin) | (1 << col_pin) : 0;
+  assign charlieplex_out_en_o = dot ? (1 << row_pin) | (1 << col_pin) : 0;
 
   always_ff @(posedge clk_i) begin
     mem[mem_wr_addr] <= mem_wr_data;

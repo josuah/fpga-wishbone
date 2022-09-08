@@ -15,7 +15,6 @@ module peri_debug (
   // led i/o
   output [7:0] debug_o
 );
-  logic unused = |{wb_adr_i};
   logic debug_d, debug_q;
 
   assign wb_dat_o = 0;
@@ -30,6 +29,9 @@ module peri_debug (
     end
   end
 
-  assign debug_d = (wb_stb_i && wb_we_i) ? wb_dat_i : debug_q;
+  always_comb begin
+    debug_d = debug_q;
+    if (wb_stb_i) if (wb_we_i) debug_d = wb_dat_i;
+  end
 
 endmodule

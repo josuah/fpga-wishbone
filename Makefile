@@ -8,7 +8,7 @@ COCOTB = ${MAKE} -f "$$(cocotb-config --makefiles)/Makefile.sim" MAKE="${MAKE}" 
   SIM="verilator" EXTRA_ARGS="--trace" TOPLEVEL_LANG="verilog" \
   VERILOG_SOURCES="${RTL}"
 
-all: synthesis.bit
+all: ice40.bit
 
 include config.mk
 
@@ -16,10 +16,10 @@ clean:
 	rm -rf tb/*.d */*.dot */*.pdf */*.xml *.log *.json *.asc *.bit *.hex
 
 lint:
-	${VERILATOR} --lint-only ${RTL} --top top 2>&1 | sed 's,^%[^:]*: ,,'
+	${VERILATOR} --lint-only --sv --top-module top ${RTL} 2>&1 | sed 's,^%[^:]*: ,,'
 
-flash: synthesis.bit
-	${ICEPROG} -d i:0x0403:0x6014:0 synthesis.bit
+flash: ice40.bit
+	${ICEPROG} -d i:0x0403:0x6014:0 ice40.bit
 
 test: ${RTL} ${TB:.py=.xml}
 
@@ -31,10 +31,10 @@ config.mk: rtl tb
 	echo RTL = rtl/*.sv >$@ 
 	echo TB = tb/*.py >>$@
 
-synthesis.json: ${RTL}
-	${YOSYS} -p "read_verilog -sv ${RTL}; synth_ice40 -top synthesis -json $@" >$*.yosys.log
-
 .SUFFIXES: .sv .elf .vcd .json .asc .bit .dfu .hex .dot .pdf .py .xml
+
+.sv.json:
+	${YOSYS} -p "read_verilog -sv $< ${RTL}; synth_ice40 -top $* -json $@" >$*.yosys.log
 
 .elf.vcd:
 	./$< >$@
