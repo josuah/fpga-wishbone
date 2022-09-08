@@ -42,8 +42,7 @@ async def run_peri_mems_microphone(dut):
     mic_data = dut.mic_data_i
     log.debug("run_peri_mems_microphone: waiting random amount of clock edges")
     for i in range(random.randint(0, 50)):
-        log.debug(f"run_peri_mems_microphone: waiting edge {i}")
-        await FallingEdge(dut.clk_i)
+        await RisingEdge(dut.clk_i)
     log.debug(f"run_peri_mems_microphone: issuing a reset")
     await wb.reset()
 
@@ -52,10 +51,10 @@ async def run_peri_mems_microphone(dut):
     log.info("entering async for")
     async for mic_byte in drive_mic(log, dut.mic_clk_o, dut.mic_data_i):
         log.info("waiting dut.irq_o")
-        await RisingEdge(dut.irq_o)
         wb_byte = await wb.read(0)
         log.info(f"{wb_byte} =?= {mic_byte}")
         assert mic_byte == wb_byte
         if i == 10:
             break
         i += 1
+        await RisingEdge(dut.irq_o)

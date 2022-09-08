@@ -48,10 +48,10 @@ module top #(
     .spi_sck_i, .spi_csn_i, .spi_sd_i, .spi_sd_o
   );
 
-//  peri_blinkenlight peri0 (
-//    .clk_i, .rst_ni, .wb_c(wbc_p), .wb_p(wbc_p),
-//    .blinkenlights(debug)
-//  );
+//peri_blinkenlight peri0 (
+//  .clk_i, .rst_ni, .wb_c(wbc_p), .wb_p(wbc_p),
+//  .blinkenlights(debug)
+//);
 
   logic peri0_wb_we, peri0_wb_stb, peri0_wb_ack;
   logic [AddrW-1:0] peri0_wb_adr;
@@ -70,47 +70,47 @@ module top #(
   assign peri0_wb_adr = ctrl_wb_adr[3:0];
   assign peri0_wb_we = ctrl_wb_we;
 
-//  logic peri1_wb_we, peri1_wb_stb, peri1_wb_ack;
-//  logic [AddrW-1:0] peri1_wb_adr;
-//  logic [DataW-1:0] peri1_wb_dat_i, peri1_wb_dat_o;
-//  peri_debug peri1 (
-//    .clk_i, .rst_ni, .wb_p(wb1_p), .wb_c(wb1_c),
-//    .debug(debug)
-//  );
-//  assign peri1_wb_dat = ctrl_wb_dat_o;
-//  assign peri1_wb_adr = ctrl_wb_adr;
-//  assign peri1_wb_we = ctrl_wb_we;
-//  assign wb0_c[13] = 1'b1;
+//logic peri1_wb_we, peri1_wb_stb, peri1_wb_ack;
+//logic [AddrW-1:0] peri1_wb_adr;
+//logic [DataW-1:0] peri1_wb_dat_i, peri1_wb_dat_o;
+//peri_debug peri1 (
+//  .clk_i, .rst_ni, .wb_p(wb1_p), .wb_c(wb1_c),
+//  .debug(debug)
+//);
+//assign peri1_wb_dat = ctrl_wb_dat_o;
+//assign peri1_wb_adr = ctrl_wb_adr;
+//assign peri1_wb_we = ctrl_wb_we;
+//assign wb0_c[13] = 1'b1;
 
-//  logic peri2_wb_we, peri2_wb_stb, peri2_wb_ack;
-//  logic [AddrW-1:0] peri2_wb_adr;
-//  logic [DataW-1:0] peri2_wb_dat_i, peri2_wb_dat_o;
-//  peri_charlieplex peri2 (
-//    .clk_i, .rst_ni, .wb_p(wb2_p), .wb_p(wb2_c),
-//    .charlieplex_o, .charlieplex_en_o
-//  );
-//  assign peri2_wb_dat = ctrl_wb_dat_o;
-//  assign peri2_wb_adr = ctrl_wb_adr;
-//  assign peri2_wb_we = ctrl_wb_we;
+//logic peri2_wb_we, peri2_wb_stb, peri2_wb_ack;
+//logic [AddrW-1:0] peri2_wb_adr;
+//logic [DataW-1:0] peri2_wb_dat_i, peri2_wb_dat_o;
+//peri_charlieplex peri2 (
+//  .clk_i, .rst_ni, .wb_p(wb2_p), .wb_p(wb2_c),
+//  .charlieplex_o, .charlieplex_en_o
+//);
+//assign peri2_wb_dat = ctrl_wb_dat_o;
+//assign peri2_wb_adr = ctrl_wb_adr;
+//assign peri2_wb_we = ctrl_wb_we;
 
   always_comb begin
     case (ctrl_wb_adr)
-    AddrW'(0): begin
-      ctrl_wb_dat_i = peri0_wb_dat_o;
-      ctrl_wb_ack = peri0_wb_ack;
-      peri0_wb_stb = ctrl_wb_stb;
-    end
+      AddrW'(0): begin
+        ctrl_wb_dat_i = peri0_wb_dat_o;
+        ctrl_wb_ack = peri0_wb_ack;
+        peri0_wb_stb = ctrl_wb_stb;
+      end
 //    AddrW'(1): begin
 //      ctrl_wb_dat_i = peri1_wb_dat_o;
 //      ctrl_wb_ack = peri1_wb_ack;
 //      peri1_wb_stb = ctrl_wb_stb;
 //    end
-    default: begin
-      ctrl_wb_dat_i = 8'b00000000;
-      ctrl_wb_ack = 1'b0;
-      peri0_wb_stb = 0;
+      default: begin
+        ctrl_wb_dat_i = 8'b00000000;
+        ctrl_wb_ack = 1'b0;
+        peri0_wb_stb = 0;
 //      peri1_wb_stb = 0;
-    end
+      end
     endcase
   end
 

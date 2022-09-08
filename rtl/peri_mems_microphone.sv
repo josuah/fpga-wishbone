@@ -23,7 +23,7 @@ module peri_mems_microphone #(
 );
   logic [$clog2(TicksPerHz):0] mic_cnt_d, mic_cnt_q;
   logic [7:0] sample_buf_d, sample_buf_q;
-  logic [$clog2(8)-1:0] sample_cnt_d, sample_cnt_q;
+  logic [7:0] sample_cnt_d, sample_cnt_q;
   logic [7:0] wb_dat_d, wb_dat_q;
   logic mic_clk_d, mic_clk_q;
   logic irq_d;
@@ -40,10 +40,10 @@ module peri_mems_microphone #(
       sample_cnt_q <= 0;
       wb_dat_q <= 0;
     end else begin
-      mic_cnt_q <= mic_cnt_q - 1;
+      mic_cnt_q <= mic_cnt_d;
       mic_clk_q <= mic_clk_d;
       sample_buf_q <= sample_buf_d;
-      sample_cnt_q <= sample_cnt_q + 1;
+      sample_cnt_q <= sample_cnt_d;
       wb_dat_q <= wb_dat_d;
     end
   end
@@ -51,24 +51,23 @@ module peri_mems_microphone #(
   // divide the input clock
   always_comb begin
     mic_clk_d = mic_clk_q;
-    mic_cnt_d = mic_cnt_q;
+    mic_cnt_d = mic_cnt_q - 1;
     if (mic_cnt_q == 0) begin
-      mic_cnt_d = TicksPerHz;
+      mic_cnt_d = TicksPerHz - 1;
       mic_clk_d = !mic_clk_q;
     end
   end
 
   // sample the mic data on `mic_clk_o` positive edge, 
-  logic mic_en;
-  assign mic_en = (mic_cnt_q == 0 && mic_clk_o == 1);
   always_comb begin
+    wb_dat_d = wb_dat_q;
     sample_buf_d = sample_buf_q;
     sample_cnt_d = sample_cnt_q;
-    wb_dat_d = wb_dat_q;
     irq_d = 0;
 
-    // apply the clock divider
-    if (mic_en) begin
+    // synchronise with mic_clk_o pace
+    if (mic_clk_q == 0 && mic_clk_d == 1) begin
+      sample_cnt_d = sample_cnt_q + 1; // overflowing
       sample_buf_d = sample_buf_q + (mic_data_i ? 1 : 0);
 
       // reset the sample buffer on counter overflow
@@ -78,9 +77,6 @@ module peri_mems_microphone #(
 
         // add the first value right away
         sample_buf_d = mic_data_i ? 1 : 0;
-
-        // and therefore not starting at zero
-        sample_cnt_d = 1;
       end
     end
   end
