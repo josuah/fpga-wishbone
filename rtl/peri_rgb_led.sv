@@ -6,11 +6,11 @@ module peri_rgb_led (
 
   // wishbone b4 peripheral
   input wb_we_i,
+  input wb_stb_i,
+  output wb_ack_o,
   input [3:0] wb_adr_i,
   input [7:0] wb_dat_i,
-  input wb_stb_i,
   output [7:0] wb_dat_o,
-  output wb_ack_o,
 
   // pwm output
   output led_r_o,

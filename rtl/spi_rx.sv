@@ -10,10 +10,9 @@ module spi_rx (
 
   // data output
   output [7:0] rx_data_o,
-  output rx_valid_o
+  output rx_req_o
 );
-  logic unused;
-
+  logic dummy;
   logic [2:0] spi_cnt_q, spi_cnt_d;
   logic [7:0] spi_shift_d, spi_shift_q;
 
@@ -27,29 +26,29 @@ module spi_rx (
   assign spi_shift_d = {spi_shift_q[6:0], spi_sd_i};
 
   logic [7:0] spi_data_d, spi_data_q;
-  logic spi_valid;
+  logic spi_req_w;
 
   // on counter overflow, latch the spi data and make it cross clock domain
   always_comb begin
     spi_data_d = spi_data_q;
     spi_cnt_d = spi_cnt_q;
-    spi_valid = 0;
+    spi_req_w = 0;
 
     if (spi_csn_i) begin
       spi_cnt_d = spi_cnt_q + 1;
 
       if (spi_cnt_q == 3'b111) begin
         spi_data_d = spi_shift_q;
-        spi_valid = 1;
+        spi_req_w = 1;
       end
     end
   end
 
   clock_domain_crossing cdc (
     .clk_src_i(clk_sys_i),
-    .src_data_i(spi_data_d), .src_valid_i(spi_valid), .src_ready_o(unused),
+    .src_data_i(spi_data_d), .src_req_i(spi_req_w), .src_rdy_o(dummy),
     .clk_dst_i(clk_spi_i),
-    .dst_data_o(rx_data_o), .dst_valid_o(rx_valid_o)
+    .dst_data_o(rx_data_o), .dst_req_o(rx_req_o)
   );
 
 endmodule

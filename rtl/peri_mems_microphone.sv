@@ -8,11 +8,11 @@ module peri_mems_microphone #(
 
   // wishbone b4 peripheral
   input wb_we_i,
-  input wb_adr_i,
-  input [7:0] wb_dat_i,
   input wb_stb_i,
-  output [7:0] wb_dat_o,
   output wb_ack_o,
+  input [3:0] wb_adr_i,
+  input [7:0] wb_dat_i,
+  output [7:0] wb_dat_o,
 
   // microphone i/o
   output mic_clk_o,
@@ -21,6 +21,7 @@ module peri_mems_microphone #(
   // interrupt
   output irq_o
 );
+  logic unused = |{wb_adr_i};
   logic [$clog2(TicksPerHz):0] mic_cnt_d, mic_cnt_q;
   logic [7:0] sample_buf_d, sample_buf_q;
   logic [7:0] sample_cnt_d, sample_cnt_q;

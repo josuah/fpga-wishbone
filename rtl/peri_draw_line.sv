@@ -10,11 +10,11 @@ module peri_draw_line #(
 
   // wishbone b4 peripheral
   input wb_we_i,
+  input wb_stb_i,
+  output wb_ack_o,
   input [7:0] wb_adr_i,
   input [7:0] wb_dat_i,
-  input wb_stb_i,
   output [7:0] wb_dat_o,
-  output wb_ack_o,
 
   // memory framebuffer i/o
   output [CoordSz-1:0] dot_row_o,

@@ -9,16 +9,17 @@ module uart_tx #(
   input rst_ni,
 
   // data input
+  input tx_stb_i,
   input [7:0] tx_data_i,
-  input tx_valid_i,
 
-  // uart output
+  // uart port
   output uart_tx_no
 );
   typedef enum logic [3:0] {
     StIdle,
     StBit0, StBit1, StBit2, StBit3, StBit4, StBit5, StBit6, StBit7,
-    StStop
+    StStop,
+    StInvalid
   } state_e;
 
   state_e state_d, state_q;
@@ -40,10 +41,14 @@ module uart_tx #(
   end
 
   always_comb begin
+    state_d = state_q;
+    shift_d = shift_q;
+    cnt_d = cnt_q;
+
     case (state_q)
 
       StIdle: begin
-        if (tx_valid_i) begin
+        if (tx_stb_i) begin
           shift_d = {1'b0, tx_data_i[7:0], 1'b1};
           state_d = StBit0;
         end
@@ -64,6 +69,7 @@ module uart_tx #(
             StBit6: state_d = StBit7;
             StBit7: state_d = StStop;
             StStop: state_d = StIdle;
+            default: state_d = StInvalid;
           endcase
           shift_d = {1'b0, shift_q[9:1]};
         end

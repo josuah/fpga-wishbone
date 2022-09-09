@@ -8,11 +8,12 @@ module uart_rx #(
   input clk_i,
   input rst_ni,
 
-  input uart_rx_ni,
-
   // data reception
+  output rx_stb_o,
   output [7:0] rx_data_o,
-  output rx_valid_o
+
+  // uart port
+  input uart_rx_ni
 );
   typedef enum logic [3:0] {
     StIdle,
@@ -37,16 +38,17 @@ module uart_rx #(
     end
   end
 
-  logic rx_data_w;
-  logic rx_valid_w;
+  logic [7:0] rx_data_w;
+  logic rx_stb_w;
   assign rx_data_o = rx_data_w;
-  assign rx_valid_o = rx_valid_w;
+  assign rx_stb_o = rx_stb_w;
 
   always_comb begin
-    cnt_d = cnt_q + 1;
+    state_d = state_q;
     shift_d = shift_q;
+    cnt_d = cnt_q + 1;
     rx_data_w = 0;
-    rx_valid_w = 0;
+    rx_stb_w = 0;
 
     case (state_q)
 
@@ -59,16 +61,7 @@ module uart_rx #(
       end
 
       StBit0, StBit1, StBit2, StBit3, StBit4, StBit5, StBit6, StBit7: begin
-        case (cnt_q)
-          StBit0: state_d = StBit1;
-          StBit1: state_d = StBit2;
-          StBit2: state_d = StBit3;
-          StBit3: state_d = StBit4;
-          StBit4: state_d = StBit5;
-          StBit5: state_d = StBit6;
-          StBit6: state_d = StBit7;
-          StBit7: state_d = StStop;
-        endcase;
+        state_d = (state_q == StBit7) ? StStop : state_q + 1;
         case (cnt_q)
 
           TicksPerBaud: begin
@@ -79,12 +72,15 @@ module uart_rx #(
             shift_d = {!uart_rx_ni, shift_q[7:1]};
           end
 
+          default: begin
+          end
+
         endcase
       end
 
       StStop: begin
         rx_data_w = shift_d;
-        rx_valid_w = 1;
+        rx_stb_w = 1;
         state_d = StIdle;
       end
 

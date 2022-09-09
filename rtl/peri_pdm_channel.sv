@@ -6,18 +6,18 @@ module peri_pdm_channel (
 
   // wishbone b4 peripheral
   input wb_we_i,
+  input wb_stb_i,
+  output wb_ack_o,
   input [3:0] wb_adr_i,
   input [7:0] wb_dat_i,
-  input wb_stb_i,
   output [7:0] wb_dat_o,
-  output wb_ack_o,
 
   // pdm channel
   output pdm_o
 );
+  logic unused = |{wb_adr_i};
   logic [7:0] level_q, level_d;
   logic [8:0] accumulator_d, accumulator_q;
-  logic unused = &{wb_adr_i};
 
   assign wb_ack_o = wb_stb_i;
   assign wb_dat_o = 0;

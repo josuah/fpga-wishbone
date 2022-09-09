@@ -1,18 +1,9 @@
-# mRgb
+# RGB LEDs
 set_io -nowarn gpio_led_g 39
 set_io -nowarn gpio_led_r 40
 set_io -nowarn gpio_led_b 41
 
-# mCharlieplex
-set_io -nowarn gpio_charlieplex[0] 38
-set_io -nowarn gpio_charlieplex[1] 36
-set_io -nowarn gpio_charlieplex[2] 34
-set_io -nowarn gpio_charlieplex[3] 31
-set_io -nowarn gpio_charlieplex[4] 32
-set_io -nowarn gpio_charlieplex[5] 26
-set_io -nowarn gpio_charlieplex[6] 23
-
-# mDebug
+# Debug LEDs
 set_io -nowarn gpio_debug[0] 2
 set_io -nowarn gpio_debug[1] 46
 set_io -nowarn gpio_debug[2] 47
@@ -22,8 +13,21 @@ set_io -nowarn gpio_debug[5] 3
 set_io -nowarn gpio_debug[6] 4
 set_io -nowarn gpio_debug[7] 44
 
-# mSpi
+# Charlieplex screen
+set_io -nowarn gpio_charlieplex[0] 38
+set_io -nowarn gpio_charlieplex[1] 36
+set_io -nowarn gpio_charlieplex[2] 34
+set_io -nowarn gpio_charlieplex[3] 31
+set_io -nowarn gpio_charlieplex[4] 32
+set_io -nowarn gpio_charlieplex[5] 26
+set_io -nowarn gpio_charlieplex[6] 23
+
+# UART port
 set_io -nowarn gpio_spi_sdi 21
 set_io -nowarn gpio_spi_sck 12
 set_io -nowarn gpio_spi_csn 10
 set_io -nowarn gpio_spi_sdo 20
+
+# SPI port
+set_io -nowarn gpio_uart_tx 21
+set_io -nowarn gpio_uart_rx 20

@@ -6,16 +6,16 @@ module peri_debug (
 
   // wishbone b4 peripheral
   input wb_we_i,
+  input wb_stb_i,
+  output wb_ack_o,
   input [3:0] wb_adr_i,
   input [7:0] wb_dat_i,
-  input wb_stb_i,
   output [7:0] wb_dat_o,
-  output wb_ack_o,
 
   // led i/o
   output [7:0] debug_o
 );
-  logic unused = |{ wb_adr_i };
+  logic unused = |{wb_adr_i};
   logic [7:0] debug_d, debug_q;
 
   assign wb_dat_o = 0;

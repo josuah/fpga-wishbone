@@ -1,10 +1,8 @@
 `default_nettype none
 
 module ice40 (
-  input gpio_spi_sck,
-  input gpio_spi_csn,
-  input gpio_spi_sdi,
-  output gpio_spi_sdo,
+  input gpio_uart_rx,
+  output gpio_uart_tx,
   output gpio_led_r,
   output gpio_led_g,
   output gpio_led_b,
@@ -61,10 +59,8 @@ module ice40 (
 
   top top (
     .clk_i, .rst_ni,
-    .spi_sck_i(gpio_spi_sck),
-    .spi_csn_i(gpio_spi_csn),
-    .spi_sd_i(gpio_spi_sdi),
-    .spi_sd_o(gpio_spi_sdo),
+    .uart_rx_ni(gpio_uart_rx),
+    .uart_tx_no(gpio_uart_tx),
     .led_r_o(led_r), .led_g_o(led_g), .led_b_o(led_b),
     .led_debug_o(gpio_debug),
     .charlieplex_out_en_o, .charlieplex_o

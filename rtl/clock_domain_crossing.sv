@@ -35,12 +35,12 @@ module clock_domain_crossing #(
   input clk_dst_i,
 
   // export from source
-  input src_valid_i,
-  output src_ready_o,
+  input src_req_i,
+  output src_rdy_o,
   input [Bits-1:0] src_data_i,
 
   // import at destination
-  output dst_valid_o,
+  output dst_req_o,
   output [Bits-1:0] dst_data_o
 );
   // signals which will cross the clock domain
@@ -68,20 +68,20 @@ module clock_domain_crossing #(
     src_req_d = src_req_q;
 
     // on incoming request latch the data and flip the `req` signal
-    if (src_ready_o && src_valid_i) begin
+    if (src_rdy_o && src_req_i) begin
       src_data_d = src_data_i;
       src_req_d = ~src_req_q;
     end
   end
 
-  // ready to receive more data when the acknoledgement is done
-  assign src_ready_o = (src_ack_q2 == src_req_q);
+  // ack to receive more data when the acknoledgement is done
+  assign src_rdy_o = (src_ack_q2 == src_req_q);
 
   // pass data through, guarded by the control signals
   assign dst_data_o = src_data_q;
 
   // data goes through when we we receive a request not yet acknoledged
-  assign dst_valid_o = (dst_req_q2 != dst_ack_q);
+  assign dst_req_o = (dst_req_q2 != dst_ack_q);
 
   // the `ack` signal follows the `req` signal
   assign dst_ack_d = dst_req_q2;

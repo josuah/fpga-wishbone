@@ -6,18 +6,18 @@ module peri_pwm_channel (
 
   // wishbone b4 peripheral
   input wb_we_i,
+  input wb_stb_i,
+  output wb_ack_o,
   input [3:0] wb_adr_i,
   input [7:0] wb_dat_i,
-  input wb_stb_i,
   output [7:0] wb_dat_o,
-  output wb_ack_o,
 
   // pwm output
   output logic pwm_o
 );
+  logic unused = |{wb_adr_i};
   logic [7:0] duty_cycle_d, duty_cycle_q;
   logic [8:0] cnt_d, cnt_q;
-  logic unused = &{wb_adr_i};
 
   assign wb_ack_o = wb_stb_i;
   assign wb_dat_o = 0;

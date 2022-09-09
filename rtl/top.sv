@@ -7,11 +7,9 @@ module top #(
   input clk_i,
   input rst_ni,
 
-  // spi peripheral
-  input spi_sck_i,
-  input spi_csn_i,
-  input spi_sd_i,
-  output spi_sd_o,
+  // uart
+  input uart_rx_ni,
+  output uart_tx_no,
 
   // led gpio
   output led_r_o,
@@ -26,7 +24,7 @@ module top #(
   logic ctrl_wb_we, ctrl_wb_stb, ctrl_wb_ack;
   logic [AddrW-1:0] ctrl_wb_adr;
   logic [DataW-1:0] ctrl_wb_dat_i, ctrl_wb_dat_o;
-  ctrl_spi ctrl (
+  ctrl_uart ctrl (
     .clk_i, .rst_ni,
     .wb_we_o(ctrl_wb_we),
     .wb_adr_o(ctrl_wb_adr),
@@ -34,7 +32,7 @@ module top #(
     .wb_stb_o(ctrl_wb_stb),
     .wb_dat_i(ctrl_wb_dat_i),
     .wb_ack_i(ctrl_wb_ack),
-    .spi_sck_i, .spi_csn_i, .spi_sd_i, .spi_sd_o
+    .uart_rx_ni, .uart_tx_no
   );
 
   logic peri0_wb_we, peri0_wb_stb, peri0_wb_ack;

@@ -19,17 +19,17 @@ module ctrl_async (
 
   // wishbone b4 peripheral
   output wb_we_o,
+  output wb_stb_o,
+  input wb_ack_i,
   output [3:0] wb_adr_o,
   output [7:0] wb_dat_o,
-  output wb_stb_o,
   input [7:0] wb_dat_i,
-  input wb_ack_i,
 
   // serial data i/o
   input [7:0] rx_data_i,
-  input rx_valid_i,
+  input rx_stb_i,
   output [7:0] tx_data_o,
-  output tx_valid_o
+  output tx_stb_o
 );
   typedef enum logic [2:0] {
     StIdle,
@@ -42,14 +42,14 @@ module ctrl_async (
   state_e state_q, state_d;
 
   logic wb_we_q, wb_we_d;
-  logic wb_adr_q, wb_adr_d;
-  logic wb_dat_q, wb_dat_d;
   logic wb_stb_q, wb_stb_d;
+  logic [3:0] wb_adr_q, wb_adr_d;
+  logic [7:0] wb_dat_q, wb_dat_d;
 
   assign wb_we_o = wb_we_d;
-  assign wb_adr_o = wb_adr_d;
-  assign wb_dat_o = wb_dat_d;
   assign wb_stb_o = wb_stb_d;
+  assign wb_dat_o = wb_dat_d;
+  assign wb_adr_o = wb_adr_d;
 
   always_ff @(posedge clk_i) begin
     if (!rst_ni) begin
@@ -68,19 +68,21 @@ module ctrl_async (
   end
 
   logic [7:0] tx_data_w;
-  logic tx_valid_w;
+  logic tx_stb_w;
   assign tx_data_o = tx_data_w;
-  assign tx_valid_o = tx_valid_w;
+  assign tx_stb_o = tx_stb_w;
 
   always_comb begin
     state_d = state_q;
     wb_we_d = wb_we_q;
-    wb_stb_d = wb_stb_d;
+    wb_stb_d = wb_stb_q;
+    wb_adr_d = wb_adr_q;
     wb_dat_d = wb_dat_q;
-    tx_valid_w = 0;
+    tx_stb_w = 0;
+    tx_data_w = 0;
 
     // wait for the async request from serial
-    if (rx_valid_i) begin
+    if (rx_stb_i) begin
       case (state_q)
 
         StIdle: begin
@@ -110,7 +112,7 @@ module ctrl_async (
     // wait for the ack from the wishbone bus
     if (wb_ack_i) begin
       tx_data_w = wb_we_d ? wb_dat_i : 8'b00000001;
-      tx_valid_w = 1;
+      tx_stb_w = 1;
       state_d = StIdle;
     end
 

@@ -10,15 +10,14 @@ module spi_tx (
 
   // clock domain crossing
   input [7:0] tx_data_i,
-  input tx_valid_i
+  input tx_req_i
 );
-  logic unused;
-
-  assign spi_sd_o = spi_shift_q[7];
-
+  logic dummy;
   logic [7:0] spi_shift_d, spi_shift_q;
   logic [7:0] spi_data_d, spi_data_q;
   logic [2:0] spi_cnt_q;
+
+  assign spi_sd_o = spi_shift_q[7];
 
   always_ff @(posedge clk_spi_i) begin
     spi_cnt_q <= spi_cnt_q + 1;
@@ -27,7 +26,7 @@ module spi_tx (
   end
 
   logic [7:0] spi_cdc_data;
-  logic spi_cdc_valid;
+  logic spi_cdc_stb;
 
   always_comb begin
     spi_shift_d = spi_shift_q;
@@ -41,7 +40,7 @@ module spi_tx (
         spi_shift_d = spi_data_q;
       end
 
-      if (spi_cdc_valid) begin
+      if (spi_cdc_stb) begin
         spi_data_d = spi_cdc_data;
       end
     end
@@ -49,9 +48,9 @@ module spi_tx (
 
   clock_domain_crossing cdc (
     .clk_src_i(clk_sys_i),
-    .src_data_i(tx_data_i), .src_valid_i(tx_valid_i), .src_ready_o(unused),
+    .src_data_i(tx_data_i), .src_req_i(tx_req_i), .src_rdy_o(dummy),
     .clk_dst_i(clk_spi_i),
-    .dst_data_o(spi_cdc_data), .dst_valid_o(spi_cdc_valid)
+    .dst_data_o(spi_cdc_data), .dst_req_o(spi_cdc_stb)
   );
 
 endmodule

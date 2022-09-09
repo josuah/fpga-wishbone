@@ -20,7 +20,7 @@ module peri_charlieplex #(
 );
   localparam MemSize = 1 << $clog2(5);
 
-  logic unused = |{ wb_adr_i };
+  logic unused = |{wb_adr_i};
   logic [2:0] row, col;
   // memory for the screen pixels
   logic [MemSize-1:0] mem[4:0];

@@ -19,17 +19,17 @@ module ctrl_sync (
 
   // wishbone b4 controller
   output wb_we_o,
+  output wb_stb_o,
+  input wb_ack_i,
   output [3:0] wb_adr_o,
   output [7:0] wb_dat_o,
-  output wb_stb_o,
   input [7:0] wb_dat_i,
-  input wb_ack_i,
 
   // serial data i/o
   input [7:0] rx_data_i,
-  input rx_valid_i,
+  input rx_req_i,
   output [7:0] tx_data_o,
-  output tx_valid_o
+  output tx_req_o
 );
   typedef enum logic [2:0] {
     StIdle,
@@ -56,7 +56,7 @@ module ctrl_sync (
   assign tx_data_o = tx_data_d;
 
   // on each byte read, queue one byte to write
-  assign tx_valid_o = rx_valid_i;
+  assign tx_req_o = rx_req_i;
 
   always_ff @(posedge clk_i) begin
     if (!rst_ni) begin
@@ -86,7 +86,7 @@ module ctrl_sync (
     wb_dat_od = 0;
     tx_data_d = 8'h00;
 
-    if (rx_valid_i) begin
+    if (rx_req_i) begin
       case (state_q)
 
         StIdle: begin
