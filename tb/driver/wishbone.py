@@ -32,6 +32,7 @@ class WishboneDriver:
         while timeout > 0:
             await RisingEdge(self.clk_i)
             if self.wb_ack_o.value == 1:
+                self.wb_stb_i.value = 0
                 return self.wb_dat_o.value
             timeout -= 1
         assert(not "WishboneDriver: timeout reached")
@@ -41,5 +42,5 @@ class WishboneDriver:
         return await self.request(0, adr=adr, timeout=timeout)
 
     async def write(self, adr, dat, timeout=30):
-        self.log.debug(f"WishboneDriver: writing '{dat}' to {adr}")
+        self.log.debug(f"WishboneDriver: writing '{dat}' to address {adr}")
         await self.request(1, adr=adr, dat=dat, timeout=timeout)

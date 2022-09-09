@@ -1,5 +1,5 @@
 `default_nettype none
-//
+
 // Simple handshake protocol for crossing clock domain.
 //
 // * The source module sending the data to another clock domain writes to
@@ -27,7 +27,7 @@
 // http://web.cse.msu.edu/~cse820/readings/sutherlandMicropipelinesTuring.pdf
 // http://www.sunburst-design.com/papers/CummingsSNUG2008Boston_CDC.pdf
 // https://zipcpu.com/blog/2018/07/06/afifo.html
-//
+
 module clock_domain_crossing #(
   parameter Bits = 8
 ) (

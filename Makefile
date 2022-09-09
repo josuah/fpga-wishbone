@@ -16,7 +16,7 @@ clean:
 	rm -rf tb/*.d */*.dot */*.pdf */*.xml *.log *.json *.asc *.bit *.hex
 
 lint:
-	${VERILATOR} --lint-only --sv --top-module top ${RTL}
+	${VERILATOR} --lint-only --top-module top ${RTL}
 
 flash: ice40.bit
 	${ICEPROG} -d i:0x0403:0x6014:0 ice40.bit

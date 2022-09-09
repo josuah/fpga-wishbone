@@ -1,9 +1,9 @@
 `default_nettype none
-//
+
 // Wishbone B4 controller, itself controlled through an SPI peripheral
 // the MCU on the other end is the SPI controller, and (via this
 // module) the Wishbone controller as well.
-//
+
 module ctrl_spi (
   input  clk_i,
   input  rst_ni,
