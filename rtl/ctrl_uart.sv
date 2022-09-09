@@ -4,20 +4,20 @@
 // with an MCU on the other end.
 
 module ctrl_uart (
-  input clk_i,
-  input rst_ni,
+  input  clk_i,
+  input  rst_ni,
 
   // wishbone b4 controller
   output wb_we_o,
   output wb_stb_o,
-  input wb_ack_i,
+  input  wb_ack_i,
   output [3:0] wb_adr_o,
   output [7:0] wb_dat_o,
-  input [7:0] wb_dat_i,
+  input  [7:0] wb_dat_i,
 
   // uart i/o
   output uart_tx_no,
-  input uart_rx_ni
+  input  uart_rx_ni
 );
   logic rx_stb;
   logic [7:0] rx_data;

@@ -3,20 +3,20 @@
 module peri_mems_microphone #(
   parameter TicksPerHz = 2
 ) (
-  input clk_i,
-  input rst_ni,
+  input  clk_i,
+  input  rst_ni,
 
   // wishbone b4 peripheral
-  input wb_we_i,
-  input wb_stb_i,
+  input  wb_we_i,
+  input  wb_stb_i,
   output wb_ack_o,
-  input [3:0] wb_adr_i,
-  input [7:0] wb_dat_i,
+  input  [3:0] wb_adr_i,
+  input  [7:0] wb_dat_i,
   output [7:0] wb_dat_o,
 
   // microphone i/o
   output mic_clk_o,
-  input mic_data_i,
+  input  mic_data_i,
 
   // interrupt
   output irq_o
@@ -49,7 +49,7 @@ module peri_mems_microphone #(
     end
   end
 
-  // divide the input clock
+  // divide the input  clock
   always_comb begin
     mic_clk_d = mic_clk_q;
     mic_cnt_d = mic_cnt_q - 1;

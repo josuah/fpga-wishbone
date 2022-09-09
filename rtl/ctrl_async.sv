@@ -14,20 +14,20 @@
 //  Peri: :::::::::::::::::::///:00000001
 
 module ctrl_async (
-  input clk_i,
-  input rst_ni,
+  input  clk_i,
+  input  rst_ni,
 
   // wishbone b4 peripheral
   output wb_we_o,
   output wb_stb_o,
-  input wb_ack_i,
+  input  wb_ack_i,
   output [3:0] wb_adr_o,
   output [7:0] wb_dat_o,
-  input [7:0] wb_dat_i,
+  input  [7:0] wb_dat_i,
 
   // serial data i/o
-  input [7:0] rx_data_i,
-  input rx_stb_i,
+  input  [7:0] rx_data_i,
+  input  rx_stb_i,
   output [7:0] tx_data_o,
   output tx_stb_o
 );

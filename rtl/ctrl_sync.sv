@@ -14,20 +14,20 @@
 //  Peri: :::::::: :::::::: [ 00000000 ]* 00000001
 
 module ctrl_sync (
-  input clk_i,
-  input rst_ni,
+  input  clk_i,
+  input  rst_ni,
 
   // wishbone b4 controller
   output wb_we_o,
   output wb_stb_o,
-  input wb_ack_i,
+  input  wb_ack_i,
   output [3:0] wb_adr_o,
   output [7:0] wb_dat_o,
-  input [7:0] wb_dat_i,
+  input  [7:0] wb_dat_i,
 
   // serial data i/o
-  input [7:0] rx_data_i,
-  input rx_req_i,
+  input  [7:0] rx_data_i,
+  input  rx_req_i,
   output [7:0] tx_data_o,
   output tx_req_o
 );
@@ -45,14 +45,14 @@ module ctrl_sync (
   logic wb_stb_d;
   logic [3:0] wb_adr_d, wb_adr_q;
   logic [7:0] wb_dat_d, wb_dat_q;
-  logic [7:0] wb_dat_od;
+  logic [7:0] wb_dat_do;
   logic [7:0] tx_data_d;
   state_e state_d, state_q;
 
   assign wb_stb_o = wb_stb_d;
   assign wb_we_o = wb_we_d;
   assign wb_adr_o = wb_adr_d;
-  assign wb_dat_o = wb_dat_od;
+  assign wb_dat_o = wb_dat_do;
   assign tx_data_o = tx_data_d;
 
   // on each byte read, queue one byte to write
@@ -83,7 +83,7 @@ module ctrl_sync (
     wb_ack_d = wb_ack_q;
     wb_dat_d = wb_dat_q;
     wb_dat_d = 0;
-    wb_dat_od = 0;
+    wb_dat_do = 0;
     tx_data_d = 8'h00;
 
     if (rx_req_i) begin
@@ -103,7 +103,7 @@ module ctrl_sync (
         end
 
         StWriteGetData: begin
-          wb_dat_od = rx_data_i;
+          wb_dat_do = rx_data_i;
           wb_stb_d = 1;
           state_d = StWriteWaitAck;
         end

@@ -5,21 +5,21 @@
 // module) the Wishbone controller as well.
 //
 module ctrl_spi (
-  input clk_i,
-  input rst_ni,
+  input  clk_i,
+  input  rst_ni,
 
   // wishbone b4 controller
   output wb_we_o,
   output wb_stb_o,
-  input wb_ack_i,
+  input  wb_ack_i,
   output [3:0] wb_adr_o,
   output [7:0] wb_dat_o,
-  input [7:0] wb_dat_i,
+  input  [7:0] wb_dat_i,
 
   // spi peripheral
-  input spi_sck_i,
-  input spi_csn_i,
-  input spi_sd_i,
+  input  spi_sck_i,
+  input  spi_csn_i,
+  input  spi_sd_i,
   output spi_sd_o
 );
   logic [7:0] rx_data;

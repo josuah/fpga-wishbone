@@ -1,16 +1,16 @@
 `default_nettype none
 
 module spi_tx (
-  input clk_sys_i,
-  input clk_spi_i,
+  input  clk_sys_i,
+  input  clk_spi_i,
 
   // spi peripheral, transmitter
-  input spi_csn_i,
+  input  spi_csn_i,
   output spi_sd_o,
 
   // clock domain crossing
-  input [7:0] tx_data_i,
-  input tx_req_i
+  input  [7:0] tx_data_i,
+  input  tx_req_i
 );
   logic dummy;
   logic [7:0] spi_shift_d, spi_shift_q;

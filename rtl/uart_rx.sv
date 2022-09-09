@@ -5,15 +5,15 @@
 module uart_rx #(
   parameter TicksPerBaud = 3
 ) (
-  input clk_i,
-  input rst_ni,
+  input  clk_i,
+  input  rst_ni,
 
   // data reception
   output rx_stb_o,
   output [7:0] rx_data_o,
 
   // uart port
-  input uart_rx_ni
+  input  uart_rx_ni
 );
   typedef enum logic [3:0] {
     StIdle,
@@ -23,7 +23,7 @@ module uart_rx #(
   } state_e;
 
   state_e state_d, state_q;
-  logic [$size(TicksPerBaud)-1:0] cnt_d, cnt_q;
+  logic [$clog2(TicksPerBaud):0] cnt_d, cnt_q;
   logic [7:0] shift_d, shift_q;
 
   always_ff @(posedge clk_i) begin

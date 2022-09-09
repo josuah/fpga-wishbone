@@ -5,12 +5,12 @@
 module uart_tx #(
   parameter TicksPerBaud = 0
 ) (
-  input clk_i,
-  input rst_ni,
+  input  clk_i,
+  input  rst_ni,
 
   // data input
-  input tx_stb_i,
-  input [7:0] tx_data_i,
+  input  tx_stb_i,
+  input  [7:0] tx_data_i,
 
   // uart port
   output uart_tx_no
@@ -24,7 +24,7 @@ module uart_tx #(
 
   state_e state_d, state_q;
   logic [9:0] shift_d, shift_q;
-  logic [$size(TicksPerBaud)-1:0] cnt_q, cnt_d;
+  logic [$clog2(TicksPerBaud):0] cnt_q, cnt_d;
 
   assign uart_tx_no = !shift_d[0];
 

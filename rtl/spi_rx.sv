@@ -1,12 +1,12 @@
 `default_nettype none
 
 module spi_rx (
-  input clk_sys_i,
-  input clk_spi_i,
+  input  clk_sys_i,
+  input  clk_spi_i,
 
   // spi peripheral, rx only
-  input spi_csn_i,
-  input spi_sd_i,
+  input  spi_csn_i,
+  input  spi_sd_i,
 
   // data output
   output [7:0] rx_data_o,
@@ -22,7 +22,7 @@ module spi_rx (
     spi_cnt_q <= spi_cnt_d;
   end
 
-  // fill the shift queue with spi data input pin
+  // fill the shift queue with spi data input  pin
   assign spi_shift_d = {spi_shift_q[6:0], spi_sd_i};
 
   logic [7:0] spi_data_d, spi_data_q;

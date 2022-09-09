@@ -1,15 +1,15 @@
 `default_nettype none
 
 module peri_pwm_channel (
-  input clk_i,
-  input rst_ni,
+  input  clk_i,
+  input  rst_ni,
 
   // wishbone b4 peripheral
-  input wb_we_i,
-  input wb_stb_i,
+  input  wb_we_i,
+  input  wb_stb_i,
   output wb_ack_o,
-  input [3:0] wb_adr_i,
-  input [7:0] wb_dat_i,
+  input  [3:0] wb_adr_i,
+  input  [7:0] wb_dat_i,
   output [7:0] wb_dat_o,
 
   // pwm output

@@ -1,14 +1,14 @@
 `default_nettype none
 
 module top #(
-  parameter int AddrW = 4,
-  parameter int DataW = 8
+  parameter int AddrSz = 4,
+  parameter int DataSz = 8
 ) (
-  input clk_i,
-  input rst_ni,
+  input  clk_i,
+  input  rst_ni,
 
   // uart
-  input uart_rx_ni,
+  input  uart_rx_ni,
   output uart_tx_no,
 
   // led gpio
@@ -22,8 +22,8 @@ module top #(
   output [6:0] charlieplex_out_en_o
 );
   logic ctrl_wb_we, ctrl_wb_stb, ctrl_wb_ack;
-  logic [AddrW-1:0] ctrl_wb_adr;
-  logic [DataW-1:0] ctrl_wb_dat_i, ctrl_wb_dat_o;
+  logic [AddrSz-1:0] ctrl_wb_adr;
+  logic [DataSz-1:0] ctrl_wb_dat_i, ctrl_wb_dat_o;
   ctrl_uart ctrl (
     .clk_i, .rst_ni,
     .wb_we_o(ctrl_wb_we),
@@ -36,8 +36,8 @@ module top #(
   );
 
   logic peri0_wb_we, peri0_wb_stb, peri0_wb_ack;
-  logic [AddrW-1:0] peri0_wb_adr;
-  logic [DataW-1:0] peri0_wb_dat_i, peri0_wb_dat_o;
+  logic [AddrSz-1:0] peri0_wb_adr;
+  logic [DataSz-1:0] peri0_wb_dat_i, peri0_wb_dat_o;
   peri_rgb_led peri0 (
     .clk_i, .rst_ni,
     .wb_we_i(peri0_wb_we),
@@ -53,8 +53,8 @@ module top #(
   assign peri0_wb_we = ctrl_wb_we;
 
   logic peri1_wb_we, peri1_wb_stb, peri1_wb_ack;
-  logic [AddrW-1:0] peri1_wb_adr;
-  logic [DataW-1:0] peri1_wb_dat_i, peri1_wb_dat_o;
+  logic [AddrSz-1:0] peri1_wb_adr;
+  logic [DataSz-1:0] peri1_wb_dat_i, peri1_wb_dat_o;
   peri_debug peri1 (
     .clk_i, .rst_ni,
     .wb_we_i(peri1_wb_we),
@@ -70,8 +70,8 @@ module top #(
   assign peri1_wb_we = ctrl_wb_we;
 
   logic peri2_wb_we, peri2_wb_stb, peri2_wb_ack;
-  logic [AddrW-1:0] peri2_wb_adr;
-  logic [DataW-1:0] peri2_wb_dat_i, peri2_wb_dat_o;
+  logic [AddrSz-1:0] peri2_wb_adr;
+  logic [DataSz-1:0] peri2_wb_dat_i, peri2_wb_dat_o;
   peri_charlieplex peri2 (
     .clk_i, .rst_ni,
     .wb_we_i(peri2_wb_we),
@@ -94,17 +94,17 @@ module top #(
     peri2_wb_stb = 0;
 
     case (ctrl_wb_adr)
-      AddrW'(0): begin
+      AddrSz'(0): begin
         ctrl_wb_dat_i = peri0_wb_dat_o;
         ctrl_wb_ack = peri0_wb_ack;
         peri0_wb_stb = ctrl_wb_stb;
       end
-      AddrW'(1): begin
+      AddrSz'(1): begin
         ctrl_wb_dat_i = peri1_wb_dat_o;
         ctrl_wb_ack = peri1_wb_ack;
         peri1_wb_stb = ctrl_wb_stb;
       end
-      AddrW'(2): begin
+      AddrSz'(2): begin
         ctrl_wb_dat_i = peri2_wb_dat_o;
         ctrl_wb_ack = peri2_wb_ack;
         peri2_wb_stb = ctrl_wb_stb;

@@ -31,13 +31,13 @@
 module clock_domain_crossing #(
   parameter Bits = 8
 ) (
-  input clk_src_i,
-  input clk_dst_i,
+  input  clk_src_i,
+  input  clk_dst_i,
 
   // export from source
-  input src_req_i,
+  input  src_req_i,
   output src_rdy_o,
-  input [Bits-1:0] src_data_i,
+  input  [Bits-1:0] src_data_i,
 
   // import at destination
   output dst_req_o,
