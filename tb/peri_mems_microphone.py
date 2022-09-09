@@ -10,28 +10,28 @@ async def test_peri_mems_microphone(dut):
     """
     Send data synchronised to the clock coming out of the device.
     """
-    for i in range(10):
-        await run_peri_mems_microphone(dut)
+    for i in range(4):
+        await run_peri_mems_microphone(dut, 4)
 
-async def drive_mic(log, mic_clk, mic_data):
+async def drive_mic(log, mic_clk, mic_data, nsamples):
     """
     Set mic_data to a random value at every mic_clk tick, and yield them as byte.
     """
-    log.info("entered drive_mic func")
-    byte = 0
+    sample = 0
     i = 0
-    while True:
+    while nsamples > 0:
         await RisingEdge(mic_clk)
         mic_data.value = random.getrandbits(1)
-        byte += mic_data.value
+        sample += mic_data.value
         i += 1
         if i == 256:
-            log.info(f"yielding {byte}")
-            yield byte
-            byte = 0
+            log.debug(f"yielding {sample}")
+            yield sample
+            sample = 0
+            nsamples -= 1
             i = 0
 
-async def run_peri_mems_microphone(dut):
+async def run_peri_mems_microphone(dut, nsamples):
     log = dut._log
 
     # driver
@@ -48,9 +48,8 @@ async def run_peri_mems_microphone(dut):
 
     # monitor
     i = 0
-    log.info("entering async for")
-    async for mic_byte in drive_mic(log, dut.mic_clk_o, dut.mic_data_i):
-        log.info("waiting dut.irq_o")
+    async for mic_byte in drive_mic(log, dut.mic_clk_o, dut.mic_data_i, nsamples):
+        log.debug("waiting dut.irq_o")
         wb_byte = await wb.read(0)
         log.info(f"{wb_byte} =?= {mic_byte}")
         assert mic_byte == wb_byte

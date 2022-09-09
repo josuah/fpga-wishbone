@@ -35,12 +35,14 @@ config.mk: rtl tb
 
 .sv.json:
 	${YOSYS} -p "read_verilog -sv $< ${RTL}; synth_ice40 -top $* -json $@" >$*.yosys.log
+	@grep -i -e warn -e error $*.yosys.log
 
 .elf.vcd:
 	./$< >$@
 
 .json.asc:
 	${NEXTPNR} -q -l $*.nextpnr.log --pcf ports.pcf --json $< --asc $@
+	@grep -i -e warn -e error $*.nextpnr.log
 
 .asc.bit:
 	${ICEPACK} $< $@

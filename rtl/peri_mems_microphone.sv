@@ -73,7 +73,7 @@ module peri_mems_microphone #(
 
       // reset the sample buffer on counter overflow
       if (sample_cnt_q == 0) begin
-        wb_dat_d = sample_buf_d;
+        wb_dat_d = sample_buf_q;
         irq_d = 1;
 
         // add the first value right away
