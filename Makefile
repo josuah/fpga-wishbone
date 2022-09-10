@@ -26,6 +26,9 @@ clean:
 lint:
 	${VERILATOR} --lint-only --top-module top ${RTL}
 
+.cpp.log:
+	${VERILATOR} --cc --top-module ${F*} ${RTL}
+
 flash: ice40.bit
 	${ICEPROG} -d i:0x0403:0x6014:0 ice40.bit
 
