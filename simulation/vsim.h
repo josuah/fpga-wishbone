@@ -6,10 +6,16 @@ typedef uint64_t nanosecond_t;
 VM *vsim;
 VerilatedVcdC *vcd;
 
-int simulation_changed = 0;
+int vsim_changed = 0;
+
+#define POSEDGE(ns, period, phase) \
+	((ns) % (period) == (phase))
+
+#define NEGEDGE(ns, period, phase) \
+	((ns) % (period) == ((phase) + (period)) / 2 % (period))
 
 static void
-simulation_fatal(char const *fmt, ...)
+vsim_fatal(char const *fmt, ...)
 {
 	va_list va;
 
@@ -20,7 +26,7 @@ simulation_fatal(char const *fmt, ...)
 }
 
 static void
-simulation_put(char const *var, uint64_t u64, uint8_t size)
+vsim_put(char const *var, uint64_t u64, uint8_t size)
 {
 	printf(" %s:", var);
 	for (u64 <<= 64 - size; size > 0; size--, u64 <<= 1)
@@ -28,14 +34,14 @@ simulation_put(char const *var, uint64_t u64, uint8_t size)
 }
 
 static void
-simulation_eval(void)
+vsim_eval(void)
 {
 	vsim->eval();
-	simulation_changed = 1;
+	vsim_changed = 1;
 }
 
 static void
-simulation_init(int argc, char **argv)
+vsim_init(int argc, char **argv)
 {
 	Verilated::commandArgs(argc, argv);
 	Verilated::traceEverOn(true);
@@ -51,38 +57,29 @@ simulation_init(int argc, char **argv)
 }
 
 static void
-simulation_finish(void)
+vsim_finish(void)
 {
 	vcd->flush();
 }
 
 static void
-simulation_tick_posedge(void)
+vsim_posedge(void)
 {
-	vsim->clk = 1;
-	simulation_eval();
+	vsim->clk_i = 1;
+	vsim_eval();
 }
 
 static void
-simulation_tick_negedge(void)
+vsim_negedge(void)
 {
-	vsim->clk = 0;
-	simulation_eval();
+	vsim->clk_i = 0;
+	vsim_eval();
 }
 
 static void
-simulation_tick_apply(void)
+vsim_apply(nanosecond_t ns)
 {
-	if (simulation_changed)
+	if (vsim_changed)
 		vcd->dump(ns);
-	simulation_changed = 0;
-}
-
-static void
-simulation_tick_ns(nanosecond_t *ns, nanosecond_t delay)
-{
-	*ns += delay;
-	simulation_tick_posedge();
-	simulation_tick_negedge();
-	simulation_tick_apply(*ns);
+	vsim_changed = 0;
 }

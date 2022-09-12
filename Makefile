@@ -1,14 +1,12 @@
 ICEPACK = icepack
 ICEPROG = iceprog
-VERILATOR = verilator -Wall -DSIMULATION --sv
+VERILATOR = verilator -Wall -DSIMULATION -Irtl --trace --sv --trace-structs --Mdir verilator
+VERILATOR_ROOT = /usr/local/share/verilator
+VERILATOR_SRC = ${VERILATOR_ROOT}/include/verilated.cpp ${VERILATOR_ROOT}/include/verilated_vcd_c.cpp
+CXX = c++ -I${VERILATOR_ROOT}/include
 NEXTPNR = nextpnr-ice40 --randomize-seed --up5k --package sg48
 YOSYS = yosys
 MAKE = gmake
-
-COCOTB = ${MAKE} -f "$$(cocotb-config --makefiles)/Makefile.sim" MAKE="${MAKE}" \
-  SIM="verilator" EXTRA_ARGS="--trace" TOPLEVEL_LANG="verilog"
-COCOTB_FLAGS = TOPLEVEL="${*F}" MODULE="tb.${*F}" SIM_BUILD="$*.d" \
-  COCOTB_RESULTS_FILE="$*.xml"
 
 RTL = rtl/clock_domain_crossing.sv rtl/ctrl_async.sv rtl/ctrl_spi.sv \
   rtl/ctrl_sync.sv rtl/ctrl_uart.sv rtl/peri_charlieplex.sv \
@@ -20,46 +18,30 @@ RTL = rtl/clock_domain_crossing.sv rtl/ctrl_async.sv rtl/ctrl_spi.sv \
 all: ice40.bit
 
 clean:
-	rm -f *.log *.json *.asc *.bit *.hex */*.dot */*.pdf
-	rm -rf tb/*.xml tb/*.d
+	rm -f *.log *.json *.asc *.bit *.dfu */*.dot */*.pdf
+	rm -rf verilator
 
 lint:
 	${VERILATOR} --lint-only --top-module top ${RTL}
 
-.cpp.log:
-	${VERILATOR} --cc --top-module ${F*} ${RTL}
-
 flash: ice40.bit
 	${ICEPROG} -d i:0x0403:0x6014:0 ice40.bit
 
-sim: tb/top.xml
-tb/top.xml: tb/top.py ${RTL}
-	${COCOTB} ${COCOTB_FLAGS} VERILOG_SOURCES="${RTL}"
+verilator/Vtop.a: rtl/top.sv
 
-test: tb/peri_mems_microphone.xml
-tb/peri_mems_microphone.xml: tb/peri_pdm_channel.py rtl/peri_mems_microphone.sv
-	${COCOTB} ${COCOTB_FLAGS} VERILOG_SOURCES="rtl/peri_mems_microphone.sv"
+.SUFFIXES: .sv .elf .vcd .json .asc .bit .dfu .elf .vcd .dot .pdf
 
-test: tb/peri_pdm_channel.xml
-tb/peri_pdm_channel.xml: tb/peri_pdm_channel.py rtl/peri_pdm_channel.sv
-	${COCOTB} ${COCOTB_FLAGS} VERILOG_SOURCES="rtl/peri_pdm_channel.sv"
+.sv.elf:
+	${VERILATOR} --cc --top-module top ${RTL}
+	${MAKE} -C verilator -f V${*F}.mk
+	${CXX} -DVM=V${*F} -I./verilator -I. -o $@ ${VERILATOR_SRC} verilator/V${*F}__ALL.a verilator/V${*F}__ALL.cpp $*.cpp
 
-test: tb/register_bank.xml
-tb/register_bank.xml: tb/register_bank.py rtl/register_bank.sv
-	${COCOTB} ${COCOTB_FLAGS} VERILOG_SOURCES="rtl/register_bank.sv"
-
-test: tb/uart_tx.xml
-tb/uart_tx.xml: tb/uart_tx.py rtl/uart_tx.sv
-	${COCOTB} ${COCOTB_FLAGS} VERILOG_SOURCES="rtl/uart_tx.sv"
-
-.SUFFIXES: .sv .elf .vcd .json .asc .bit .dfu .hex .dot .pdf .py .xml
+.elf.vcd:
+	./$< >$@
 
 .sv.json:
 	${YOSYS} -p "read_verilog -sv $< ${RTL}; synth_ice40 -top $* -json $@" >$*.yosys.log
 	@grep -i -e warn -e error $*.yosys.log
-
-.elf.vcd:
-	./$< >$@
 
 .json.asc:
 	${NEXTPNR} -q -l $*.nextpnr.log --pcf ports.pcf --json $< --asc $@

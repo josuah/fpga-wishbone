@@ -1,17 +1,8 @@
 `default_nettype none
 
-// Controller for a Wishbone bus, receiving data from an asynchronous serial
-// interface
-//
-// Wishbone read
-//
-//  Ctrl: :0000AAAA:///::::::::::
-//  Peri: ::::::::::///:DDDDDDDD:
-//
-
 // General purpose register bank.
-// It takes the burden of handling read/write wishbone request to
-// configure registers out of the view, and lets one 
+// This module implement wishbone read from, and write to registers that
+// can later be read by the peripherals.
 
 module register_bank #(
   AddrSz = 4,
@@ -54,7 +45,10 @@ module register_bank #(
 
   // write request
   for (genvar i = 0; i < RegsNb; i++) begin : for_each_reg
-    assign reg_bank_d[DataSz*(i+1)-1:DataSz*i] = (wb_wr_req && wb_adr_i == i) ? wb_dat_i : reg_bank_q[DataSz*(i+1)-1:DataSz*i];
+    `define i0 DataSz * i
+    `define i1 DataSz * (i + 1) - 1
+    `define en (wb_wr_req && wb_adr_i == i)
+    assign reg_bank_d[`i0:`i1] = `en ? wb_dat_i : reg_bank_q[`i1:`i0];
   end
 
 endmodule

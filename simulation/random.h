@@ -8,7 +8,7 @@ random_open(void)
 	if (random_fp != NULL)
 		return;
 	if ((random_fp = fopen("/dev/urandom", "r")) == NULL)
-		simulation_fatal("opening /dev/urandom: %s", strerror(errno));
+		vsim_fatal("opening /dev/urandom: %s", strerror(errno));
 }
 
 static uint8_t
@@ -19,7 +19,7 @@ random_byte(void)
 	random_open();
 	byte = fgetc(random_fp);
 	if (ferror(random_fp))
-		simulation_fatal("reading from /dev/urandom: %s", strerror(errno));
+		vsim_fatal("reading from /dev/urandom: %s", strerror(errno));
 	return byte;
 }
 

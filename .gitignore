@@ -3,11 +3,12 @@
 *.bit
 *.core
 *.dfu
+*.dot
 *.hex
 *.json
 *.log
 *.pdf
-*.dot
-*.xml
-*.d
 __pycache__
+*.vcd
+/verilator
+*.xml
