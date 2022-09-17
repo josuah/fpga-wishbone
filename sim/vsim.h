@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdarg.h>
 #include "verilated_vcd_c.h"
 
 typedef uint64_t nanosecond_t;
@@ -24,6 +25,21 @@ vsim_fatal(char const *fmt, ...)
 	vfprintf(stderr, fmt, va);
 	fputs("\n", stderr);
 }
+
+#ifdef NDEBUG
+#define debug(...) 0
+#else
+
+static void
+debug(char const *fmt, ...)
+{
+	va_list va;
+
+	va_start(va, fmt);
+	vfprintf(stderr, fmt, va);
+	fputs("\n", stderr);
+}
+#endif
 
 static void
 vsim_put(char const *var, uint64_t u64, uint8_t size)
@@ -52,6 +68,7 @@ vsim_init(int argc, char **argv)
 	vsim->trace(vcd, 99);
 	vcd->open("/dev/stdout");
 
+	vsim->rst_ni = 0;
 	vsim->eval();
 	vcd->dump(0);
 }

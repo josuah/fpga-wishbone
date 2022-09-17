@@ -1,19 +1,19 @@
+GTKWAVE = gtkwave -CM
 ICEPACK = icepack
 ICEPROG = iceprog
 VERILATOR = verilator -Wall -DSIMULATION -Irtl --trace --sv --trace-structs --Mdir verilator
-VERILATOR_ROOT = /usr/local/share/verilator
-VERILATOR_SRC = ${VERILATOR_ROOT}/include/verilated.cpp ${VERILATOR_ROOT}/include/verilated_vcd_c.cpp
-CXX = c++ -I${VERILATOR_ROOT}/include
+VERILATOR_INC = /usr/local/share/verilator/include
+VERILATOR_SRC = ${VERILATOR_INC}/verilated.cpp ${VERILATOR_INC}/verilated_vcd_c.cpp
+CXX = c++ -I${VERILATOR_INC} #-DNDEBUG
 NEXTPNR = nextpnr-ice40 --randomize-seed --up5k --package sg48
 YOSYS = yosys
 MAKE = gmake
 
-RTL = rtl/clock_domain_crossing.sv rtl/ctrl_async.sv rtl/ctrl_spi.sv \
-  rtl/ctrl_sync.sv rtl/ctrl_uart.sv rtl/peri_charlieplex.sv \
-  rtl/peri_debug.sv rtl/peri_draw_line.sv rtl/peri_mems_microphone.sv \
-  rtl/peri_pdm_channel.sv rtl/peri_pwm_channel.sv rtl/peri_rgb_led.sv \
-  rtl/register_bank.sv rtl/spi_rx.sv rtl/spi_tx.sv rtl/top.sv rtl/uart_rx.sv \
-  rtl/uart_tx.sv
+RTL = top.sv clock_domain_crossing.sv \
+ ctrl_async.sv ctrl_spi.sv ctrl_sync.sv ctrl_uart.sv \
+ peri_charlieplex.sv peri_debug.sv peri_draw_line.sv peri_mems_microphone.sv \
+ peri_pdm_channel.sv peri_pwm_channel.sv peri_rgb_led.sv \
+ register_bank.sv spi_rx.sv spi_tx.sv uart_rx.sv uart_tx.sv
 
 all: ice40.bit
 
@@ -24,17 +24,20 @@ clean:
 flash: ice40.bit
 	${ICEPROG} -d i:0x0403:0x6014:0 ice40.bit
 
-verilator/Vtop.a: rtl/top.sv
+verilator/Vtop.a: top.sv
 
-.SUFFIXES: .sv .elf .vcd .json .asc .bit .dfu .elf .vcd .dot .pdf
+.SUFFIXES: .sv .elf .vcd .json .asc .bit .dfu .elf .vcd .dot .pdf .gtkw
 
 .sv.elf:
-	${VERILATOR} --cc --top-module top ${RTL}
+	${VERILATOR} --cc --top-module ${*F} ${RTL}
 	${MAKE} -C verilator -f V${*F}.mk
 	${CXX} -DVM=V${*F} -I./verilator -I. -o $@ ${VERILATOR_SRC} verilator/V${*F}__ALL.a verilator/V${*F}__ALL.cpp $*.cpp
 
 .elf.vcd:
 	./$< >$@
+
+.vcd.gtkw:
+	${GTKWAVE} $<
 
 .sv.json:
 	${YOSYS} -p "read_verilog -sv $< ${RTL}; synth_ice40 -top $* -json $@" >$*.yosys.log
