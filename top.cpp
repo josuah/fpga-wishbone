@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "Vtop.h"
-#include "simulation/vsim.h"
-#include "simulation/uart.h"
+#include "sim/vsim.h"
+#include "sim/uart.h"
 
 #define CLK_SYS_PERIOD 30
 #define CLK_SYS_PHASE 3

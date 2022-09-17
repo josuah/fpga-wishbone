@@ -18,11 +18,8 @@ RTL = rtl/clock_domain_crossing.sv rtl/ctrl_async.sv rtl/ctrl_spi.sv \
 all: ice40.bit
 
 clean:
-	rm -f *.log *.json *.asc *.bit *.dfu */*.dot */*.pdf
+	rm -f *.log *.json *.asc *.bit *.dfu *.dot *.pdf *.vcd *.elf
 	rm -rf verilator
-
-lint:
-	${VERILATOR} --lint-only --top-module top ${RTL}
 
 flash: ice40.bit
 	${ICEPROG} -d i:0x0403:0x6014:0 ice40.bit
@@ -44,7 +41,7 @@ verilator/Vtop.a: rtl/top.sv
 	@grep -i -e warn -e error $*.yosys.log
 
 .json.asc:
-	${NEXTPNR} -q -l $*.nextpnr.log --pcf ports.pcf --json $< --asc $@
+	${NEXTPNR} -q -l $*.nextpnr.log --pcf ice40.pcf --json $< --asc $@
 	@grep -i -e warn -e error $*.nextpnr.log
 
 .asc.bit:
