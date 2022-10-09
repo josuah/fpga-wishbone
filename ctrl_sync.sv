@@ -1,17 +1,25 @@
 `default_nettype none
 
-// Controller for a Wishbone bus, receiving data from an synchronous serial
-// interface
-//
-// Wishbone read:
-//
-//  Ctrl: W000AAAA [ :::::::: ]* :::::::: ::::::::
-//  Peri: :::::::: [ 00000000 ]* 00000001 DDDDDDDD
-//
-// Wishbone write:
-//
-//  Ctrl: W000AAAA DDDDDDDD [ :::::::: ]* ::::::::
-//  Peri: :::::::: :::::::: [ 00000000 ]* 00000001
+/*
+ * Controller for a Wishbone bus, receiving data from an synchronous serial
+ * interface
+ *
+ * Wishbone read (single): [A]ddress [D]ata
+ *  Ctrl: 00AAAAAA [ :::::::: ]* :::::::: ::::::::
+ *  Peri: :::::::: [ 00000000 ]* 00000001 DDDDDDDD
+ *
+ * Wishbone write (single): [A]ddress [D]ata
+ *  Ctrl: 01AAAAAA DDDDDDDD [ :::::::: ]* ::::::::
+ *  Peri: :::::::: :::::::: [ 00000000 ]* 00000001
+ *
+ * Wishbone read (burst): [L]ength [D]ata
+ *  Ctrl: 10LLLLLL [ :::::::: ]*L
+ *  Peri: :::::::: [ DDDDDDDD ]*L
+ *
+ * Wishbone write (burst): [L]ength [D]ata
+ *  Ctrl: 11LLLLLL [ DDDDDDDD ]*L
+ *  Peri: :::::::: [ :::::::: ]*L
+ */
 
 module ctrl_sync (
   input  clk_i,
